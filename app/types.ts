@@ -1,6 +1,7 @@
 export interface Fanfic {
 	id: string;
 	title: string;
+	downloadLinks: DownloadLink[];
 	author: string;
 	summary: string;
 	sourceUrl: string;
@@ -12,4 +13,9 @@ export interface Section {
 	id: string;
 	name: string;
 	fanfics: Fanfic[];
+}
+
+export interface DownloadLink {
+	type: string;
+	link: string;
 }

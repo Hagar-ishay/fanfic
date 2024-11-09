@@ -1,9 +1,8 @@
-// src/components/FanficCard.tsx
-
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { useDrag } from "react-dnd";
 import Modal from "react-modal";
-import { Fanfic } from "../types";
+import type { Fanfic } from "@/types";
 
 interface Props {
 	fanfic: Fanfic;
@@ -12,10 +11,6 @@ interface Props {
 
 const FanficCard: React.FC<Props> = ({ fanfic, sectionId }) => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
-
-	const handleOpenModal = () => {
-		setIsModalOpen(true);
-	};
 
 	const [{ isDragging }, drag] = useDrag({
 		type: "FANFIC",
@@ -26,21 +21,23 @@ const FanficCard: React.FC<Props> = ({ fanfic, sectionId }) => {
 	});
 
 	const handleOpenModal = () => {
-		// Open modal with fanfic details
+		setIsModalOpen(true);
 	};
 
 	const handleUpdate = () => {
-		// Check for updates and update fanfic.hasUpdate
+		// Logic to check for updates and update fanfic.hasUpdate
 	};
 
 	const handleSendToKindle = () => {
-		// Send the fanfic to the configured Kindle email
+		// Logic to send the fanfic to Kindle email address
 	};
 
 	return (
 		<div
 			ref={drag}
-			className={`p-2 my-2 bg-white shadow-md rounded ${isDragging ? "opacity-50" : "opacity-100"}`}
+			className={`p-2 my-2 bg-white shadow-md rounded ${
+				isDragging ? "opacity-50" : "opacity-100"
+			}`}
 		>
 			<div onClick={handleOpenModal}>
 				<h3 className="font-bold">{fanfic.title}</h3>
@@ -48,7 +45,9 @@ const FanficCard: React.FC<Props> = ({ fanfic, sectionId }) => {
 			</div>
 			<div className="flex justify-end mt-2">
 				<button
-					className={`btn mr-2 ${fanfic.hasUpdate ? "" : "opacity-50 cursor-not-allowed"}`}
+					className={`btn mr-2 ${
+						fanfic.hasUpdate ? "" : "opacity-50 cursor-not-allowed"
+					}`}
 					onClick={handleUpdate}
 					disabled={!fanfic.hasUpdate}
 				>
