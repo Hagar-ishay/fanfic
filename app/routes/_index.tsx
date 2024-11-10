@@ -1,112 +1,124 @@
-import { FanficSection } from "@/components/FanficSection";
-import { FanficExtractor } from "@/server/extractor";
+import { FanficSections } from "@/components/FanficSections";
+import { Button } from "@/components/ui/Button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import * as consts from "@/consts";
+import { getFanfic } from "@/server/ao3Client";
+import { fanficExtractor } from "@/server/extractor";
 import { isMobileDevice } from "@/server/utils";
-import type { Section, Fanfic } from "@/types";
-import type { BackendFactory } from "dnd-core";
-import React, { useState } from "react";
+import { useSectionsStore } from "@/store";
+import type { Fanfic } from "@/types";
+import { type SerializeFrom, json } from "@remix-run/node";
+import { useFetcher } from "@remix-run/react";
+import { Settings } from "lucide-react";
+import { DateTime } from "luxon";
+import React from "react";
+import { useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { TouchBackend } from "react-dnd-touch-backend";
-import { json } from "@remix-run/node";
-import { useLoaderData, Form, useFetcher } from "@remix-run/react";
-import { getFanfic } from "@/server/ao3Client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useSectionsStore } from "@/store";
 
 export async function loader({ request }: { request: Request }) {
 	const url = new URL(request.url);
 	const fanficUrl = url.searchParams.get("fanficUrl");
 
 	if (fanficUrl) {
-		const data = await getFanfic(fanficUrl);
-
-		const metadata = await FanficExtractor(data, fanficUrl);
-
-		return json({ metadata });
+		const fanficId =
+			fanficUrl
+				.toString()
+				.replace(`${consts.AO3_LINK}/works/`, "")
+				.split("/")[0] ?? "";
+		const data = await getFanfic(fanficId);
+		const metadata = await fanficExtractor(data, fanficId);
+		return json(metadata);
 	}
 
-	return json({ metadata: null });
+	return json(null);
 }
 
 function MainPage() {
-	const { metadata } = useLoaderData<{ metadata: Fanfic | null }>();
-	const fetcher = useFetcher();
-	const [newFanficUrl, setNewFanficUrl] = useState("");
-	const [backend, setBackend] = useState<BackendFactory>(() => HTML5Backend);
-	const sections = useSectionsStore((state) => state.sections);
-	const setSections = useSectionsStore((state) => state.setSections);
+	const setFanficInSection = useSectionsStore(
+		(state) => state.setFanficInSection,
+	);
+	const [backend, setBackend] = useState(() => HTML5Backend);
+	const [newFanficUrl, setNewFanficUrl] = React.useState("");
+	const fetcher = useFetcher<typeof loader>();
 
-	React.useEffect(() => {
+	function parseFanfic(
+		data: SerializeFrom<typeof loader> | undefined,
+	): Fanfic | null {
+		const fetchDate = (date: string | null | undefined): DateTime | null => {
+			return date ? DateTime.fromISO(date) : null;
+		};
+
+		if (data) {
+			return {
+				...data,
+				createdAt: fetchDate(data.createdAt),
+				updatedAt: fetchDate(data.updatedAt),
+				completedAt: fetchDate(data.completedAt),
+				downloadedAt: fetchDate(data.downloadedAt),
+			};
+		}
+		return null;
+	}
+
+	useEffect(() => {
 		const chosenBackend = isMobileDevice() ? TouchBackend : HTML5Backend;
 		setBackend(() => chosenBackend);
 	}, []);
 
-	React.useEffect(() => {
-		if (metadata) {
-			console.log("AO3 Metadata:", JSON.stringify(metadata, null, 2));
+	useEffect(() => {
+		const fanfic = parseFanfic(fetcher.data);
+		if (fanfic) {
+			const sectonId = fanfic.completedAt
+				? consts.DEFAULT_SECTIONS.COMPLETED
+				: consts.DEFAULT_SECTIONS.READING;
+			setFanficInSection(fanfic, sectonId);
 		}
-	}, [metadata]);
+	}, [fetcher, setFanficInSection]);
 
-	const moveFanfic = (
-		fanficId: string,
-		sourceSectionId: string,
-		targetSectionId: string,
-	) => {
-		setSections((prevSections) => {
-			const sourceSection = prevSections.find((s) => s.id === sourceSectionId)!;
-			const fanfic = sourceSection.fanfics.find((f) => f.id === fanficId)!;
-
-			sourceSection.fanfics = sourceSection.fanfics.filter(
-				(f) => f.id !== fanficId,
-			);
-
-			const targetSection = prevSections.find((s) => s.id === targetSectionId)!;
-			targetSection.fanfics = [fanfic, ...targetSection.fanfics];
-
-			return [...prevSections];
-		});
-	};
-
-	const handleAddFanfic = (e: React.FormEvent) => {
-		e.preventDefault();
-		if (newFanficUrl.trim()) {
-			fetcher.load(`?fanficUrl=${encodeURIComponent(newFanficUrl)}`);
-			setNewFanficUrl("");
+	const handleAddFanficFromClipboard = async () => {
+		try {
+			const clipboardText = await navigator.clipboard.readText();
+			if (clipboardText.startsWith(`${consts.AO3_LINK}/works/`)) {
+				setNewFanficUrl(clipboardText);
+				fetcher.submit(`?fanficUrl=${encodeURIComponent(clipboardText)}`);
+				setNewFanficUrl("");
+			} else {
+				alert("Invalid URL. Please copy a valid AO3 fanfic URL.");
+			}
+		} catch (error) {
+			console.error("Failed to read from clipboard: ", error);
 		}
 	};
 
 	return (
 		<DndProvider backend={backend}>
-			{/* Top-Level Bar for Adding Fanfic URL */}
-			<div className="flex items-center p-4">
-				<Form
-					method="get"
-					onSubmit={handleAddFanfic}
-					className="flex items-center"
+			<div className="flex items-center p-4 justify-end">
+				<Button
+					type="submit"
+					className="ml-4"
+					onClick={handleAddFanficFromClipboard}
 				>
-					<Input
-						type="text"
-						className="flex-1 p-2 border rounded mr-2"
-						placeholder="Enter URL"
-						value={newFanficUrl}
-						onChange={(e) => setNewFanficUrl(e.target.value)}
-					/>
-					<Button type="submit" className="btn ml-4">
-						Add
-					</Button>
-				</Form>
-				<Button className="btn ml-4">Configure Kindle Email Address</Button>
+					Add From Clipboard
+				</Button>
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<Button className="ml-4">
+							<Settings />
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent className="mr-2">
+						<DropdownMenuItem>Configure Kindle Email</DropdownMenuItem>
+					</DropdownMenuContent>
+				</DropdownMenu>
 			</div>
-
-			{/* Sections */}
-			{sections.map((section) => (
-				<FanficSection
-					key={section.id}
-					section={section}
-					moveFanfic={moveFanfic}
-				/>
-			))}
+			<FanficSections />
 		</DndProvider>
 	);
 }

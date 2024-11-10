@@ -1,4 +1,7 @@
-export async function getFanfic(url: string): Promise<string> {
+import * as consts from "@/consts";
+
+export async function getFanfic(fanficId: string): Promise<string> {
+	const url = `${consts.AO3_LINK}/works/${fanficId}?view_full_work=true&view_adult=true`;
 	const request = new Request(url, {
 		method: "GET",
 	});
