@@ -1,12 +1,9 @@
 import * as consts from "@/consts";
-import type { DownloadLink, Fanfic, TagsByCategory } from "@/types";
+import type { Fanfic, Tags } from "@/db/types";
 import * as cheerio from "cheerio";
 import { DateTime } from "luxon";
 
-export async function fanficExtractor(
-	data: string,
-	fanficId: string,
-): Promise<Fanfic | null> {
+export async function fanficExtractor(data: string, fanficId: string) {
 	try {
 		const $ = cheerio.load(data);
 		$("#admin-banner").remove();
@@ -15,18 +12,19 @@ export async function fanficExtractor(
 			return $(selector).first().text().trim();
 		};
 
-		const parseToDate = (selector: string): DateTime => {
-			return DateTime.fromISO($(selector).text().trim());
+		const parseToDate = (selector: string): Date => {
+			return DateTime.fromISO($(selector).text().trim()).toJSDate();
 		};
 
 		const summaryElement = $(
 			"#workskin div.summary.module blockquote.userstuff",
 		).first();
+
 		const summary =
-			summaryElement.length > 0
+			summaryElement && summaryElement.length > 0
 				? summaryElement
 						.html()
-						.replace(/<\/p><p>/g, "\n")
+						?.replace(/<\/p><p>/g, "\n")
 						.replace(/<[^>]+>/g, "\n")
 						.trim()
 				: "";
@@ -37,17 +35,17 @@ export async function fanficExtractor(
 				.map((_, el) => `${consts.AO3_LINK}${$(el).attr("href") ?? ""}`)
 				.get(0) || "";
 
-
 		const authorLink = `${consts.AO3_LINK}${$("a[rel=author]").attr("href") ?? ""}`;
 
-		const tags: TagsByCategory = {};
+		const tags: Tags = {};
+
 		$("dl.work.meta.group > dt").each((_, el) => {
 			const category = $(el)
 				.text()
 				.trim()
 				.replace(/\s+/g, " ")
 				.replace(":", "")
-				.toUpperCase();
+				.toUpperCase() as keyof typeof consts.TAGS;
 
 			if (consts.TAGS[category]) {
 				const tagElements = $(el).next("dd").find("ul.commas > li > a.tag");
@@ -67,17 +65,16 @@ export async function fanficExtractor(
 			}
 		});
 
-
-		const fanfic: Fanfic = {
-			id: fanficId,
+		const fanfic = {
+			fanficId: +fanficId,
 			sourceUrl: `${consts.AO3_LINK}/works/${fanficId}`,
 			title: parseHtml("h2.title.heading"),
 			author: parseHtml("a[rel=author]"),
-			summary: summary,
+			summary: summary || null,
 			updatedAt: parseToDate("dd.status"),
 			completedAt: parseHtml("dt.status").startsWith("Completed")
 				? parseToDate("dd.status")
-				: undefined,
+				: null,
 			authorUrl: authorLink,
 			createdAt: parseToDate("dd.published"),
 			downloadLink: downloadLink,

@@ -8,8 +8,13 @@ import React from "react";
 
 export default function SectionsView() {
 	const fetcher = useFetcher<typeof loader>();
-	const sections = fetcher.data?.sections;
 	const [openedSections, setOpenedSections] = React.useState<string[]>([]);
+
+	const sections = fetcher.data?.sections?.map((section) => ({
+		...section,
+		creationTime: new Date(section.creationTime),
+		updateTime: section.updateTime ? new Date(section.updateTime) : null,
+	}));
 
 	React.useEffect(() => {
 		if (fetcher.state === "idle" && fetcher.data == null) {

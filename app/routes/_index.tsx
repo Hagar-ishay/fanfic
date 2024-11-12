@@ -40,25 +40,6 @@ function MainPage() {
 	const [backend, setBackend] = useState(() => HTML5Backend);
 	const fetcher = useFetcher<typeof loader>();
 
-	function parseFanfic(
-		data: SerializeFrom<typeof loader> | undefined,
-	): Fanfic | null {
-		const fetchDate = (date: string | null | undefined): DateTime | null => {
-			return date ? DateTime.fromISO(date) : null;
-		};
-
-		if (data) {
-			return {
-				...data,
-				createdAt: fetchDate(data.createdAt),
-				updatedAt: fetchDate(data.updatedAt),
-				completedAt: fetchDate(data.completedAt),
-				downloadedAt: fetchDate(data.downloadedAt),
-			};
-		}
-		return null;
-	}
-
 	useEffect(() => {
 		const chosenBackend = isMobileDevice() ? TouchBackend : HTML5Backend;
 		setBackend(() => chosenBackend);
@@ -66,7 +47,7 @@ function MainPage() {
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
-		const fanfic = parseFanfic(fetcher.data);
+		const fanfic = fetcher.data;
 		if (fanfic) {
 			setFanficInSection(fanfic, consts.DEFAULT_SECTIONS.READING);
 		}
