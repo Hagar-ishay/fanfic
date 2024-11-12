@@ -11,6 +11,27 @@ type FanficSectionState = {
 	deleteFanfic: (fanficId: string) => void;
 };
 
+type SettingsState = {
+	kindleEmail: string;
+	setEmail: (email: string) => void;
+};
+
+export const useSettingsStore = create(
+	persist<SettingsState>(
+		(set) => ({
+			kindleEmail: "",
+			setEmail: (email: string) =>
+				set((state) => ({
+					...state,
+					kindleEmail: email,
+				})),
+		}),
+		{
+			name: "settings-storage",
+		},
+	),
+);
+
 export const useSectionsStore = create(
 	persist<FanficSectionState>(
 		(set) => ({

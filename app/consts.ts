@@ -7,7 +7,8 @@ export const DEFAULT_SECTIONS = {
 	ARCHIVED: "Archived",
 };
 export const TAGS = {
-	RATING: "Rating",
-	CATEGORIES: "Categories",
-	RELATIONSHIPS: "Relationships",
+	FANDOM: "FANDOM",
+	RATING: "RATING",
+	CATEGORIES: "CATEGORIES",
+	RELATIONSHIPS: "RELATIONSHIPS",
 };

@@ -1,22 +1,15 @@
-import { FanficSections } from "@/components/FanficSections";
+import SectionsView from "@/components/SectionsView";
+import { SettingsModal } from "@/components/Settings";
 import { Button } from "@/components/ui/Button";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import * as consts from "@/consts";
+import type { Fanfic } from "@/db/types";
+import { isMobileDevice } from "@/lib/utils";
 import { getFanfic } from "@/server/ao3Client";
 import { fanficExtractor } from "@/server/extractor";
-import { isMobileDevice } from "@/server/utils";
 import { useSectionsStore } from "@/store";
-import type { Fanfic } from "@/types";
 import { type SerializeFrom, json } from "@remix-run/node";
 import { useFetcher } from "@remix-run/react";
-import { Settings } from "lucide-react";
 import { DateTime } from "luxon";
-import React from "react";
 import { useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
@@ -45,7 +38,6 @@ function MainPage() {
 		(state) => state.setFanficInSection,
 	);
 	const [backend, setBackend] = useState(() => HTML5Backend);
-	const [newFanficUrl, setNewFanficUrl] = React.useState("");
 	const fetcher = useFetcher<typeof loader>();
 
 	function parseFanfic(
@@ -72,13 +64,11 @@ function MainPage() {
 		setBackend(() => chosenBackend);
 	}, []);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		const fanfic = parseFanfic(fetcher.data);
 		if (fanfic) {
-			const sectonId = fanfic.completedAt
-				? consts.DEFAULT_SECTIONS.COMPLETED
-				: consts.DEFAULT_SECTIONS.READING;
-			setFanficInSection(fanfic, sectonId);
+			setFanficInSection(fanfic, consts.DEFAULT_SECTIONS.READING);
 		}
 	}, [fetcher, setFanficInSection]);
 
@@ -86,9 +76,7 @@ function MainPage() {
 		try {
 			const clipboardText = await navigator.clipboard.readText();
 			if (clipboardText.startsWith(`${consts.AO3_LINK}/works/`)) {
-				setNewFanficUrl(clipboardText);
 				fetcher.submit(`?fanficUrl=${encodeURIComponent(clipboardText)}`);
-				setNewFanficUrl("");
 			} else {
 				alert("Invalid URL. Please copy a valid AO3 fanfic URL.");
 			}
@@ -99,7 +87,7 @@ function MainPage() {
 
 	return (
 		<DndProvider backend={backend}>
-			<div className="flex items-center p-4 justify-end">
+			<div className="flex items-center p-4 justify-end gap-2">
 				<Button
 					type="submit"
 					className="ml-4"
@@ -107,18 +95,9 @@ function MainPage() {
 				>
 					Add From Clipboard
 				</Button>
-				<DropdownMenu>
-					<DropdownMenuTrigger asChild>
-						<Button className="ml-4">
-							<Settings />
-						</Button>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent className="mr-2">
-						<DropdownMenuItem>Configure Kindle Email</DropdownMenuItem>
-					</DropdownMenuContent>
-				</DropdownMenu>
+				<SettingsModal />
 			</div>
-			<FanficSections />
+			<SectionsView />
 		</DndProvider>
 	);
 }

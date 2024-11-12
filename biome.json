@@ -25,6 +25,11 @@
 					"level": "error",
 					"fix": "safe"
 				}
+			},
+			"suspicious": {
+				"noArrayIndexKey": {
+					"level": "off"
+				}
 			}
 		}
 	},

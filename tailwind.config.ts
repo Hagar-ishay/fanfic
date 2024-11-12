@@ -51,6 +51,10 @@ export default {
 					"4": "hsl(var(--chart-4))",
 					"5": "hsl(var(--chart-5))",
 				},
+				success: "hsl(145, 41%, 45%)",
+				"success-foreground": "hsl(240 5.9% 10%)",
+				info: "hsl(200, 70%, 55%)",
+				"info-foreground": "hsl(0, 0%, 98%)",
 			},
 			keyframes: {
 				"accordion-down": {
