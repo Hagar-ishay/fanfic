@@ -1,0 +1,1 @@
+ALTER TABLE "fanfiction"."fanfics" ALTER COLUMN "chapter_count" SET DATA TYPE varchar;

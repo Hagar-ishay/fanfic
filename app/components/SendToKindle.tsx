@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/Button";
 import type { Fanfic } from "@/db/types";
 import { cn } from "@/lib/utils";
-import type { action } from "@/routes/sections.$sectionId.fanfics.$fanficId.send-to-kindle";
+import type { action } from "@/routes/api.sections.$sectionId.fanfics.$fanficId.send-to-kindle";
 import { useSettingsStore } from "@/store";
 import { useFetcher } from "@remix-run/react";
 import { CheckCircle, Loader2, SendHorizontal, XCircle } from "lucide-react";

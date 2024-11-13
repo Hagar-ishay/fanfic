@@ -1,4 +1,7 @@
+import * as consts from "@/consts";
 import { insertFanfic, selectFanfics } from "@/db/db"; // Assuming this is your DB function
+import { getFanfic } from "@/server/ao3Client";
+import { fanficExtractor } from "@/server/extractor";
 import { type ActionFunction, json } from "@remix-run/node";
 import type { LoaderFunctionArgs } from "react-router-dom";
 
@@ -28,12 +31,34 @@ export const action: ActionFunction = async ({
 	switch (request.method) {
 		case "POST": {
 			const formData = await request.formData();
-			const fanfic = JSON.parse(formData.get("fanfic") as string);
-			return await insertFanfic(fanfic);
+			const fanficUrl = formData.get("url") as string;
+			const fanficId =
+				fanficUrl
+					.toString()
+					.replace(`${consts.AO3_LINK}/works/`, "")
+					.split("/")[0] ?? "";
+			const data = await getFanfic(fanficId);
+			const metadata = await fanficExtractor(data, fanficId);
+			if (metadata) {
+				try {
+					const value = await insertFanfic(metadata);
+					return json({ success: true, message: "" });
+				} catch (error) {
+					const errorMessage =
+						(typeof error === "string" && error) ||
+						(error instanceof Error && error.message) ||
+						"Unknown Error";
+
+					return json(
+						{ success: false, message: errorMessage },
+						{ status: 500 },
+					);
+				}
+			}
+			return json(null);
 		}
 
-		default: {
+		default:
 			throw new Response("Method Not Allowed", { status: 405 });
-		}
 	}
 };

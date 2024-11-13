@@ -12,7 +12,7 @@ export const insertFanfic = async (fanfic: NewFanfic) => {
 };
 
 export const deleteFanfic = async (ficId: number) => {
-	return db
+	return await db
 		.delete(fanfics)
 		.where(drizz.eq(fanfics.id, ficId))
 		.returning({ fanficId: fanfics.id });

@@ -16,7 +16,7 @@ import {
 import * as consts from "@/consts";
 import type { Fanfic } from "@/db/types";
 import { cn } from "@/lib/utils";
-import type { action } from "@/routes/sections.$sectionId.fanfics.$fanficId.send-to-kindle";
+import type { action } from "@/routes/api.sections.$sectionId.fanfics.$fanficId.send-to-kindle";
 import { useFetcher } from "@remix-run/react";
 import { CircleCheck, CircleEllipsis, Trash2 } from "lucide-react";
 
@@ -83,13 +83,18 @@ export default function FanficCard({
 						<div className="flex gap-2 flex-row justify-end">
 							{fanfic.wordCount && (
 								<Badge title="Word Count">
-									W: {fanfic.wordCount.toLocaleString()}
+									Words: {fanfic.wordCount.toLocaleString()}
+								</Badge>
+							)}
+							{fanfic.chapterCount && (
+								<Badge title="Chapter Count">
+									Chapters: {fanfic.chapterCount}
 								</Badge>
 							)}
 							<TagList category={consts.TAGS.RATING} />
 							<TagList category={consts.TAGS.FANDOM} />
 						</div>
-						<div className="flex gap-2 flex-row">
+						<div className="flex gap-2 flex-row justify-end">
 							<TagList category={consts.TAGS.CATEGORIES} />
 							<TagList category={consts.TAGS.RELATIONSHIPS} />
 						</div>

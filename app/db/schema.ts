@@ -40,7 +40,10 @@ export const fanfics = schema.table(
 		title: varchar().notNull(),
 		summary: varchar(),
 		author: varchar(),
-		sectionId: integer("section_id").references(() => sections.id),
+		sectionId: integer("section_id")
+			.references(() => sections.id)
+			.notNull()
+			.default(1),
 		authorUrl: varchar("author_url"),
 		sourceUrl: varchar("source_url").notNull(),
 		downloadLink: varchar("download_link").notNull(),
@@ -53,7 +56,7 @@ export const fanfics = schema.table(
 			.notNull()
 			.default({}),
 		wordCount: integer("word_count"),
-		chapterCount: integer("chapter_count"),
+		chapterCount: varchar("chapter_count"),
 		language: varchar(),
 		rating: ratingEnum(),
 		creationTime: timestamp("creation_time").notNull().defaultNow(),

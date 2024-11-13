@@ -11,9 +11,8 @@ const unlinkAsync = promisify(fs.unlink);
 const statAsync = promisify(fs.stat);
 
 export async function sendToKindle(kindleEmail: string, fanfic: Fanfic) {
-	const fileName = `${fanfic.id}.epub`;
+	const fileName = `${fanfic.title.replace(" ", "_")}.epub`;
 	const downloadPath = path.resolve(`/tmp/${fileName}`);
-	console.log({ link: fanfic.downloadLink });
 
 	try {
 		await downloadFanfic(fanfic.downloadLink, downloadPath);
@@ -35,16 +34,20 @@ export async function sendToKindle(kindleEmail: string, fanfic: Fanfic) {
 			from: ENV.GMAIL_EMAIL,
 			to: kindleEmail,
 			subject: fanfic.title,
+			text: "Please find the attached book.",
 			attachments: [
 				{
 					filename: fileName,
 					path: downloadPath,
+					contentType: "application/epub+zip",
+					headers: {
+						"Content-Disposition": "attachment",
+					},
 				},
 			],
 		};
 
 		const info = await transporter.sendMail(mailOptions);
-		console.log("Email sent:", info.messageId);
 
 		await unlinkAsync(downloadPath);
 

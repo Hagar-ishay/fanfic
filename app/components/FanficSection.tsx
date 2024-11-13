@@ -6,24 +6,24 @@ import {
 } from "@/components/ui/Accordion";
 import type { Section } from "@/db/types";
 import { parseFanfic } from "@/lib/utils";
-import type { loader } from "@/routes/api/sections.$sectionId.fanfics";
+import type { loader } from "@/routes/api.sections.$sectionId.fanfics";
 import { useFetcher } from "@remix-run/react";
 import React from "react";
 
-export default function FanficSection({ section }: { section: Section }) {
+export default function FanficSection({
+	section,
+	reloadTrigger,
+}: { section: Section; reloadTrigger: number }) {
 	const fetcher = useFetcher<typeof loader>();
 
 	const fanfics = fetcher.data?.fanfics?.map((fanfic) => parseFanfic(fanfic));
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	React.useEffect(() => {
-		if (fetcher.state === "idle" && fetcher.data == null) {
-			fetcher.load(`/sections/${section.id}/fanfics`);
+		if (fetcher.state === "idle") {
+			fetcher.load(`/api/sections/${section.id}/fanfics`);
 		}
-	}, [fetcher, section]);
-
-	if (fetcher.state === "loading") {
-		return <p>Loading...</p>;
-	}
+	}, [fetcher, section.id, reloadTrigger]);
 
 	return (
 		<AccordionItem value={section.name} className="p-2">

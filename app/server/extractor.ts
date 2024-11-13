@@ -80,6 +80,8 @@ export async function fanficExtractor(data: string, fanficId: string) {
 			downloadLink: downloadLink,
 			tags: tags,
 			wordCount: +parseHtml("dd.words").replace(",", ""),
+			chapterCount: parseHtml("dd.chapters"),
+			language: parseHtml("dd.language.lang"),
 		};
 
 		return fanfic;

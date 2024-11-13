@@ -2,7 +2,9 @@ import SectionsView from "@/components/SectionsView";
 import { SettingsModal } from "@/components/Settings";
 import { Button } from "@/components/ui/Button";
 import * as consts from "@/consts";
+import { insertFanfic } from "@/db/db";
 import { isMobileDevice, parseFanfic } from "@/lib/utils";
+import type { action } from "@/routes/api.sections.$sectionId.fanfics";
 import { getFanfic } from "@/server/ao3Client";
 import { fanficExtractor } from "@/server/extractor";
 import { json } from "@remix-run/node";
@@ -12,27 +14,11 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { TouchBackend } from "react-dnd-touch-backend";
 
-export async function loader({ request }: { request: Request }) {
-	const url = new URL(request.url);
-	const fanficUrl = url.searchParams.get("fanficUrl");
-
-	if (fanficUrl) {
-		const fanficId =
-			fanficUrl
-				.toString()
-				.replace(`${consts.AO3_LINK}/works/`, "")
-				.split("/")[0] ?? "";
-		const data = await getFanfic(fanficId);
-		const metadata = await fanficExtractor(data, fanficId);
-		return json(metadata);
-	}
-
-	return json(null);
-}
-
 function MainPage() {
+	const [reloadTrigger, setReloadTrigger] = useState(0);
+
 	const [backend, setBackend] = useState(() => HTML5Backend);
-	const fetcher = useFetcher<typeof loader>();
+	const fetcher = useFetcher<typeof action>();
 
 	useEffect(() => {
 		const chosenBackend = isMobileDevice() ? TouchBackend : HTML5Backend;
@@ -40,26 +26,35 @@ function MainPage() {
 	}, []);
 
 	useEffect(() => {
-		if (fetcher.state === "idle" && fetcher.data) {
-			fetcher.submit(
-				{
-					fanfic: JSON.stringify(parseFanfic(fetcher.data)),
-				},
-				{
-					method: "POST",
-					action: "/api/sections/1/fanfics",
-				},
-			);
+		if (fetcher.data && !fetcher.data.success) {
+			const message = fetcher.data.message;
+			if (message?.includes("duplicate key value violates unique constraint")) {
+				alert("This fic already exists :)");
+			} else {
+				alert(`An error occured: ${message}`);
+			}
 		}
-	}, [fetcher.data, fetcher.state, fetcher.submit]);
+	}, [fetcher.data]);
+
+	useEffect(() => {
+		if (fetcher.data?.success) {
+			setReloadTrigger((prev) => prev + 1);
+		}
+	}, [fetcher.data]);
 
 	const handleAddFanficFromClipboard = async () => {
 		try {
 			const clipboardText = await navigator.clipboard.readText();
 			if (clipboardText.startsWith(`${consts.AO3_LINK}/works/`)) {
-				fetcher.submit(`?fanficUrl=${encodeURIComponent(clipboardText)}`);
+				fetcher.submit(
+					{ url: clipboardText },
+					{
+						method: "POST",
+						action: "/api/sections/1/fanfics",
+					},
+				);
 			} else {
-				alert("Invalid URL. Please copy a valid AO3 fanfic URL.");
+				alert("Invalid URL. Please copy a valid AO3 fanfic URL");
 			}
 		} catch (error) {
 			console.error("Failed to read from clipboard: ", error);
@@ -70,7 +65,7 @@ function MainPage() {
 		<DndProvider backend={backend}>
 			<div className="flex items-center p-4 justify-end gap-2">
 				<Button
-					type="submit"
+					type="button"
 					className="ml-4"
 					onClick={handleAddFanficFromClipboard}
 				>
@@ -78,7 +73,7 @@ function MainPage() {
 				</Button>
 				<SettingsModal />
 			</div>
-			<SectionsView />
+			<SectionsView reloadTrigger={reloadTrigger} />
 		</DndProvider>
 	);
 }
