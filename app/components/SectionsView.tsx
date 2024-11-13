@@ -1,8 +1,6 @@
 import FanficSection from "@/components/FanficSection";
 import { Accordion } from "@/components/ui/Accordion";
-import type { Section } from "@/db/types";
 import type { loader } from "@/routes/api/sections";
-import type { SerializeFrom } from "@remix-run/node";
 import { useFetcher } from "@remix-run/react";
 import React from "react";
 

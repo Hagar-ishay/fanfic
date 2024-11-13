@@ -5,6 +5,7 @@ import {
 	AccordionTrigger,
 } from "@/components/ui/Accordion";
 import type { Section } from "@/db/types";
+import { parseFanfic } from "@/lib/utils";
 import type { loader } from "@/routes/api/sections.$sectionId.fanfics";
 import { useFetcher } from "@remix-run/react";
 import React from "react";
@@ -12,15 +13,7 @@ import React from "react";
 export default function FanficSection({ section }: { section: Section }) {
 	const fetcher = useFetcher<typeof loader>();
 
-	const fanfics = fetcher.data?.fanfics?.map((fanfic) => ({
-		...fanfic,
-		creationTime: new Date(fanfic.creationTime),
-		createdAt: new Date(fanfic.createdAt),
-		updatedAt: new Date(fanfic.updatedAt),
-		completedAt: fanfic.completedAt ? new Date(fanfic.completedAt) : null,
-		updateTime: fanfic.updateTime ? new Date(fanfic.updateTime) : null,
-		lastSent: fanfic.lastSent ? new Date(fanfic.lastSent) : null,
-	}));
+	const fanfics = fetcher.data?.fanfics?.map((fanfic) => parseFanfic(fanfic));
 
 	React.useEffect(() => {
 		if (fetcher.state === "idle" && fetcher.data == null) {

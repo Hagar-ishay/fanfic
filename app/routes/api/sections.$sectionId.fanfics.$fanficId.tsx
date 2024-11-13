@@ -14,10 +14,11 @@ export const action: ActionFunction = async ({
 	}
 
 	switch (request.method) {
-		case "DELETE":
+		case "DELETE": {
 			return await deleteFanfic(+ficId);
-
-		default:
+		}
+		default: {
 			throw new Response("Method Not Allowed", { status: 405 });
+		}
 	}
 };

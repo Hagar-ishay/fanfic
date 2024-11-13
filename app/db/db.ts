@@ -36,3 +36,7 @@ export const selectFanfics = async (sectionId: number) => {
 export const selectSections = async () => {
 	return await db.select().from(sections);
 };
+
+export const getSectionByName = async (name: string) => {
+	return await db.select().from(sections).where(drizz.eq(sections.name, name));
+};

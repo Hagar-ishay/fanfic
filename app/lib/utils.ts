@@ -10,3 +10,16 @@ export function isMobileDevice() {
 	}
 	return /Mobi|Android/i.test(navigator.userAgent);
 }
+
+// biome-ignore lint/suspicious/noExplicitAny: temp
+export function parseFanfic(fanfic: any) {
+	return {
+		...fanfic,
+		creationTime: new Date(fanfic.creationTime),
+		createdAt: new Date(fanfic.createdAt),
+		updatedAt: new Date(fanfic.updatedAt),
+		completedAt: fanfic.completedAt ? new Date(fanfic.completedAt) : null,
+		updateTime: fanfic.updateTime ? new Date(fanfic.updateTime) : null,
+		lastSent: fanfic.lastSent ? new Date(fanfic.lastSent) : null,
+	};
+}
