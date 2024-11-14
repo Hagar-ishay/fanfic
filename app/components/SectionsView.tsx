@@ -1,11 +1,21 @@
-import FanficSection from "@/components/FanficSection";
-import { Accordion } from "@/components/ui/Accordion";
+import FanficCard from "@/components/FanficCard";
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@/components/ui/Accordion";
 import { parseFanfic } from "@/lib/utils";
 import type { loader as fanficLoader } from "@/routes/api.fanfics";
 import type { loader as sectionLoader } from "@/routes/api.sections";
 import type { action } from "@/routes/api.sections.$sectionId.fanfics.$fanficId";
 import { useSectionsStore } from "@/store";
-import { DragDropContext, Droppable } from "@hello-pangea/dnd";
+import {
+	DragDropContext,
+	Draggable,
+	type DropResult,
+	Droppable,
+} from "@hello-pangea/dnd";
 import { useFetcher } from "@remix-run/react";
 import React from "react";
 
@@ -21,6 +31,7 @@ export default function SectionsView({
 	const fanfics =
 		fanficFetcher.data?.fanfics?.map((fanfic) => parseFanfic(fanfic)) || [];
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	React.useEffect(() => {
 		if (fanficFetcher.state === "idle") {
 			fanficFetcher.load("/api/fanfics");
@@ -41,7 +52,7 @@ export default function SectionsView({
 		sectionFetcher.load("/api/sections");
 	}
 
-	const handleDragEnd = (result) => {
+	const handleDragEnd = (result: DropResult) => {
 		if (!result.destination) return;
 
 		const { source, destination } = result;
@@ -94,10 +105,35 @@ export default function SectionsView({
 					<Droppable key={section.id} droppableId={section.id.toString()}>
 						{(provided) => (
 							<div ref={provided.innerRef} {...provided.droppableProps}>
-								<FanficSection
-									section={section}
-									fanfics={sectionFanfics(section.id)}
-								/>
+								<AccordionItem value={section.name} className="p-2">
+									<AccordionTrigger className="w-full p-4 bg-secondary rounded-md">
+										<h2 className="text-xl font-bold text-secondary-foreground">{`${section.name} (${sectionFanfics(section.id).length})`}</h2>
+									</AccordionTrigger>
+									<AccordionContent className="p-4 bg-primary-foreground border-t">
+										<div className="flex flex-col gap-4">
+											{sectionFanfics(section.id)?.map((fanfic, index) => (
+												<Draggable
+													key={fanfic.id}
+													draggableId={fanfic.id.toString()}
+													index={index}
+												>
+													{(provided) => (
+														<div
+															ref={provided.innerRef}
+															{...provided.draggableProps}
+															{...provided.dragHandleProps}
+														>
+															<FanficCard
+																fanfic={fanfic}
+																sectionId={section.id}
+															/>
+														</div>
+													)}
+												</Draggable>
+											))}
+										</div>
+									</AccordionContent>
+								</AccordionItem>
 								{provided.placeholder}
 							</div>
 						)}

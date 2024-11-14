@@ -77,32 +77,36 @@ function MainPage() {
 	};
 
 	return (
-		<>
-			<div className="flex items-center p-4 justify-end gap-2">
-				<Button
-					type="button"
-					className="ml-4 w-fit"
-					onClick={handleCheckForUpdates}
-					disabled={checkUpdatesFetcher.state === "submitting"}
-				>
-					<CheckUpdates
-						className={cn(
-							"w-fit",
-							checkUpdatesFetcher.state === "submitting" && "animate-spin",
-						)}
-					/>
-				</Button>
-				<Button
-					type="button"
-					className="w-fit"
-					onClick={handleAddFanficFromClipboard}
-				>
-					Add From Clipboard
-				</Button>
-				<SettingsModal />
+		<div className="flex flex-col h-screen">
+			<div className="sticky top-0 z-20 p-4 shadow-md bg-accent">
+				<div className="flex items-center justify-end gap-2">
+					<Button
+						type="button"
+						className="ml-4 w-fit"
+						onClick={handleCheckForUpdates}
+						disabled={checkUpdatesFetcher.state === "submitting"}
+					>
+						<CheckUpdates
+							className={cn(
+								"w-fit",
+								checkUpdatesFetcher.state === "submitting" && "animate-spin",
+							)}
+						/>
+					</Button>
+					<Button
+						type="button"
+						className="w-fit"
+						onClick={handleAddFanficFromClipboard}
+					>
+						Add From Clipboard
+					</Button>
+					<SettingsModal />
+				</div>
 			</div>
-			<SectionsView reloadTrigger={reloadTrigger} />
-		</>
+			<div className="flex-1 overflow-y-auto">
+				<SectionsView reloadTrigger={reloadTrigger} />
+			</div>
+		</div>
 	);
 }
 

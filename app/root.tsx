@@ -7,6 +7,7 @@ import {
 	ScrollRestoration,
 } from "@remix-run/react";
 
+import { Button } from "@/components/ui/Button";
 import { Toaster } from "@/components/ui/sonner";
 import styles from "./tailwind.css?url";
 
