@@ -21,15 +21,18 @@ export default function SendToKindle({
 	if (fetcher.state === "submitting") {
 		Icon = Loader2;
 	} else if (fetcher.data?.success) {
+		toast("Email sent successfully");
 		Icon = CheckCircle;
-	} else if (fetcher.data && !fetcher.data.success) {
+	} else if (fetcher.data && !fetcher.data.success && fetcher.data.message) {
+		toast(`Failed sending email: ${fetcher.data.message}`);
 		Icon = XCircle;
 	}
 
 	const isSendDisabled =
-		!kindleEmail || fetcher.data?.success || fetcher.state === "submitting";
-
-	fetcher.data?.success && toast("Email sent successfully");
+		!kindleEmail ||
+		fetcher.data?.success ||
+		fetcher.state === "submitting" ||
+		!(!fanfic.lastSent || fanfic.lastSent < fanfic.updatedAt);
 
 	const handleSend = () => {
 		fetcher.submit(

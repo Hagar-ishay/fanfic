@@ -23,7 +23,7 @@ export default function FanficSection({
 		if (fetcher.state === "idle") {
 			fetcher.load(`/api/sections/${section.id}/fanfics`);
 		}
-	}, [fetcher, section.id, reloadTrigger]);
+	}, [reloadTrigger]);
 
 	return (
 		<AccordionItem value={section.name} className="p-2">

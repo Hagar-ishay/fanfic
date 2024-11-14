@@ -1,8 +1,8 @@
 import * as consts from "@/consts";
-import { insertFanfic, selectFanfics } from "@/db/db"; // Assuming this is your DB function
+import { insertFanfic, selectFanfics } from "@/db/db";
 import { getFanfic } from "@/server/ao3Client";
 import { fanficExtractor } from "@/server/extractor";
-import { type ActionFunction, json } from "@remix-run/node";
+import { json } from "@remix-run/node";
 import type { LoaderFunctionArgs } from "react-router-dom";
 
 export async function loader({ params }: LoaderFunctionArgs) {
@@ -17,11 +17,9 @@ export async function loader({ params }: LoaderFunctionArgs) {
 	return json({ fanfics });
 }
 
-export const action: ActionFunction = async ({
-	params,
-	request,
-}: LoaderFunctionArgs) => {
+export const action = async ({ params, request }: LoaderFunctionArgs) => {
 	const sectionId = params.sectionId;
+	const formData = await request.formData();
 	if (!sectionId) {
 		throw new Response(null, {
 			status: 404,
@@ -30,7 +28,6 @@ export const action: ActionFunction = async ({
 	}
 	switch (request.method) {
 		case "POST": {
-			const formData = await request.formData();
 			const fanficUrl = formData.get("url") as string;
 			const fanficId =
 				fanficUrl
@@ -41,7 +38,7 @@ export const action: ActionFunction = async ({
 			const metadata = await fanficExtractor(data, fanficId);
 			if (metadata) {
 				try {
-					const value = await insertFanfic(metadata);
+					await insertFanfic(metadata);
 					return json({ success: true, message: "" });
 				} catch (error) {
 					const errorMessage =

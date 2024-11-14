@@ -3,7 +3,6 @@ import { Accordion } from "@/components/ui/Accordion";
 import type { loader } from "@/routes/api.sections";
 import { useSectionsStore } from "@/store";
 import { useFetcher } from "@remix-run/react";
-import React from "react";
 
 export default function SectionsView({
 	reloadTrigger,
@@ -18,11 +17,9 @@ export default function SectionsView({
 		updateTime: section.updateTime ? new Date(section.updateTime) : null,
 	}));
 
-	React.useEffect(() => {
-		if (fetcher.state === "idle" && fetcher.data == null) {
-			fetcher.load("/api/sections");
-		}
-	}, [fetcher]);
+	if (fetcher.state === "idle" && fetcher.data == null) {
+		fetcher.load("/api/sections");
+	}
 
 	return (
 		<Accordion

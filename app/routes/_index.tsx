@@ -7,31 +7,34 @@ import type { action as updateAction } from "@/routes/api.check-for-updates";
 import type { action as addAction } from "@/routes/api.sections.$sectionId.fanfics";
 import { useFetcher } from "@remix-run/react";
 import { CheckCircle, Loader2, RotateCw, XCircle } from "lucide-react";
-import { useEffect, useState } from "react";
-import { DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
-import { TouchBackend } from "react-dnd-touch-backend";
+import { useState } from "react";
 import { toast } from "sonner";
 
 function MainPage() {
+	if (typeof window === "undefined") {
+		return; // Prevents running on server
+	}
 	const [reloadTrigger, setReloadTrigger] = useState(0);
-	const [backend, setBackend] = useState(() => HTML5Backend);
+
 	const addFanficFetcher = useFetcher<typeof addAction>();
 	const checkUpdatesFetcher = useFetcher<typeof updateAction>();
 
 	let CheckUpdates = RotateCw;
 	if (checkUpdatesFetcher.state === "submitting") {
 		CheckUpdates = Loader2;
-	} else if (checkUpdatesFetcher.data?.success) {
+	} else if (
+		checkUpdatesFetcher.data?.success &&
+		!checkUpdatesFetcher.data.isCache
+	) {
+		checkUpdatesFetcher.data.data.updatedFanfics.map((fanficTitle) =>
+			toast.success(`Fic ${fanficTitle} updated successfully`),
+		);
+
 		CheckUpdates = CheckCircle;
 	} else if (checkUpdatesFetcher.data && !checkUpdatesFetcher.data.success) {
+		toast.error(`An error occurred: ${checkUpdatesFetcher.data.data}`);
 		CheckUpdates = XCircle;
 	}
-
-	useEffect(() => {
-		const chosenBackend = isMobileDevice() ? TouchBackend : HTML5Backend;
-		setBackend(() => chosenBackend);
-	}, []);
 
 	if (addFanficFetcher.data && !addFanficFetcher.data.success) {
 		const message = addFanficFetcher.data.message;
@@ -45,14 +48,6 @@ function MainPage() {
 		setReloadTrigger((prev) => prev + 1);
 		toast.success("Fanfic added successfully!");
 	}
-
-	useEffect(() => {
-		if (checkUpdatesFetcher.data && !checkUpdatesFetcher.data.success) {
-			toast.error(`An error occurred: ${checkUpdatesFetcher.data.message}`);
-		} else if (checkUpdatesFetcher.data?.success) {
-			toast.success("Updates checked successfully!");
-		}
-	}, [checkUpdatesFetcher.data]);
 
 	const handleAddFanficFromClipboard = async () => {
 		try {
@@ -82,32 +77,32 @@ function MainPage() {
 	};
 
 	return (
-		<DndProvider backend={backend}>
+		<>
 			<div className="flex items-center p-4 justify-end gap-2">
 				<Button
 					type="button"
-					className="ml-4"
-					onClick={handleAddFanficFromClipboard}
-				>
-					Add From Clipboard
-				</Button>
-				<Button
-					type="button"
-					className="ml-4"
+					className="ml-4 w-fit"
 					onClick={handleCheckForUpdates}
 					disabled={checkUpdatesFetcher.state === "submitting"}
 				>
 					<CheckUpdates
 						className={cn(
-							"w-[6%]",
+							"w-fit",
 							checkUpdatesFetcher.state === "submitting" && "animate-spin",
 						)}
 					/>
 				</Button>
+				<Button
+					type="button"
+					className="w-fit"
+					onClick={handleAddFanficFromClipboard}
+				>
+					Add From Clipboard
+				</Button>
 				<SettingsModal />
 			</div>
 			<SectionsView reloadTrigger={reloadTrigger} />
-		</DndProvider>
+		</>
 	);
 }
 

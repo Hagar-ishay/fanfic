@@ -1,19 +1,25 @@
 import * as db from "@/db/db";
 import { getFanfic } from "@/server/ao3Client";
 import { fanficExtractor } from "@/server/extractor";
-import type { ActionFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import NodeCache from "node-cache";
 
 const nextRunCache = new NodeCache({ stdTTL: 7200, checkperiod: 120 });
 
-export const action: ActionFunction = async ({ request }) => {
+export const action = async () => {
+	const updatedFanfics: string[] = [];
 	if (nextRunCache.get("updated")) {
-		return json({ success: true, message: "" });
+		return json({
+			success: true,
+			isCache: true,
+			data: { updatedFanfics },
+			message: "",
+		});
 	}
 
 	try {
 		const fanfics = await db.selectOngoingFanfics();
+		const updatedFanfics: string[] = [];
 
 		await Promise.all(
 			fanfics.map(async (fanfic) => {
@@ -26,17 +32,25 @@ export const action: ActionFunction = async ({ request }) => {
 					parsedFanfic?.updatedAt > fanfic.updatedAt
 				) {
 					await db.updateFanfic(fanfic.id, parsedFanfic);
+					updatedFanfics.push(fanfic.title);
 				}
 			}),
 		);
 
 		nextRunCache.set("updated", true);
-		return json({ success: true, message: "" });
+		return json({
+			success: true,
+			data: { updatedFanfics },
+			isCache: false,
+			message: "",
+		});
 	} catch (error) {
 		console.error("Error checking updates:", error);
 		return json({
 			success: false,
 			message: "An error occurred while checking updates",
+			isCache: false,
+			data: { updatedFanfics },
 		});
 	}
 };

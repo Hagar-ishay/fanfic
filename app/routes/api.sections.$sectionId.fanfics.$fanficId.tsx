@@ -1,10 +1,7 @@
-import { deleteFanfic } from "@/db/db";
-import type { ActionFunction, LoaderFunctionArgs } from "@remix-run/node";
+import { deleteFanfic, updateFanfic } from "@/db/db";
+import type { LoaderFunctionArgs } from "@remix-run/node";
 
-export const action: ActionFunction = async ({
-	request,
-	params,
-}: LoaderFunctionArgs) => {
+export const action = async ({ request, params }: LoaderFunctionArgs) => {
 	const ficId = params.fanficId;
 	if (!ficId) {
 		throw new Response(null, {
@@ -16,6 +13,13 @@ export const action: ActionFunction = async ({
 	switch (request.method) {
 		case "DELETE": {
 			const deleted = await deleteFanfic(+ficId);
+			return deleted;
+		}
+		case "PATCH": {
+			const formData = await request.formData();
+			const newSectionId = formData.get("newSectionId");
+			console.dir({ formData }, { depth: null });
+			const deleted = await updateFanfic(+ficId, { sectionId: newSectionId });
 			return deleted;
 		}
 		default: {

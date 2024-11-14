@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import * as consts from "@/consts";
 import type { Fanfic } from "@/db/types";
-import { cn } from "@/lib/utils";
 import type { action } from "@/routes/api.sections.$sectionId.fanfics.$fanficId.send-to-kindle";
 import { useFetcher } from "@remix-run/react";
 import { CircleCheck, CircleEllipsis, Trash2 } from "lucide-react";
@@ -49,7 +48,7 @@ export default function FanficCard({
 	};
 
 	return (
-		<Card className={cn("p-2 my-2 bg-accent shadow-md rounded h-50")}>
+		<Card className="p-2 my-2 bg-accent shadow-md rounded h-50">
 			<CardHeader>
 				<div className="flex flex-row justify-between items-center">
 					<CardTitle className="flex flex-col mb-4 gap-1">
