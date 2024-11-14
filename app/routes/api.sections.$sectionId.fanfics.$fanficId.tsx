@@ -18,7 +18,6 @@ export const action = async ({ request, params }: LoaderFunctionArgs) => {
 		case "PATCH": {
 			const formData = await request.formData();
 			const newSectionId = formData.get("newSectionId");
-			console.dir({ formData }, { depth: null });
 			const deleted = await updateFanfic(+ficId, { sectionId: newSectionId });
 			return deleted;
 		}

@@ -2,7 +2,7 @@ import SectionsView from "@/components/SectionsView";
 import { SettingsModal } from "@/components/Settings";
 import { Button } from "@/components/ui/Button";
 import * as consts from "@/consts";
-import { cn, isMobileDevice } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import type { action as updateAction } from "@/routes/api.check-for-updates";
 import type { action as addAction } from "@/routes/api.sections.$sectionId.fanfics";
 import { useFetcher } from "@remix-run/react";
