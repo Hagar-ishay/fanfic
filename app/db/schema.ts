@@ -36,7 +36,7 @@ export const fanfics = schema.table(
 	"fanfics",
 	{
 		id: serial().primaryKey(),
-		fanficId: integer(),
+		fanficId: integer().notNull(),
 		title: varchar().notNull(),
 		summary: varchar(),
 		author: varchar(),

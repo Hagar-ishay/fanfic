@@ -1,7 +1,7 @@
+import { AO3_LINK } from "@/consts";
 import { type ClassValue, clsx } from "clsx";
 import React, { createContext, useContext, useState } from "react";
 import { twMerge } from "tailwind-merge";
-
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -24,4 +24,8 @@ export function parseFanfic(fanfic: any) {
 		updateTime: fanfic.updateTime ? new Date(fanfic.updateTime) : null,
 		lastSent: fanfic.lastSent ? new Date(fanfic.lastSent) : null,
 	};
+}
+
+export function getFanficFromUrl(url: string) {
+	return url.toString().replace(`${AO3_LINK}/works/`, "").split("/")[0] ?? "";
 }

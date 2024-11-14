@@ -33,6 +33,13 @@ export const selectFanfics = async (sectionId: number) => {
 		.where(drizz.eq(fanfics.sectionId, sectionId));
 };
 
+export const selectOngoingFanfics = async () => {
+	return await db
+		.select()
+		.from(fanfics)
+		.where(drizz.isNull(fanfics.completedAt));
+};
+
 export const selectSections = async () => {
 	return await db.select().from(sections);
 };

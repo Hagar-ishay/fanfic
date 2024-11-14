@@ -5,6 +5,7 @@ import type { action } from "@/routes/api.sections.$sectionId.fanfics.$fanficId.
 import { useSettingsStore } from "@/store";
 import { useFetcher } from "@remix-run/react";
 import { CheckCircle, Loader2, SendHorizontal, XCircle } from "lucide-react";
+import { toast } from "sonner";
 
 export default function SendToKindle({
 	fanfic,
@@ -27,6 +28,8 @@ export default function SendToKindle({
 
 	const isSendDisabled =
 		!kindleEmail || fetcher.data?.success || fetcher.state === "submitting";
+
+	fetcher.data?.success && toast("Email sent successfully");
 
 	const handleSend = () => {
 		fetcher.submit(

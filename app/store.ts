@@ -1,5 +1,3 @@
-import * as consts from "@/consts";
-import type { Fanfic, Section } from "@/types";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 

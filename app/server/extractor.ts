@@ -38,7 +38,6 @@ export async function fanficExtractor(data: string, fanficId: string) {
 		const authorLink = `${consts.AO3_LINK}${$("a[rel=author]").attr("href") ?? ""}`;
 
 		const tags: Tags = {};
-
 		$("dl.work.meta.group > dt").each((_, el) => {
 			const category = $(el)
 				.text()
@@ -81,7 +80,7 @@ export async function fanficExtractor(data: string, fanficId: string) {
 			tags: tags,
 			wordCount: +parseHtml("dd.words").replace(",", ""),
 			chapterCount: parseHtml("dd.chapters"),
-			language: parseHtml("dd.language.lang"),
+			language: $("dd.language").attr("lang"),
 		};
 
 		return fanfic;

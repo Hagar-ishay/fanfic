@@ -47,7 +47,7 @@ export async function sendToKindle(kindleEmail: string, fanfic: Fanfic) {
 			],
 		};
 
-		const info = await transporter.sendMail(mailOptions);
+		await transporter.sendMail(mailOptions);
 
 		await unlinkAsync(downloadPath);
 
