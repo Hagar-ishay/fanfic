@@ -1,53 +1,49 @@
+import LoadableIcon from "@/components/LoadableIcon";
 import SectionsView from "@/components/SectionsView";
 import { SettingsModal } from "@/components/Settings";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
 import * as consts from "@/consts";
-import { cn } from "@/lib/utils";
 import type { action as updateAction } from "@/routes/api.check-for-updates";
 import type { action as addAction } from "@/routes/api.sections.$sectionId.fanfics";
 import { useFetcher } from "@remix-run/react";
-import { CheckCircle, Loader2, RotateCw, XCircle } from "lucide-react";
-import { useState } from "react";
+import { ClipboardPlus, RotateCw, Search, X } from "lucide-react";
+import React, { useState } from "react";
 import { toast } from "sonner";
 
 function MainPage() {
 	if (typeof window === "undefined") {
-		return; // Prevents running on server
+		return [];
 	}
-	const [reloadTrigger, setReloadTrigger] = useState(0);
-
 	const addFanficFetcher = useFetcher<typeof addAction>();
+	const addFanficSuccessState = addFanficFetcher.data?.success;
+
 	const checkUpdatesFetcher = useFetcher<typeof updateAction>();
+	const isCheckUpdatesSubmitting = checkUpdatesFetcher.state === "submitting";
+	const checkUpdatesSuccessState = checkUpdatesFetcher.data?.success;
 
-	let CheckUpdates = RotateCw;
-	if (checkUpdatesFetcher.state === "submitting") {
-		CheckUpdates = Loader2;
-	} else if (
-		checkUpdatesFetcher.data?.success &&
-		!checkUpdatesFetcher.data.isCache
-	) {
-		checkUpdatesFetcher.data.data.updatedFanfics.map((fanficTitle) =>
-			toast.success(`Fic ${fanficTitle} updated successfully`),
-		);
+	const [searchInput, setSearchInput] = useState("");
 
-		CheckUpdates = CheckCircle;
-	} else if (checkUpdatesFetcher.data && !checkUpdatesFetcher.data.success) {
-		toast.error(`An error occurred: ${checkUpdatesFetcher.data.data}`);
-		CheckUpdates = XCircle;
-	}
-
-	if (addFanficFetcher.data && !addFanficFetcher.data.success) {
-		const message = addFanficFetcher.data.message;
-		if (message?.includes("duplicate key value violates unique constraint")) {
-			toast.error("This fic already exists :)");
-		} else {
-			toast.error(`An error occurred: ${message}`);
+	React.useEffect(() => {
+		if (checkUpdatesSuccessState && !checkUpdatesFetcher.data?.isCache) {
+			checkUpdatesFetcher.data?.data.updatedFanfics.map((fanficTitle) =>
+				toast.success(`Fic ${fanficTitle} updated successfully`),
+			);
+		} else if (checkUpdatesFetcher.data && !checkUpdatesFetcher.data.success) {
+			toast.error(`An error occurred: ${checkUpdatesFetcher.data.data}`);
 		}
-	}
-	if (addFanficFetcher.data?.success) {
-		setReloadTrigger((prev) => prev + 1);
-		toast.success("Fanfic added successfully!");
-	}
+	}, [checkUpdatesFetcher.data, checkUpdatesSuccessState]);
+
+	React.useEffect(() => {
+		if (addFanficSuccessState === false) {
+			const message = addFanficFetcher.data?.message;
+			if (message?.includes("duplicate key value violates unique constraint")) {
+				toast.error("This fic already exists :)");
+			} else {
+				toast.error(`An error occurred: ${message}`);
+			}
+		}
+	}, [addFanficSuccessState, addFanficFetcher.data]);
 
 	const handleAddFanficFromClipboard = async () => {
 		try {
@@ -79,32 +75,50 @@ function MainPage() {
 	return (
 		<div className="flex flex-col h-screen">
 			<div className="sticky top-0 z-20 p-4 shadow-md bg-accent">
-				<div className="flex items-center justify-end gap-2">
+				<div className="flex items-center justify-end gap-2 ">
+					<div className="justify-center relative">
+						<Input
+							value={searchInput}
+							className="pl-8"
+							placeholder="Search"
+							onChange={(event) => setSearchInput(event.target.value)}
+						/>
+						<Search className="pointer-events-none absolute left-2 top-1/2 size-4 -translate-y-1/2 select-none opacity-50" />
+						{searchInput && (
+							<Button
+								onClick={() => setSearchInput("")}
+								variant="ghost"
+								size="icon"
+								className="absolute right-1 top-1/2 -translate-y-1/2 "
+							>
+								<X />
+							</Button>
+						)}
+					</div>
 					<Button
 						type="button"
 						className="ml-4 w-fit"
 						onClick={handleCheckForUpdates}
-						disabled={checkUpdatesFetcher.state === "submitting"}
+						disabled={isCheckUpdatesSubmitting}
 					>
-						<CheckUpdates
-							className={cn(
-								"w-fit",
-								checkUpdatesFetcher.state === "submitting" && "animate-spin",
-							)}
+						<LoadableIcon
+							DefaultIcon={RotateCw}
+							state={checkUpdatesFetcher.state}
+							successState={checkUpdatesSuccessState}
 						/>
 					</Button>
-					<Button
-						type="button"
-						className="w-fit"
-						onClick={handleAddFanficFromClipboard}
-					>
-						Add From Clipboard
+					<Button type="button" onClick={handleAddFanficFromClipboard}>
+						<LoadableIcon
+							DefaultIcon={ClipboardPlus}
+							state={addFanficFetcher.state}
+							successState={addFanficSuccessState}
+						/>
 					</Button>
 					<SettingsModal />
 				</div>
 			</div>
 			<div className="flex-1 overflow-y-auto">
-				<SectionsView reloadTrigger={reloadTrigger} />
+				<SectionsView searchInput={searchInput} />
 			</div>
 		</div>
 	);

@@ -39,7 +39,7 @@ export const fanfics = schema.table(
 		fanficId: integer().notNull(),
 		title: varchar().notNull(),
 		summary: varchar(),
-		author: varchar(),
+		author: varchar().notNull(),
 		sectionId: integer("section_id")
 			.references(() => sections.id)
 			.notNull()

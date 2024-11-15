@@ -5,6 +5,7 @@ import { updateFanfic } from "@/db/db";
 import type { Fanfic } from "@/db/types";
 import { downloadFanfic } from "@/server/ao3Client";
 import { sendToKindle } from "@/server/kindleSender";
+import { translateFic } from "@/server/translator";
 import type { ActionFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 
@@ -16,10 +17,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 	const kindleEmail = formData.get("kindleEmail") as string;
 	const fanfic: Fanfic = JSON.parse(formData.get("fanfic") as string);
 	const fileName = `${fanfic.title.replace(" ", "_")}.epub`;
-	const downloadPath = path.resolve(`/tmp/${fileName}`);
+	let downloadPath = path.resolve(`/tmp/${fileName}`);
 
 	try {
 		await downloadFanfic(fanfic.downloadLink, downloadPath);
+		downloadPath = await translateFic(fanfic, downloadPath);
+
 		await sendToKindle(kindleEmail, fanfic.title, fileName, downloadPath);
 		const stats = await statAsync(downloadPath);
 		if (stats.size === 0) {

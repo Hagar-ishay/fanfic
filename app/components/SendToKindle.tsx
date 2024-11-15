@@ -1,10 +1,11 @@
+import LoadableIcon from "@/components/LoadableIcon";
 import { Button } from "@/components/ui/Button";
 import type { Fanfic } from "@/db/types";
-import { cn } from "@/lib/utils";
 import type { action } from "@/routes/api.sections.$sectionId.fanfics.$fanficId.send-to-kindle";
 import { useSettingsStore } from "@/store";
 import { useFetcher } from "@remix-run/react";
-import { CheckCircle, Loader2, SendHorizontal, XCircle } from "lucide-react";
+import { SendHorizontal } from "lucide-react";
+import React from "react";
 import { toast } from "sonner";
 
 export default function SendToKindle({
@@ -16,23 +17,19 @@ export default function SendToKindle({
 }) {
 	const kindleEmail = useSettingsStore((state) => state.kindleEmail);
 	const fetcher = useFetcher<typeof action>();
-
-	let Icon = SendHorizontal;
-	if (fetcher.state === "submitting") {
-		Icon = Loader2;
-	} else if (fetcher.data?.success) {
-		toast("Email sent successfully");
-		Icon = CheckCircle;
-	} else if (fetcher.data && !fetcher.data.success && fetcher.data.message) {
-		toast(`Failed sending email: ${fetcher.data.message}`);
-		Icon = XCircle;
-	}
-
 	const isSendDisabled =
 		!kindleEmail ||
 		fetcher.data?.success ||
 		fetcher.state === "submitting" ||
 		!(!fanfic.lastSent || fanfic.lastSent < fanfic.updatedAt);
+
+	React.useEffect(() => {
+		if (fetcher.data?.success) {
+			toast("Email sent successfully");
+		} else if (fetcher.data && !fetcher.data.success && fetcher.data.message) {
+			toast(`Failed sending email: ${fetcher.data.message}`);
+		}
+	}, [fetcher.data]);
 
 	const handleSend = () => {
 		fetcher.submit(
@@ -53,11 +50,10 @@ export default function SendToKindle({
 			onClick={handleSend}
 			disabled={isSendDisabled}
 		>
-			<Icon
-				className={cn(
-					"w-[6%]",
-					fetcher.state === "submitting" && "animate-spin",
-				)}
+			<LoadableIcon
+				DefaultIcon={SendHorizontal}
+				state={fetcher.state}
+				successState={fetcher.data?.success}
 			/>
 		</Button>
 	);

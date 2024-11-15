@@ -5,9 +5,9 @@ import {
 	AccordionItem,
 	AccordionTrigger,
 } from "@/components/ui/Accordion";
-import { parseFanfic } from "@/lib/utils";
 import type { loader as fanficLoader } from "@/routes/api.fanfics";
 import type { loader as sectionLoader } from "@/routes/api.sections";
+import type { action as AddFanficAction } from "@/routes/api.sections.$sectionId.fanfics";
 import type { action } from "@/routes/api.sections.$sectionId.fanfics.$fanficId";
 import { useSectionsStore } from "@/store";
 import {
@@ -17,26 +17,33 @@ import {
 	Droppable,
 } from "@hello-pangea/dnd";
 import { useFetcher } from "@remix-run/react";
-import React from "react";
+import { matchSorter } from "match-sorter";
 
-export default function SectionsView({
-	reloadTrigger,
-}: { reloadTrigger: number }) {
+export default function SectionsView({ searchInput }: { searchInput: string }) {
 	const sectionFetcher = useFetcher<typeof sectionLoader>();
 	const fanficFetcher = useFetcher<typeof fanficLoader>();
 	const updateFetcher = useFetcher<typeof action>();
+	const addFanficFetcher = useFetcher<typeof AddFanficAction>();
 	const openSections = useSectionsStore((state) => state.openSections);
 	const setOpenSections = useSectionsStore((state) => state.setOpenSections);
 
 	const fanfics =
-		fanficFetcher.data?.fanfics?.map((fanfic) => parseFanfic(fanfic)) || [];
+		fanficFetcher.data?.fanfics?.map((fanfic) => ({
+			...fanfic,
+			creationTime: new Date(fanfic.creationTime),
+			createdAt: new Date(fanfic.createdAt),
+			updatedAt: new Date(fanfic.updatedAt),
+			completedAt: fanfic.completedAt ? new Date(fanfic.completedAt) : null,
+			updateTime: fanfic.updateTime ? new Date(fanfic.updateTime) : null,
+			lastSent: fanfic.lastSent ? new Date(fanfic.lastSent) : null,
+		})) || [];
 
-	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-	React.useEffect(() => {
-		if (fanficFetcher.state === "idle") {
-			fanficFetcher.load("/api/fanfics");
-		}
-	}, [reloadTrigger]);
+	if (
+		(fanficFetcher.state === "idle" && !fanficFetcher.data?.fanfics) ||
+		addFanficFetcher.data?.success
+	) {
+		fanficFetcher.load("/api/fanfics");
+	}
 
 	const sections = sectionFetcher.data?.sections?.map((section) => ({
 		...section,
@@ -90,7 +97,13 @@ export default function SectionsView({
 			});
 		}
 
-		return updatedFics.filter((fanfic) => fanfic.sectionId === sectionId);
+		const filteredFanfics = updatedFics.filter(
+			(fanfic) => fanfic.sectionId === sectionId,
+		);
+
+		return matchSorter(filteredFanfics, searchInput, {
+			keys: ["title", "author", "tags.FANDOM", "tags.RELATIONSHIPS"],
+		});
 	};
 
 	return (

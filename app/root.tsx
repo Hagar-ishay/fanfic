@@ -7,7 +7,6 @@ import {
 	ScrollRestoration,
 } from "@remix-run/react";
 
-import { Button } from "@/components/ui/Button";
 import { Toaster } from "@/components/ui/sonner";
 import styles from "./tailwind.css?url";
 
@@ -35,10 +34,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
 				<Links />
 			</head>
 			<body>
+				<Toaster richColors />
 				{children}
 				<ScrollRestoration />
 				<Scripts />
-				<Toaster position="bottom-right" richColors />
 			</body>
 		</html>
 	);
