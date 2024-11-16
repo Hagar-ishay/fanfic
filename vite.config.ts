@@ -1,3 +1,4 @@
+import path from "node:path";
 import { vitePlugin as remix } from "@remix-run/dev";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
@@ -9,6 +10,11 @@ declare module "@remix-run/node" {
 }
 
 export default defineConfig({
+	resolve: {
+		alias: {
+			"@": path.resolve(__dirname, "./app"), // Ensure this matches the `baseUrl` in tsconfig
+		},
+	},
 	plugins: [
 		remix({
 			future: {
