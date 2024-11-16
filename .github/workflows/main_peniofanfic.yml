@@ -61,6 +61,20 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_A2990C10101F4903B6FD7864092A9FB2 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_328A9D2C42914396B833598CC91DF0BE }}
 
+      - name: Create GOOGLE_SERVICE_ACCOUNT file
+        run: echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT }}" > ./google-service-account.json
+
+      - name: Set environment variables
+        run: |
+          echo "Setting environment variables for deployment"
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_PROJECT_ID }}
+          GMAIL_EMAIL: ${{ secrets.GMAIL_EMAIL }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NODE_ENV: production
+
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
