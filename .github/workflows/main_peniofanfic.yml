@@ -62,7 +62,7 @@ jobs:
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_328A9D2C42914396B833598CC91DF0BE }}
 
       - name: Create GOOGLE_SERVICE_ACCOUNT file
-        run: echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT }}" > "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}""
+        run: echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT }}" > "${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}"
 
       - name: Set environment variables
         run: |
