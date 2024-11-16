@@ -1,17 +1,18 @@
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+
 import {
-	Dialog,
-	DialogContent,
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
+	Sheet,
+	SheetClose,
+	SheetContent,
+	SheetDescription,
+	SheetFooter,
+	SheetHeader,
+	SheetTitle,
+	SheetTrigger,
+} from "@/components/ui/sheet";
 import { useSettingsStore } from "@/store";
-import { Settings } from "lucide-react";
+import { SettingsIcon } from "lucide-react";
 import { useState } from "react";
 
 export function SettingsModal() {
@@ -26,43 +27,38 @@ export function SettingsModal() {
 		const emailInput = form.elements.namedItem("email") as HTMLInputElement;
 		const email = emailInput.value;
 		setEmail(email);
-		setIsDialogOpen(false);
 	};
 
 	return (
-		<Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-			<DialogTrigger asChild>
+		<Sheet>
+			<SheetTrigger asChild>
 				<Button>
-					<Settings />
+					<SettingsIcon />
 				</Button>
-			</DialogTrigger>
-
-			<DialogContent className="sm:max-w-[425px]">
+			</SheetTrigger>
+			<SheetContent className="flex flex-col gap-3" side={"bottom"}>
 				<form onSubmit={handleSubmit}>
-					<DialogHeader>
-						<DialogTitle>Settings</DialogTitle>
-						<DialogDescription>
+					<SheetHeader>
+						<SheetTitle>Settings</SheetTitle>
+						<SheetDescription>
 							Configuration here is kept in your browser's cache
-						</DialogDescription>
-					</DialogHeader>
-					<div className="grid gap-4 py-4">
-						<div className="grid grid-cols-4 items-center gap-4">
-							<Label htmlFor="email" className="text-right">
-								Kindle Email
-							</Label>
-							<Input
-								id="email"
-								name="email"
-								defaultValue={kindleEmail}
-								className="col-span-3"
-							/>
-						</div>
+						</SheetDescription>
+					</SheetHeader>
+					<div className="gap-4 py-4">
+						<Input
+							id="email"
+							name="email"
+							defaultValue={kindleEmail}
+							placeholder="Kindle email"
+						/>
 					</div>
-					<DialogFooter>
-						<Button type="submit">Save changes</Button>
-					</DialogFooter>
+					<SheetFooter>
+						<SheetClose asChild>
+							<Button type="submit">Save changes</Button>
+						</SheetClose>
+					</SheetFooter>
 				</form>
-			</DialogContent>
-		</Dialog>
+			</SheetContent>
+		</Sheet>
 	);
 }
