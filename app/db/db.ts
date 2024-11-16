@@ -1,11 +1,13 @@
 import { fanfics, sections } from "@/db/schema";
 import type { NewFanfic } from "@/db/types";
 import { ENV } from "@/server/config";
+import { neon } from "@neondatabase/serverless";
 import * as drizz from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-http";
 
 // biome-ignore lint/style/noNonNullAssertion: <explanation>
-export const db = drizzle(ENV.DATABASE_URL!);
+const sql = neon(ENV.DATABASE_URL!);
+export const db = drizzle({ client: sql });
 
 export const insertFanfic = async (fanfic: NewFanfic) => {
 	return db.insert(fanfics).values(fanfic);
