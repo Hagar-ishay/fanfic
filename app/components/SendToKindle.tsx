@@ -1,5 +1,5 @@
 import LoadableIcon from "@/components/LoadableIcon";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import type { Fanfic } from "@/db/types";
 import type { action } from "@/routes/api.sections.$sectionId.fanfics.$fanficId.send-to-kindle";
 import { useSettingsStore } from "@/store";

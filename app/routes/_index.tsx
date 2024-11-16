@@ -1,8 +1,8 @@
 import LoadableIcon from "@/components/LoadableIcon";
 import SectionsView from "@/components/SectionsView";
 import { SettingsModal } from "@/components/Settings";
-import { Button } from "@/components/ui/Button";
-import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import * as consts from "@/consts";
 import { listFanfics, selectSections } from "@/db/db";
 import type { action as updateAction } from "@/routes/api.check-for-updates";
