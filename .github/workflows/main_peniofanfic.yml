@@ -65,7 +65,6 @@ jobs:
         run: echo "${{ secrets.GOOGLE_SERVICE_ACCOUNT }}" > ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
 
       - name: Set environment variables
-      - name: create .env file
         run: |
           touch .env
           echo GOOGLE_SERVICE_ACCOUNT_JSON=${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }} >> .env
