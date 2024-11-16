@@ -6,7 +6,7 @@ import {
 	CardDescription,
 	CardHeader,
 	CardTitle,
-} from "@/components/ui/Cc";
+} from "@/components/ui/card";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
