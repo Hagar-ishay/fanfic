@@ -5,8 +5,11 @@ import { neon } from "@neondatabase/serverless";
 import * as drizz from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-http";
 
-// biome-ignore lint/style/noNonNullAssertion: <explanation>
-const sql = neon(ENV.DATABASE_URL!);
+if (!ENV.DATABASE_URL) {
+	throw "Database URL string Was not set!"
+}
+
+const sql = neon(ENV.DATABASE_URL);
 export const db = drizzle({ client: sql });
 
 export const insertFanfic = async (fanfic: NewFanfic) => {
