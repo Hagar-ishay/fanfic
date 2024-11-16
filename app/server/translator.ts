@@ -1,13 +1,12 @@
 import type { Fanfic } from "@/db/types";
 import { ENV } from "@/server/config";
-import Translate from "@google-cloud/translate";
-import { json } from "@remix-run/node";
+import { TranslationServiceClient } from "@google-cloud/translate";
 import EPub from "epub";
 import EpubGen from "epub-gen";
 
 const TRANSLATION_LANGUAGE = "en";
 
-const translate = new Translate.TranslationServiceClient({
+const translate = new TranslationServiceClient({
 	projectId: ENV.GOOGLE_PROJECT_ID,
 	keyFilename: ENV.GOOGLE_SERVICE_ACCOUNT_JSON,
 });
@@ -15,12 +14,17 @@ const translate = new Translate.TranslationServiceClient({
 export const translateFic = async (
 	fanfic: Fanfic,
 	epubFilePath: string,
-): Promise<string> => {
-	const sourceLanguage = fanfic.language;
-	if (!sourceLanguage || sourceLanguage === TRANSLATION_LANGUAGE) {
-		return epubFilePath;
+): Promise<{ downloadPath: string; fileName: string; title: string }> => {
+	if (!fanfic.language) {
+		throw "No Language set to translate";
 	}
 	const epub = new EPub(epubFilePath);
+	const sourceLanguage = fanfic.language;
+
+	const [translatedTitle, translatedAuthor] = await translateMetadata(
+		[fanfic.title, fanfic.author],
+		sourceLanguage,
+	);
 
 	return new Promise((resolve, reject) => {
 		epub.on("end", async () => {
@@ -29,9 +33,7 @@ export const translateFic = async (
 
 				for (const chapter of epub.flow) {
 					const chapterText = await getChapterAsync(epub, chapter.id);
-
 					const chunks = splitTextIntoChunks(chapterText, 5000);
-
 					const translatedChunks = [];
 					for (const chunk of chunks) {
 						const [response] = await translate.translateText({
@@ -51,11 +53,6 @@ export const translateFic = async (
 						content: translatedChunks.join(" "),
 					});
 				}
-
-				const [translatedTitle, translatedAuthor] = await translateMetadata(
-					[fanfic.title, fanfic.author],
-					sourceLanguage,
-				);
 
 				const translatedEpub = await buildTranslatedEpub(
 					{ ...fanfic, title: translatedTitle, author: translatedAuthor },
@@ -101,8 +98,9 @@ async function translateChapterTitle(title: string, sourceLanguage: string) {
 		targetLanguageCode: TRANSLATION_LANGUAGE,
 	});
 
-	if (typeof response.translations?.[0].translatedText === "string")
+	if (typeof response.translations?.[0].translatedText === "string") {
 		return response.translations[0].translatedText;
+	}
 
 	return "Unknown Chapter Title";
 }
@@ -118,16 +116,22 @@ async function buildTranslatedEpub(
 
 	const epub = new EpubGen(
 		{
-			title: fanfic.title, // Translated title
-			author: fanfic.author, // Translated author
+			title: fanfic.title,
+			author: fanfic.author,
 			publisher: "https://archiveofourown.org",
 			content,
 		},
-		`/tmp/${fanfic.title}.epub`,
+		`/tmp/translated/${fanfic.title}.epub`,
 	);
 
 	return epub.promise
-		.then(() => `/tmp/translated/${fanfic.title}.epub`)
+		.then(() => {
+			return {
+				downloadPath: `/tmp/translated/${fanfic.title}.epub`,
+				fileName: `${fanfic.title}.epub`,
+				title: fanfic.title,
+			};
+		})
 		.catch((err) => {
 			throw new Error(`Failed to generate EPUB: ${err.message}`);
 		});

@@ -16,14 +16,23 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 	const formData = await request.formData();
 	const kindleEmail = formData.get("kindleEmail") as string;
 	const fanfic: Fanfic = JSON.parse(formData.get("fanfic") as string);
-	const fileName = `${fanfic.title.replace(" ", "_")}.epub`;
+	let fileName = `${fanfic.title.replace(" ", "_")}.epub`;
 	let downloadPath = path.resolve(`/tmp/${fileName}`);
+	let title = fanfic.title;
 
 	try {
 		await downloadFanfic(fanfic.downloadLink, downloadPath);
-		downloadPath = await translateFic(fanfic, downloadPath);
+		if (fanfic.language && fanfic.language !== "en") {
+			const translated = await translateFic(fanfic, downloadPath);
 
-		await sendToKindle(kindleEmail, fanfic.title, fileName, downloadPath);
+			await unlinkAsync(downloadPath);
+
+			fileName = translated.fileName;
+			downloadPath = translated.downloadPath;
+			title = translated.title;
+		}
+
+		await sendToKindle(kindleEmail, title, fileName, downloadPath);
 		const stats = await statAsync(downloadPath);
 		if (stats.size === 0) {
 			await unlinkAsync(downloadPath);

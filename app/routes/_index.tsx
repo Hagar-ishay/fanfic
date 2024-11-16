@@ -4,17 +4,23 @@ import { SettingsModal } from "@/components/Settings";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import * as consts from "@/consts";
+import { listFanfics, selectSections } from "@/db/db";
 import type { action as updateAction } from "@/routes/api.check-for-updates";
 import type { action as addAction } from "@/routes/api.sections.$sectionId.fanfics";
 import { useFetcher } from "@remix-run/react";
 import { ClipboardPlus, RotateCw, Search, X } from "lucide-react";
 import React, { useState } from "react";
+import { typedjson } from "remix-typedjson";
 import { toast } from "sonner";
 
+export async function loader() {
+	const fanfics = await listFanfics();
+	const sections = await selectSections();
+
+	return typedjson({ fanfics, sections });
+}
+
 function MainPage() {
-	if (typeof window === "undefined") {
-		return [];
-	}
 	const addFanficFetcher = useFetcher<typeof addAction>();
 	const addFanficSuccessState = addFanficFetcher.data?.success;
 
@@ -53,7 +59,7 @@ function MainPage() {
 					{ url: clipboardText },
 					{
 						method: "POST",
-						action: "/api/sections/1/fanfics",
+						action: "/api/sections/3/fanfics",
 					},
 				);
 			} else {

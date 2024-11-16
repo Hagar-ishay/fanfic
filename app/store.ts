@@ -9,16 +9,24 @@ type sectionState = {
 type SettingsState = {
 	kindleEmail: string;
 	setEmail: (email: string) => void;
+	languageCode: string | null;
+	setLanguageCode: (languageCode: string) => void;
 };
 
 export const useSettingsStore = create(
 	persist<SettingsState>(
 		(set) => ({
 			kindleEmail: "",
+			languageCode: null,
 			setEmail: (email: string) =>
 				set((state) => ({
 					...state,
 					kindleEmail: email,
+				})),
+			setLanguageCode: (languageCode: string) =>
+				set((state) => ({
+					...state,
+					languageCode: languageCode,
 				})),
 		}),
 		{

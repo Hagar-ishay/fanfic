@@ -13,6 +13,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Separator } from "@/components/ui/separator";
 import {
 	Sheet,
 	SheetContent,
@@ -133,10 +134,11 @@ export default function FanficCard({
 									<Title showComplete={false} />
 								</SheetTitle>
 								<SheetDescription>
-									<div className="overflow-auto max-h-80 gap-1 flex flex-col mt-1 bg-secondary ml-10 mr-10 shadow-sm">
+									<div className="overflow-auto max-h-80 gap-1 flex flex-col mt-1 bg-secondary ml-10 mr-10">
 										<Description />
 									</div>
 									<div className="flex flex-col flex-wrap gap-2 mt-5">
+										<Separator />
 										<div className="flex gap-2 flex-row flex-wrap text-xs justify-center">
 											{fanfic.wordCount && (
 												<Badge title="Word Count">

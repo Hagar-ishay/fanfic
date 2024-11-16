@@ -1,21 +1,9 @@
 import * as consts from "@/consts";
-import { insertFanfic, selectFanfics } from "@/db/db";
+import { insertFanfic } from "@/db/db";
 import { getFanfic } from "@/server/ao3Client";
 import { fanficExtractor } from "@/server/extractor";
 import { json } from "@remix-run/node";
 import type { LoaderFunctionArgs } from "react-router-dom";
-
-export async function loader({ params }: LoaderFunctionArgs) {
-	const sectionId = params.sectionId;
-	if (!sectionId) {
-		throw new Response(null, {
-			status: 404,
-			statusText: "Not Found",
-		});
-	}
-	const fanfics = await selectFanfics(+sectionId);
-	return json({ fanfics });
-}
 
 export const action = async ({ params, request }: LoaderFunctionArgs) => {
 	const sectionId = params.sectionId;
