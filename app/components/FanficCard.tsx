@@ -1,4 +1,5 @@
 import SendToKindle from "@/components/SendToKindle";
+import { Tooltip } from "@/components/base/Tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -126,7 +127,9 @@ export default function FanficCard({
 
 					<Sheet>
 						<SheetTrigger className="flex p-3">
-							<ExpandIcon size={20} />
+							<Tooltip description="Expand">
+								<ExpandIcon size={20} />
+							</Tooltip>
 						</SheetTrigger>
 						<SheetContent side="bottom" className="bg-secondary ">
 							<SheetHeader>
@@ -176,13 +179,14 @@ export default function FanficCard({
 				>
 					<Description />
 				</CardDescription>
-
 				<div className="flex justify-end gap-2 items-baseline p-6">
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
-							<Button>
-								<CircleChevronRight />
-							</Button>
+							<Tooltip description="Transfer fanfic">
+								<Button>
+									<CircleChevronRight />
+								</Button>
+							</Tooltip>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent>
 							{transferableSections.map((section) => (

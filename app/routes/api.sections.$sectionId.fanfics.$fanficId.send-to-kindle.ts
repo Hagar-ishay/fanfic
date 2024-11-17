@@ -15,6 +15,7 @@ const statAsync = promisify(fs.stat);
 export const action = async ({ request }: ActionFunctionArgs) => {
 	const formData = await request.formData();
 	const kindleEmail = formData.get("kindleEmail") as string;
+	const translationLanguage = formData.get("translationLanguage") as string;
 	const fanfic: Fanfic = JSON.parse(formData.get("fanfic") as string);
 	let fileName = `${fanfic.title.replace(" ", "_")}.epub`;
 	let downloadPath = path.resolve(`/tmp/${fileName}`);
@@ -22,8 +23,12 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 	try {
 		await downloadFanfic(fanfic.downloadLink, downloadPath);
-		if (fanfic.language && fanfic.language !== "en") {
-			const translated = await translateFic(fanfic, downloadPath);
+		if (fanfic.language && fanfic.language !== translationLanguage) {
+			const translated = await translateFic(
+				fanfic,
+				downloadPath,
+				translationLanguage,
+			);
 
 			await unlinkAsync(downloadPath);
 

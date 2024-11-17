@@ -1,6 +1,6 @@
-import LoadableIcon from "@/components/LoadableIcon";
 import SectionsView from "@/components/SectionsView";
 import { SettingsModal } from "@/components/Settings";
+import LoadableIcon from "@/components/base/LoadableIcon";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import * as consts from "@/consts";

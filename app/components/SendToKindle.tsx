@@ -1,4 +1,5 @@
-import LoadableIcon from "@/components/LoadableIcon";
+import LoadableIcon from "@/components/base/LoadableIcon";
+import { Tooltip } from "@/components/base/Tooltip";
 import { Button } from "@/components/ui/button";
 import type { Fanfic } from "@/db/types";
 import type { action } from "@/routes/api.sections.$sectionId.fanfics.$fanficId.send-to-kindle";
@@ -16,6 +17,7 @@ export default function SendToKindle({
 	sectionId: number;
 }) {
 	const kindleEmail = useSettingsStore((state) => state.kindleEmail);
+	const translationLanguage = useSettingsStore((state) => state.languageCode);
 	const fetcher = useFetcher<typeof action>();
 	const isSendDisabled =
 		!kindleEmail ||
@@ -36,6 +38,7 @@ export default function SendToKindle({
 			{
 				kindleEmail,
 				fanfic: JSON.stringify(fanfic),
+				translationLanguage,
 			},
 			{
 				method: "POST",
@@ -45,16 +48,16 @@ export default function SendToKindle({
 	};
 
 	return (
-		<Button
-			title="Send to kindle"
-			onClick={handleSend}
-			disabled={isSendDisabled}
+		<Tooltip
+			description={kindleEmail ? "Send Fic to Kindle" : "Kindle Email not set"}
 		>
-			<LoadableIcon
-				DefaultIcon={SendHorizontal}
-				state={fetcher.state}
-				successState={fetcher.data?.success}
-			/>
-		</Button>
+			<Button onClick={handleSend} disabled={isSendDisabled}>
+				<LoadableIcon
+					DefaultIcon={SendHorizontal}
+					state={fetcher.state}
+					successState={fetcher.data?.success}
+				/>
+			</Button>
+		</Tooltip>
 	);
 }

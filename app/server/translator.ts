@@ -4,8 +4,6 @@ import { TranslationServiceClient } from "@google-cloud/translate";
 import EPub from "epub";
 import EpubGen from "epub-gen";
 
-const TRANSLATION_LANGUAGE = "en";
-
 const translate = new TranslationServiceClient({
 	projectId: ENV.GOOGLE_PROJECT_ID,
 	keyFilename: ENV.GOOGLE_SERVICE_ACCOUNT_JSON,
@@ -14,6 +12,7 @@ const translate = new TranslationServiceClient({
 export const translateFic = async (
 	fanfic: Fanfic,
 	epubFilePath: string,
+	translationLanguage: string,
 ): Promise<{ downloadPath: string; fileName: string; title: string }> => {
 	if (!fanfic.language) {
 		throw "No Language set to translate";
@@ -24,6 +23,7 @@ export const translateFic = async (
 	const [translatedTitle, translatedAuthor] = await translateMetadata(
 		[fanfic.title, fanfic.author],
 		sourceLanguage,
+		translationLanguage,
 	);
 
 	return new Promise((resolve, reject) => {
@@ -41,7 +41,7 @@ export const translateFic = async (
 							contents: [chunk],
 							mimeType: "text/plain",
 							sourceLanguageCode: sourceLanguage,
-							targetLanguageCode: TRANSLATION_LANGUAGE,
+							targetLanguageCode: translationLanguage,
 						});
 						if (response.translations) {
 							translatedChunks.push(response.translations[0].translatedText);
@@ -49,7 +49,11 @@ export const translateFic = async (
 					}
 
 					translatedChapters.push({
-						title: await translateChapterTitle(chapter.title, sourceLanguage),
+						title: await translateChapterTitle(
+							chapter.title,
+							sourceLanguage,
+							translationLanguage,
+						),
 						content: translatedChunks.join(" "),
 					});
 				}
@@ -73,13 +77,17 @@ export const translateFic = async (
 	});
 };
 
-async function translateMetadata(contents: string[], sourceLanguage: string) {
+async function translateMetadata(
+	contents: string[],
+	sourceLanguage: string,
+	translationLanguage: string,
+) {
 	const [response] = await translate.translateText({
 		parent: `projects/${ENV.GOOGLE_PROJECT_ID}/locations/global`,
 		contents,
 		mimeType: "text/plain",
 		sourceLanguageCode: sourceLanguage,
-		targetLanguageCode: TRANSLATION_LANGUAGE,
+		targetLanguageCode: translationLanguage,
 	});
 
 	return (
@@ -89,13 +97,17 @@ async function translateMetadata(contents: string[], sourceLanguage: string) {
 		]
 	);
 }
-async function translateChapterTitle(title: string, sourceLanguage: string) {
+async function translateChapterTitle(
+	title: string,
+	sourceLanguage: string,
+	translationLanguage: string,
+) {
 	const [response] = await translate.translateText({
 		parent: `projects/${ENV.GOOGLE_PROJECT_ID}/locations/global`,
 		contents: [title],
 		mimeType: "text/plain",
 		sourceLanguageCode: sourceLanguage,
-		targetLanguageCode: TRANSLATION_LANGUAGE,
+		targetLanguageCode: translationLanguage,
 	});
 
 	if (typeof response.translations?.[0].translatedText === "string") {
