@@ -4,7 +4,7 @@ import {
 	AccordionContent,
 	AccordionItem,
 	AccordionTrigger,
-} from "@/components/ui/accordion";
+} from "@/components/ui/Accordion";
 import { cn } from "@/lib/utils";
 import type { loader } from "@/routes/_index";
 import type { action } from "@/routes/api.sections.$sectionId.fanfics.$fanficId";

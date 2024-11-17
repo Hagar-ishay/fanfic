@@ -1,37 +1,55 @@
 {
-	"include": [
-		"./*",
-		"**/*.ts",
-		"**/*.tsx",
-		"app/components/ui/*.tsx",
-		"**/.server/**/*.ts",
-		"**/.server/**/*.tsx",
-		"**/.client/**/*.ts",
-		"**/.client/**/*.tsx",
-		"remix.config.js",
-		"tailwind.config.ts",
-		"server.js"
-	],
-	"compilerOptions": {
-		"lib": ["DOM", "DOM.Iterable", "ES2022"],
-		"types": ["@remix-run/node", "vite/client"],
-		"isolatedModules": true,
-		"esModuleInterop": true,
-		"jsx": "react-jsx",
-		"module": "ESNext",
-		"moduleResolution": "Bundler",
-		"resolveJsonModule": true,
-		"target": "ES2022",
-		"strict": true,
-		"allowJs": true,
-		"skipLibCheck": true,
-		"forceConsistentCasingInFileNames": true,
-		"baseUrl": "./",
-		"paths": {
-			"@/*": ["./app/*"]
-		},
-
-		// Vite takes care of building everything, not tsc.
-		"noEmit": true
-	}
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "**/.client/**/*.ts",
+    "**/.client/**/*.tsx",
+    "**/.server/**/*.ts",
+    "**/.server/**/*.tsx",
+    "./*",
+    "app/components/ui/*.tsx",
+    "remix.config.js",
+    "server.js",
+    "tailwind.config.ts",
+    ".next/types/**/*.ts"
+  ],
+  "compilerOptions": {
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ES2022"
+    ],
+    "types": [
+      "@remix-run/node",
+      "vite/client"
+    ],
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "resolveJsonModule": true,
+    "target": "ES2022",
+    "strict": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": "./",
+    "paths": {
+      "@/*": [
+        "./app/*"
+      ]
+    },
+    // Vite takes care of building everything, not tsc.
+    "noEmit": true,
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "exclude": [
+    "node_modules"
+  ]
 }

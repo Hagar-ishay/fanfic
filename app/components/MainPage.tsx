@@ -1,0 +1,130 @@
+"use client";
+
+import SectionsView from "@/components/SectionsView";
+import { SettingsModal } from "@/components/Settings";
+import LoadableIcon from "@/components/base/LoadableIcon";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import * as consts from "@/consts";
+import type { Fanfic, Section } from "@/db/types";
+import type { action as updateAction } from "@/routes/api.check-for-updates";
+import type { action as addAction } from "@/routes/api.sections.$sectionId.fanfics";
+import { useFetcher } from "@remix-run/react";
+import { ClipboardPlus, RotateCw, Search, X } from "lucide-react";
+import React, { useState } from "react";
+import { toast } from "sonner";
+
+async function MainPage({
+	fanfics,
+	sections,
+}: { fanfics: Fanfic[]; sections: Section[] }) {
+	const addFanficFetcher = useFetcher<typeof addAction>();
+	const addFanficSuccessState = addFanficFetcher.data?.success;
+
+	const checkUpdatesFetcher = useFetcher<typeof updateAction>();
+	const isCheckUpdatesSubmitting = checkUpdatesFetcher.state === "submitting";
+	const checkUpdatesSuccessState = checkUpdatesFetcher.data?.success;
+
+	const [searchInput, setSearchInput] = useState("");
+
+	React.useEffect(() => {
+		if (checkUpdatesSuccessState && !checkUpdatesFetcher.data?.isCache) {
+			checkUpdatesFetcher.data?.data.updatedFanfics.map((fanficTitle) =>
+				toast.success(`Fic ${fanficTitle} updated successfully`),
+			);
+		} else if (checkUpdatesFetcher.data && !checkUpdatesFetcher.data.success) {
+			toast.error(`An error occurred: ${checkUpdatesFetcher.data.data}`);
+		}
+	}, [checkUpdatesFetcher.data, checkUpdatesSuccessState]);
+
+	React.useEffect(() => {
+		if (addFanficSuccessState === false) {
+			const message = addFanficFetcher.data?.message;
+			if (message?.includes("duplicate key value violates unique constraint")) {
+				toast.error("This fic already exists :)");
+			} else {
+				toast.error(`An error occurred: ${message}`);
+			}
+		}
+	}, [addFanficSuccessState, addFanficFetcher.data]);
+
+	const handleAddFanficFromClipboard = async () => {
+		try {
+			const clipboardText = await navigator.clipboard.readText();
+			if (clipboardText.startsWith(`${consts.AO3_LINK}/works/`)) {
+				addFanficFetcher.submit(
+					{ url: clipboardText },
+					{
+						method: "POST",
+						action: "/api/sections/3/fanfics",
+					},
+				);
+			} else {
+				toast.error("Invalid URL. Please copy a valid AO3 fanfic URL");
+			}
+		} catch (error) {
+			console.error("Failed to read from clipboard: ", error);
+			toast.error("Failed to read from clipboard");
+		}
+	};
+
+	const handleCheckForUpdates = () => {
+		checkUpdatesFetcher.submit(null, {
+			method: "POST",
+			action: "/api/check-for-updates",
+		});
+	};
+
+	return (
+		<div className="flex flex-col h-screen">
+			<div className="sticky top-0 z-20 p-4 shadow-md bg-accent">
+				<div className="flex items-center justify-end gap-2 ">
+					<div className="justify-center relative">
+						<Input
+							value={searchInput}
+							className="pl-8"
+							placeholder="Search"
+							onChange={(event) => setSearchInput(event.target.value)}
+						/>
+						<Search className="pointer-events-none absolute left-2 top-1/2 size-4 -translate-y-1/2 select-none opacity-50" />
+						{searchInput && (
+							<Button
+								onClick={() => setSearchInput("")}
+								variant="ghost"
+								size="icon"
+								className="absolute right-1 top-1/2 -translate-y-1/2 "
+							>
+								<X />
+							</Button>
+						)}
+					</div>
+					<Button
+						type="button"
+						className="ml-4 w-fit"
+						onClick={handleCheckForUpdates}
+						disabled={isCheckUpdatesSubmitting}
+					>
+						<LoadableIcon
+							DefaultIcon={RotateCw}
+							state={checkUpdatesFetcher.state}
+							successState={checkUpdatesSuccessState}
+						/>
+					</Button>
+					<Button type="button" onClick={handleAddFanficFromClipboard}>
+						<LoadableIcon
+							DefaultIcon={ClipboardPlus}
+							state={addFanficFetcher.state}
+							successState={addFanficSuccessState}
+						/>
+					</Button>
+					<SettingsModal />
+				</div>
+			</div>
+			<div className="flex-1 overflow-y-auto">
+				<SectionsView searchInput={searchInput} />
+			</div>
+		</div>
+	);
+}
+
+export default MainPage;

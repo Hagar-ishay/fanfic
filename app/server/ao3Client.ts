@@ -2,16 +2,14 @@ import fs from "node:fs";
 import * as consts from "@/consts";
 import got from "got";
 
-const httpsOptions = { https: { rejectUnauthorized: false } };
-
 export async function getFanfic(fanficId: string): Promise<string> {
 	const url = `${consts.AO3_LINK}/works/${fanficId}?view_full_work=true&view_adult=true`;
-	const { body } = await got(url, httpsOptions);
+	const { body } = await got(url);
 	return body;
 }
 
 export async function downloadFanfic(url: string, downloadPath: string) {
-	const downloadStream = got.stream(url, httpsOptions);
+	const downloadStream = got.stream(url);
 
 	await new Promise((resolve, reject) => {
 		downloadStream
