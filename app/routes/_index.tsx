@@ -14,8 +14,7 @@ import {
 	SignedOut,
 	UserButton,
 } from "@clerk/remix";
-import { getAuth } from "@clerk/remix/ssr.server";
-import { type LoaderFunctionArgs, redirect } from "@remix-run/node";
+import type { LoaderFunctionArgs } from "@remix-run/node";
 import { useFetcher } from "@remix-run/react";
 import { ClipboardPlus, RotateCw, Search, X } from "lucide-react";
 import React, { useState } from "react";
@@ -140,12 +139,16 @@ function MainPage() {
 					<SectionsView searchInput={searchInput} />
 				</div>
 			</SignedIn>
-			<div className="flex flex-row justify-center gap-4 relative">
-				<SignedOut>
-					<SignUpButton />
-					<SignInButton />
-				</SignedOut>
-			</div>
+			<SignedOut>
+				<div className="flex flex-row justify-center relative items-center gap-4 h-screen max-h-screen">
+					<Button>
+						<SignUpButton />
+					</Button>
+					<Button>
+						<SignInButton />
+					</Button>
+				</div>
+			</SignedOut>
 		</div>
 	);
 }
