@@ -7,13 +7,22 @@ import * as consts from "@/consts";
 import { listFanfics, selectSections } from "@/db/db";
 import type { action as updateAction } from "@/routes/api.check-for-updates";
 import type { action as addAction } from "@/routes/api.sections.$sectionId.fanfics";
+import {
+	SignInButton,
+	SignUpButton,
+	SignedIn,
+	SignedOut,
+	UserButton,
+} from "@clerk/remix";
+import { getAuth } from "@clerk/remix/ssr.server";
+import { type LoaderFunctionArgs, redirect } from "@remix-run/node";
 import { useFetcher } from "@remix-run/react";
 import { ClipboardPlus, RotateCw, Search, X } from "lucide-react";
 import React, { useState } from "react";
 import { typedjson } from "remix-typedjson";
 import { toast } from "sonner";
 
-export async function loader() {
+export async function loader(args: LoaderFunctionArgs) {
 	const fanfics = await listFanfics();
 	const sections = await selectSections();
 
@@ -80,51 +89,62 @@ function MainPage() {
 
 	return (
 		<div className="flex flex-col h-screen">
-			<div className="sticky top-0 z-20 p-4 shadow-md bg-accent">
-				<div className="flex items-center justify-end gap-2 ">
-					<div className="justify-center relative">
-						<Input
-							value={searchInput}
-							className="pl-8"
-							placeholder="Search"
-							onChange={(event) => setSearchInput(event.target.value)}
-						/>
-						<Search className="pointer-events-none absolute left-2 top-1/2 size-4 -translate-y-1/2 select-none opacity-50" />
-						{searchInput && (
-							<Button
-								onClick={() => setSearchInput("")}
-								variant="ghost"
-								size="icon"
-								className="absolute right-1 top-1/2 -translate-y-1/2 "
-							>
-								<X />
-							</Button>
-						)}
+			<SignedIn>
+				<div className="sticky top-0 z-20 p-4 shadow-md bg-accent flex flex-row justify-between">
+					<div className="flex items-start">
+						<UserButton />
 					</div>
-					<Button
-						type="button"
-						className="ml-4 w-fit"
-						onClick={handleCheckForUpdates}
-						disabled={isCheckUpdatesSubmitting}
-					>
-						<LoadableIcon
-							DefaultIcon={RotateCw}
-							state={checkUpdatesFetcher.state}
-							successState={checkUpdatesSuccessState}
-						/>
-					</Button>
-					<Button type="button" onClick={handleAddFanficFromClipboard}>
-						<LoadableIcon
-							DefaultIcon={ClipboardPlus}
-							state={addFanficFetcher.state}
-							successState={addFanficSuccessState}
-						/>
-					</Button>
-					<SettingsModal />
+					<div className="flex items-center justify-end gap-2 ">
+						<div className="justify-center relative">
+							<Input
+								value={searchInput}
+								className="pl-8"
+								placeholder="Search"
+								onChange={(event) => setSearchInput(event.target.value)}
+							/>
+							<Search className="pointer-events-none absolute left-2 top-1/2 size-4 -translate-y-1/2 select-none opacity-50" />
+							{searchInput && (
+								<Button
+									onClick={() => setSearchInput("")}
+									variant="ghost"
+									size="icon"
+									className="absolute right-1 top-1/2 -translate-y-1/2 "
+								>
+									<X />
+								</Button>
+							)}
+						</div>
+						<Button
+							type="button"
+							className="ml-4 w-fit"
+							onClick={handleCheckForUpdates}
+							disabled={isCheckUpdatesSubmitting}
+						>
+							<LoadableIcon
+								DefaultIcon={RotateCw}
+								state={checkUpdatesFetcher.state}
+								successState={checkUpdatesSuccessState}
+							/>
+						</Button>
+						<Button type="button" onClick={handleAddFanficFromClipboard}>
+							<LoadableIcon
+								DefaultIcon={ClipboardPlus}
+								state={addFanficFetcher.state}
+								successState={addFanficSuccessState}
+							/>
+						</Button>
+						<SettingsModal />
+					</div>
 				</div>
-			</div>
-			<div className="flex-1 overflow-y-auto">
-				<SectionsView searchInput={searchInput} />
+				<div className="flex-1 overflow-y-auto">
+					<SectionsView searchInput={searchInput} />
+				</div>
+			</SignedIn>
+			<div className="flex flex-row justify-center gap-4 relative">
+				<SignedOut>
+					<SignUpButton />
+					<SignInButton />
+				</SignedOut>
 			</div>
 		</div>
 	);

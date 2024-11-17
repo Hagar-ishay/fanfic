@@ -70,6 +70,8 @@ jobs:
           echo GMAIL_APP_PASSWORD="${{ secrets.GMAIL_APP_PASSWORD }}" >> .env
           echo DATABASE_URL="${{ secrets.DATABASE_URL }}" >> .env
           echo NODE_ENV=production >> .env
+          echo CLERK_PUBLISHABLE_KEY="${{ secrets.CLERK_PUBLISHABLE_KEY}}" >> .env
+          echo CLERK_SECRET_KEY="${{ secrets.CLERK_SECRET_KEY}}" >> .env
 
       - name: Create GOOGLE_SERVICE_ACCOUNT file
         run: |
