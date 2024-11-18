@@ -23,7 +23,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 	try {
 		await downloadFanfic(fanfic.downloadLink, downloadPath);
-		if (fanfic.language && fanfic.language !== translationLanguage) {
+		if (
+			fanfic.language &&
+			translationLanguage &&
+			fanfic.language !== translationLanguage
+		) {
 			const translated = await translateFic(
 				fanfic,
 				downloadPath,

@@ -1,22 +1,35 @@
 import type { Fanfic } from "@/db/types";
 import { ENV } from "@/server/config";
 import { TranslationServiceClient } from "@google-cloud/translate";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import EPub from "epub";
 import EpubGen from "epub-gen";
 
-const translate = new TranslationServiceClient({
-	projectId: ENV.GOOGLE_PROJECT_ID,
-	keyFilename: ENV.GOOGLE_SERVICE_ACCOUNT_JSON,
-});
+const ERROR_MESSSAGE = "***ERROR FOUND***";
+
+const genAI = new GoogleGenerativeAI(ENV.API_KEY as string);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 export const translateFic = async (
 	fanfic: Fanfic,
 	epubFilePath: string,
 	translationLanguage: string,
 ): Promise<{ downloadPath: string; fileName: string; title: string }> => {
-	if (!fanfic.language) {
+	if (!fanfic.language || !translationLanguage) {
 		throw "No Language set to translate";
 	}
+	const translationBookPrompt = `
+	You are a book translator. Please translate the below text in the context and tone of the writer. 
+	Try to handle typos and writing inconsistencies as a writing editor might. If you encounter an unknown word, try to decipher it to the best of your ability. 
+	If you encounter an error during the process of translation and you are unable to continue, please do not return the translated content. 
+	Instead, write - ${ERROR_MESSSAGE} with an appropriate error and return.`;
+
+	const translationBookMetadataPrompt = `
+	You are a book translator. Please translate the below metadata of the books (chapter names, title, author name, etc etc). 
+	Try to handle typos and writing inconsistencies as a writing editor might. If you encounter an unknown word, try to decipher it to the best of your ability. 
+	If you encounter an error during the process of translation and you are unable to continue, please do not return the translated content. 
+	Instead, write - ${ERROR_MESSSAGE} with an appropriate error and return.`;
+
 	const epub = new EPub(epubFilePath);
 	const sourceLanguage = fanfic.language;
 
@@ -35,19 +48,13 @@ export const translateFic = async (
 					const chapterText = await getChapterAsync(epub, chapter.id);
 					const chunks = splitTextIntoChunks(chapterText, 5000);
 					const translatedChunks = [];
-					for (const chunk of chunks) {
-						const [response] = await translate.translateText({
-							parent: `projects/${ENV.GOOGLE_PROJECT_ID}/locations/global`,
-							contents: [chunk],
-							mimeType: "text/plain",
-							sourceLanguageCode: sourceLanguage,
-							targetLanguageCode: translationLanguage,
-						});
-						if (response.translations) {
-							translatedChunks.push(response.translations[0].translatedText);
-						}
+					const result = await model.generateContentStream(
+						`${translationBookPrompt}\n${chunks}`,
+					);
+					for await (const chunk of result.stream) {
+						const chunkText = chunk.text();
+						translatedChunks.push(chunkText);
 					}
-
 					translatedChapters.push({
 						title: await translateChapterTitle(
 							chapter.title,
@@ -82,14 +89,9 @@ async function translateMetadata(
 	sourceLanguage: string,
 	translationLanguage: string,
 ) {
-	const [response] = await translate.translateText({
-		parent: `projects/${ENV.GOOGLE_PROJECT_ID}/locations/global`,
-		contents,
-		mimeType: "text/plain",
-		sourceLanguageCode: sourceLanguage,
-		targetLanguageCode: translationLanguage,
-	});
-
+	const result = await model.generateContent(`${prompt}\n${contents}`);
+	const response = await result.response;
+	const text = response.text();
 	return (
 		response.translations?.map((t) => t.translatedText ?? "") || [
 			"Unknown Title",
