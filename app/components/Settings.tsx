@@ -1,6 +1,5 @@
 import { Tooltip } from "@/components/base/Tooltip";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -15,6 +14,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "@/components/ui/sheet";
+import { Switch } from "@/components/ui/switch";
 import { useSettingsStore } from "@/store";
 import { SettingsIcon } from "lucide-react";
 import React from "react";
@@ -39,13 +39,13 @@ export function SettingsModal() {
 
 	return (
 		<Sheet>
-			<SheetTrigger>
-				<Tooltip description="Settings">
-					<Button>
+			<Tooltip description="Settings">
+				<SheetTrigger asChild>
+					<Button size="icon">
 						<SettingsIcon />
 					</Button>
-				</Tooltip>
-			</SheetTrigger>
+				</SheetTrigger>
+			</Tooltip>
 			<SheetContent
 				className="flex flex-col gap-3 justify-center items-center"
 				side={"bottom"}
@@ -58,25 +58,25 @@ export function SettingsModal() {
 								Configuration here is kept in your browser's cache
 							</SheetDescription>
 						</SheetHeader>
-
-						<div className="gap-4 py-4 flex flex-col">
+						<div className="gap-5 py-4 flex flex-col">
 							<Input
 								id="email"
 								name="email"
 								defaultValue={kindleEmail}
 								placeholder="Kindle email"
 							/>
-							<Separator />
-							<div className="flex flex-row gap-2 text-sm font-medium">
-								<Checkbox
+							<div className="flex flex-row gap-2 justify-between text-sm font-medium">
+								<Label className="ml-1">Translate to English</Label>
+								<Switch
 									id="enableTranslation"
 									name="enableTranslation"
 									checked={shouldTranslate}
 									onCheckedChange={() => setShouldTranslate(!shouldTranslate)}
 								/>
-								<Label>Translate Fanfictions to English</Label>
 							</div>
+							<Separator />
 						</div>
+
 						<SheetFooter className="">
 							<SheetClose asChild>
 								<Button type="submit">Save changes</Button>

@@ -4,11 +4,15 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import type React from "react";
 
 export function Tooltip({
 	description,
 	children,
-}: { description: string; children: React.ReactNode }) {
+}: {
+	description: string;
+	children: React.ReactNode;
+}) {
 	return (
 		<TooltipProvider>
 			<BaseTooltip>

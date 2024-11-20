@@ -10,7 +10,10 @@ export async function getFanfic(fanficId: string): Promise<string> {
 	return body;
 }
 
-export async function downloadFanfic(url: string, downloadPath: string) {
+export async function downloadFanfic(
+	url: string,
+	downloadPath: string,
+) {
 	const downloadStream = got.stream(url, httpsOptions);
 
 	await new Promise((resolve, reject) => {

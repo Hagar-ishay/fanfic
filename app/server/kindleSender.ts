@@ -37,5 +37,5 @@ export async function sendToKindle(
 		],
 	};
 
-	await transporter.sendMail(mailOptions);
+	// await transporter.sendMail(mailOptions);
 }

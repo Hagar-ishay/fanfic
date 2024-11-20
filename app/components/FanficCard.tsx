@@ -181,13 +181,13 @@ export default function FanficCard({
 				</CardDescription>
 				<div className="flex justify-end gap-2 items-baseline p-6">
 					<DropdownMenu>
-						<DropdownMenuTrigger>
-							<Tooltip description="Transfer fanfic">
+						<Tooltip description="Transfer fanfic">
+							<DropdownMenuTrigger asChild>
 								<Button>
 									<CircleChevronRight />
 								</Button>
-							</Tooltip>
-						</DropdownMenuTrigger>
+							</DropdownMenuTrigger>
+						</Tooltip>
 						<DropdownMenuContent>
 							{transferableSections.map((section) => (
 								<DropdownMenuItem
