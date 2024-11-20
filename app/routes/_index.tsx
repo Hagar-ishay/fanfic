@@ -1,6 +1,7 @@
 import SectionsView from "@/components/SectionsView";
 import { SettingsModal } from "@/components/Settings";
 import LoadableIcon from "@/components/base/LoadableIcon";
+import { Tooltip } from "@/components/base/Tooltip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import * as consts from "@/consts";
@@ -90,7 +91,7 @@ function MainPage() {
 		<div className="flex flex-col h-screen">
 			<SignedIn>
 				<div className="sticky top-0 z-20 p-4 shadow-md bg-accent flex flex-row justify-between">
-					<div className="flex items-start">
+					<div className="flex items-center ml-3">
 						<UserButton />
 					</div>
 					<div className="flex items-center justify-end gap-2 ">
@@ -113,25 +114,30 @@ function MainPage() {
 								</Button>
 							)}
 						</div>
-						<Button
-							type="button"
-							className="ml-4 w-fit"
-							onClick={handleCheckForUpdates}
-							disabled={isCheckUpdatesSubmitting}
-						>
-							<LoadableIcon
-								DefaultIcon={RotateCw}
-								state={checkUpdatesFetcher.state}
-								successState={checkUpdatesSuccessState}
-							/>
-						</Button>
-						<Button type="button" onClick={handleAddFanficFromClipboard}>
-							<LoadableIcon
-								DefaultIcon={ClipboardPlus}
-								state={addFanficFetcher.state}
-								successState={addFanficSuccessState}
-							/>
-						</Button>
+						<Tooltip description="Check for updates">
+							<Button
+								type="button"
+								className="ml-4 w-fit"
+								onClick={handleCheckForUpdates}
+								disabled={isCheckUpdatesSubmitting}
+							>
+								<LoadableIcon
+									DefaultIcon={RotateCw}
+									state={checkUpdatesFetcher.state}
+									successState={checkUpdatesSuccessState}
+								/>
+							</Button>
+						</Tooltip>
+
+						<Tooltip description="Add Fanfic from clipboard">
+							<Button type="button" onClick={handleAddFanficFromClipboard}>
+								<LoadableIcon
+									DefaultIcon={ClipboardPlus}
+									state={addFanficFetcher.state}
+									successState={addFanficSuccessState}
+								/>
+							</Button>
+						</Tooltip>
 						<SettingsModal />
 					</div>
 				</div>

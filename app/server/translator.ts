@@ -1,170 +1,56 @@
-import type { Fanfic } from "@/db/types";
 import { ENV } from "@/server/config";
-import { TranslationServiceClient } from "@google-cloud/translate";
-import EPub from "epub";
-import EpubGen from "epub-gen";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const translate = new TranslationServiceClient({
-	projectId: ENV.GOOGLE_PROJECT_ID,
-	keyFilename: ENV.GOOGLE_SERVICE_ACCOUNT_JSON,
-});
+const ERROR_MESSSAGE = "***ERROR FOUND***";
 
-export const translateFic = async (
-	fanfic: Fanfic,
-	epubFilePath: string,
-	translationLanguage: string,
-): Promise<{ downloadPath: string; fileName: string; title: string }> => {
-	if (!fanfic.language) {
-		throw "No Language set to translate";
-	}
-	const epub = new EPub(epubFilePath);
-	const sourceLanguage = fanfic.language;
+const genAI = new GoogleGenerativeAI(ENV.GEMINI_API_KEY as string);
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-	const [translatedTitle, translatedAuthor] = await translateMetadata(
-		[fanfic.title, fanfic.author],
-		sourceLanguage,
-		translationLanguage,
-	);
+const translationBookPrompt = `
+	You are a book translator. You should translate content provided in the context and tone of the writer. Make sure to add newlines, commas and other styling
+	when required.
+	Try to handle typos and writing inconsistencies as a writing editor might. If you encounter an unknown word, try to decipher it to the best of your ability. 
+	If you encounter an error during the process of translation and you are unable to continue, please do not return the translated content. 
+	Instead, write - ${ERROR_MESSSAGE} with an appropriate error and return.
+	
+	Content to translate:
+	`;
 
-	return new Promise((resolve, reject) => {
-		epub.on("end", async () => {
-			try {
-				const translatedChapters = [];
+const translationBookMetadataPrompt = `
+	You are a translator. You are to translates values provided from a json format. Return it in a raw json format without additional input
+	for example, if you recieve a json of {"title": "שלום", "author": "הגר"}, 
+	return a raw json string with a translated prefix - ie {"translatedTitle": "hello", "translatedAuthor": "Hagar"}
+	or {"chapterTitle": "אני הולך"} - return it as {"translatedChapterTitle": "I'm going"}
+	
+	Content to translate:
+	`;
 
-				for (const chapter of epub.flow) {
-					const chapterText = await getChapterAsync(epub, chapter.id);
-					const chunks = splitTextIntoChunks(chapterText, 5000);
-					const translatedChunks = [];
-					for (const chunk of chunks) {
-						const [response] = await translate.translateText({
-							parent: `projects/${ENV.GOOGLE_PROJECT_ID}/locations/global`,
-							contents: [chunk],
-							mimeType: "text/plain",
-							sourceLanguageCode: sourceLanguage,
-							targetLanguageCode: translationLanguage,
-						});
-						if (response.translations) {
-							translatedChunks.push(response.translations[0].translatedText);
-						}
-					}
-
-					translatedChapters.push({
-						title: await translateChapterTitle(
-							chapter.title,
-							sourceLanguage,
-							translationLanguage,
-						),
-						content: translatedChunks.join(" "),
-					});
-				}
-
-				const translatedEpub = await buildTranslatedEpub(
-					{ ...fanfic, title: translatedTitle, author: translatedAuthor },
-					translatedChapters,
-				);
-
-				resolve(translatedEpub);
-			} catch (error) {
-				reject(
-					(typeof error === "string" && error) ||
-						(error instanceof Error && error.message) ||
-						"",
-				);
-			}
-		});
-
-		epub.parse();
-	});
-};
-
-async function translateMetadata(
-	contents: string[],
-	sourceLanguage: string,
-	translationLanguage: string,
+export async function translateChapter(
+	chapterText: string,
+	chapterTitle: string,
 ) {
-	const [response] = await translate.translateText({
-		parent: `projects/${ENV.GOOGLE_PROJECT_ID}/locations/global`,
-		contents,
-		mimeType: "text/plain",
-		sourceLanguageCode: sourceLanguage,
-		targetLanguageCode: translationLanguage,
-	});
-
-	return (
-		response.translations?.map((t) => t.translatedText ?? "") || [
-			"Unknown Title",
-			"unknown Author",
-		]
+	const response = await model.generateContentStream(
+		`${translationBookPrompt}\n${chapterText}`,
 	);
-}
-async function translateChapterTitle(
-	title: string,
-	sourceLanguage: string,
-	translationLanguage: string,
-) {
-	const [response] = await translate.translateText({
-		parent: `projects/${ENV.GOOGLE_PROJECT_ID}/locations/global`,
-		contents: [title],
-		mimeType: "text/plain",
-		sourceLanguageCode: sourceLanguage,
-		targetLanguageCode: translationLanguage,
-	});
-
-	if (typeof response.translations?.[0].translatedText === "string") {
-		return response.translations[0].translatedText;
+	let chapterChunks = "";
+	for await (const chunk of response.stream) {
+		const chunkText = chunk.text();
+		chapterChunks += chunkText;
 	}
-
-	return "Unknown Chapter Title";
+	const { translatedChapterTitle } = await translateMetadata({
+		chatperTitle: chapterTitle,
+	});
+	return {
+		title: translatedChapterTitle,
+		data: chapterChunks,
+	};
 }
 
-async function buildTranslatedEpub(
-	fanfic: Fanfic,
-	chapters: { title: string; content: string }[],
-) {
-	const content = chapters.map((chapter) => ({
-		title: chapter.title,
-		data: chapter.content,
-	}));
-
-	const epub = new EpubGen(
-		{
-			title: fanfic.title,
-			author: fanfic.author,
-			publisher: "https://archiveofourown.org",
-			content,
-		},
-		`/tmp/translated/${fanfic.title}.epub`,
+export async function translateMetadata(contents: object) {
+	const metadata = JSON.stringify({ contents });
+	const result = await model.generateContent(
+		`${translationBookMetadataPrompt}\n${metadata}`,
 	);
-
-	return epub.promise
-		.then(() => {
-			return {
-				downloadPath: `/tmp/translated/${fanfic.title}.epub`,
-				fileName: `${fanfic.title}.epub`,
-				title: fanfic.title,
-			};
-		})
-		.catch((err) => {
-			throw new Error(`Failed to generate EPUB: ${err.message}`);
-		});
-}
-
-function splitTextIntoChunks(text: string, chunkSize: number): string[] {
-	const chunks = [];
-	for (let i = 0; i < text.length; i += chunkSize) {
-		chunks.push(text.slice(i, i + chunkSize));
-	}
-	return chunks;
-}
-
-function getChapterAsync(epub: EPub, chapterId: string): Promise<string> {
-	return new Promise((resolve, reject) => {
-		epub.getChapter(chapterId, (err, text) => {
-			if (err) {
-				reject(err);
-			} else {
-				resolve(text);
-			}
-		});
-	});
+	const response = await result.response;
+	return JSON.parse(response.text());
 }

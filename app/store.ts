@@ -10,7 +10,7 @@ type SettingsState = {
 	kindleEmail: string;
 	setEmail: (email: string) => void;
 	languageCode: string | null;
-	setLanguageCode: (languageCode: string) => void;
+	setLanguageCode: (languageCode: string | null) => void;
 };
 
 export const useSettingsStore = create(
@@ -23,7 +23,7 @@ export const useSettingsStore = create(
 					...state,
 					kindleEmail: email,
 				})),
-			setLanguageCode: (languageCode: string) =>
+			setLanguageCode: (languageCode: string | null) =>
 				set((state) => ({
 					...state,
 					languageCode: languageCode,
