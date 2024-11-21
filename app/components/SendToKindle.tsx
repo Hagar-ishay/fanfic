@@ -1,6 +1,5 @@
 import { DropdownMenu, type Item } from "@/components/base/Dropdown";
 import LoadableIcon from "@/components/base/LoadableIcon";
-import { Tooltip } from "@/components/base/Tooltip";
 import { Button } from "@/components/ui/button";
 import type { Fanfic } from "@/db/types";
 import type { action } from "@/routes/api.sections.$sectionId.fanfics.$fanficId.send-to-kindle";
@@ -83,8 +82,7 @@ export default function SendToKindle({
 		const title = `Send chapters ${fanfic.latestStartingChapter} - ${latestFinalChapter}`;
 		items.push({
 			title: title,
-			onSelect: handleSend,
-			value: fanfic.latestStartingChapter,
+			onSelect: () => handleSend(fanfic.latestStartingChapter),
 		});
 	}
 

@@ -90,11 +90,11 @@ function MainPage() {
 	return (
 		<div className="flex flex-col h-screen">
 			<SignedIn>
-				<div className="sticky top-0 z-20 p-4 shadow-md bg-accent flex flex-row justify-between">
-					<div className="flex items-center ml-3">
+				<div className="sticky top-0 z-20 p-4 shadow-md bg-accent flex flex-row justify-between gap-2">
+					<div className="flex items-center ml-2">
 						<UserButton />
 					</div>
-					<div className="flex items-center justify-end gap-2 ">
+					<div className="flex items-center justify-end gap-2">
 						<div className="justify-center relative">
 							<Input
 								value={searchInput}
@@ -114,31 +114,37 @@ function MainPage() {
 								</Button>
 							)}
 						</div>
-						<Tooltip description="Check for updates">
-							<Button
-								type="button"
-								className="ml-4 w-fit"
-								onClick={handleCheckForUpdates}
-								disabled={isCheckUpdatesSubmitting}
-							>
-								<LoadableIcon
-									DefaultIcon={RotateCw}
-									state={checkUpdatesFetcher.state}
-									successState={checkUpdatesSuccessState}
-								/>
-							</Button>
-						</Tooltip>
+						<div className="flex flex-row gap-2">
+							<Tooltip description="Check for updates">
+								<Button
+									size="icon"
+									className="ml-4 w-10"
+									onClick={handleCheckForUpdates}
+									disabled={isCheckUpdatesSubmitting}
+								>
+									<LoadableIcon
+										DefaultIcon={RotateCw}
+										state={checkUpdatesFetcher.state}
+										successState={checkUpdatesSuccessState}
+									/>
+								</Button>
+							</Tooltip>
 
-						<Tooltip description="Add Fanfic from clipboard">
-							<Button type="button" onClick={handleAddFanficFromClipboard}>
-								<LoadableIcon
-									DefaultIcon={ClipboardPlus}
-									state={addFanficFetcher.state}
-									successState={addFanficSuccessState}
-								/>
-							</Button>
-						</Tooltip>
-						<SettingsModal />
+							<Tooltip description="Add Fanfic from clipboard">
+								<Button
+									className="w-10"
+									size="icon"
+									onClick={handleAddFanficFromClipboard}
+								>
+									<LoadableIcon
+										DefaultIcon={ClipboardPlus}
+										state={addFanficFetcher.state}
+										successState={addFanficSuccessState}
+									/>
+								</Button>
+							</Tooltip>
+							<SettingsModal />
+						</div>
 					</div>
 				</div>
 				<div className="flex-1 overflow-y-auto">

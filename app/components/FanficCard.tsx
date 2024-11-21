@@ -1,19 +1,15 @@
 import SendToKindle from "@/components/SendToKindle";
+import { DropdownMenu } from "@/components/base/Dropdown";
 import { Tooltip } from "@/components/base/Tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardDescription,
+	CardFooter,
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import {
 	Sheet,
@@ -77,6 +73,15 @@ export default function FanficCard({
 		));
 	};
 
+	const Trigger = React.forwardRef<
+		HTMLButtonElement,
+		React.ComponentPropsWithoutRef<"button">
+	>((props, ref) => (
+		<Button ref={ref} {...props}>
+			<CircleChevronRight />
+		</Button>
+	));
+
 	const Title = ({ showComplete }: { showComplete: boolean }) => {
 		return (
 			<>
@@ -126,11 +131,12 @@ export default function FanficCard({
 					</CardTitle>
 
 					<Sheet>
-						<SheetTrigger className="flex p-3">
-							<Tooltip description="Expand">
+						<Tooltip description="Expand">
+							<SheetTrigger className="flex p-3">
 								<ExpandIcon size={20} />
-							</Tooltip>
-						</SheetTrigger>
+							</SheetTrigger>
+						</Tooltip>
+
 						<SheetContent side="bottom" className="bg-secondary ">
 							<SheetHeader>
 								<SheetTitle className="flex flex-col gap-2 items-center justify-center">
@@ -179,28 +185,18 @@ export default function FanficCard({
 				>
 					<Description />
 				</CardDescription>
-				<div className="flex justify-end gap-2 items-baseline p-6">
-					<DropdownMenu>
-						<Tooltip description="Transfer fanfic">
-							<DropdownMenuTrigger asChild>
-								<Button>
-									<CircleChevronRight />
-								</Button>
-							</DropdownMenuTrigger>
-						</Tooltip>
-						<DropdownMenuContent>
-							{transferableSections.map((section) => (
-								<DropdownMenuItem
-									key={section.id}
-									onSelect={() => handleTranfser(section.id)}
-								>
-									<span>{section.displayName}</span>
-								</DropdownMenuItem>
-							))}
-						</DropdownMenuContent>
-					</DropdownMenu>
+				<CardFooter className="flex justify-end gap-2 items-center p-6">
+					<DropdownMenu
+						tooltip="Transfer fanfic"
+						trigger={<Trigger />}
+						items={transferableSections.map((section) => ({
+							title: section.displayName,
+							onSelect: () => handleTranfser(section.id),
+						}))}
+					/>
+
 					<SendToKindle fanfic={fanfic} sectionId={sectionId} />
-				</div>
+				</CardFooter>
 			</div>
 		</Card>
 	);

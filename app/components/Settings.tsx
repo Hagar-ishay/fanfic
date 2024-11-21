@@ -41,7 +41,7 @@ export function SettingsModal() {
 		<Sheet>
 			<Tooltip description="Settings">
 				<SheetTrigger asChild>
-					<Button size="icon">
+					<Button size="icon" className="w-10">
 						<SettingsIcon />
 					</Button>
 				</SheetTrigger>
