@@ -3,14 +3,26 @@
 @tailwind utilities;
 @layer base {
 	:root {
+		--fire-bush-50: 39 97% 93%;
+		--fire-bush-100: 36 85% 85%;
+		--fire-bush-200: 33 70% 75%;
+		--fire-bush-300: 31 62% 64%;
+		--fire-bush-400: 29 53% 55%;
+		--fire-bush-500: 26 50% 45%;
+		--fire-bush-600: 22 45% 38%;
+		--fire-bush-700: 19 40% 32%;
+		--fire-bush-800: 16 35% 28%;
+		--fire-bush-900: 13 30% 24%;
+		--fire-bush-950: 8 20% 14%;
+
 		--background: 0 0% 100%;
 		--foreground: 240 10% 3.9%;
 		--card: 0 0% 100%;
 		--card-foreground: 240 10% 3.9%;
 		--popover: 0 0% 100%;
 		--popover-foreground: 240 10% 3.9%;
-		--primary: 240 5.9% 10%;
-		--primary-foreground: 0 0% 98%;
+		--primary: var(--fire-bush-500);
+		--primary-foreground: var(--fire-bush-50);
 		--secondary: 240 4.8% 95.9%;
 		--secondary-foreground: 240 5.9% 10%;
 		--muted: 240 4.8% 95.9%;

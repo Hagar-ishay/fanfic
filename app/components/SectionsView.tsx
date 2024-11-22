@@ -106,7 +106,7 @@ export default function SectionsView({ searchInput }: { searchInput: string }) {
 									<AccordionTrigger className="w-full p-4 bg-secondary rounded-md">
 										<h2 className="text-xl font-bold text-secondary-foreground">{`${section.name} (${sectionFanfics(section.id).length})`}</h2>
 									</AccordionTrigger>
-									<AccordionContent className="p-4 bg-primary-foreground border-t">
+									<AccordionContent className="p-4 bg-white border-t">
 										<div className={cn("flex flex-col gap-4")}>
 											{sectionFanfics(section.id)?.map((fanfic, index) => (
 												<Draggable

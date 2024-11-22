@@ -90,7 +90,7 @@ function MainPage() {
 	return (
 		<div className="flex flex-col h-screen">
 			<SignedIn>
-				<div className="sticky top-0 z-20 p-4 shadow-md bg-accent flex flex-row justify-between gap-2">
+				<div className="sticky top-0 z-20 p-4 shadow-md flex flex-row justify-between gap-2">
 					<div className="flex items-center ml-2">
 						<UserButton />
 					</div>
