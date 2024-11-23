@@ -1,5 +1,6 @@
-import { ENV } from "@/server/config";
+"use server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { ENV } from "@/config";
 
 const ERROR_MESSSAGE = "***ERROR FOUND***";
 
@@ -26,31 +27,31 @@ const translationBookMetadataPrompt = `
 	`;
 
 export async function translateChapter(
-	chapterText: string,
-	chapterTitle: string,
+  chapterText: string,
+  chapterTitle: string
 ) {
-	const response = await model.generateContentStream(
-		`${translationBookPrompt}\n${chapterText}`,
-	);
-	let chapterChunks = "";
-	for await (const chunk of response.stream) {
-		const chunkText = chunk.text();
-		chapterChunks += chunkText;
-	}
-	const { translatedChapterTitle } = await translateMetadata({
-		chatperTitle: chapterTitle,
-	});
-	return {
-		title: translatedChapterTitle,
-		data: chapterChunks,
-	};
+  const response = await model.generateContentStream(
+    `${translationBookPrompt}\n${chapterText}`
+  );
+  let chapterChunks = "";
+  for await (const chunk of response.stream) {
+    const chunkText = chunk.text();
+    chapterChunks += chunkText;
+  }
+  const { translatedChapterTitle } = await translateMetadata({
+    chatperTitle: chapterTitle,
+  });
+  return {
+    title: translatedChapterTitle,
+    data: chapterChunks,
+  };
 }
 
 export async function translateMetadata(contents: object) {
-	const metadata = JSON.stringify({ contents });
-	const result = await model.generateContent(
-		`${translationBookMetadataPrompt}\n${metadata}`,
-	);
-	const response = await result.response;
-	return JSON.parse(response.text());
+  const metadata = JSON.stringify({ contents });
+  const result = await model.generateContent(
+    `${translationBookMetadataPrompt}\n${metadata}`
+  );
+  const response = await result.response;
+  return JSON.parse(response.text());
 }

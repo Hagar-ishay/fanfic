@@ -1,10 +1,11 @@
-import { Tooltip } from "@/components/base/Tooltip";
+"use client";
 import {
 	DropdownMenu as BaseDropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "../ui/dropdown-menu";
+import { Tooltip } from "./Tooltip";
 
 export type Item = {
 	// biome-ignore lint/suspicious/noExplicitAny: It could be anything here
