@@ -1,22 +1,44 @@
-import fs from "node:fs";
-import got from "got";
-import * as consts from "../consts";
+"use server";
 
-const httpsOptions = { https: { rejectUnauthorized: false } };
+import fs from "node:fs";
+import axios from "axios";
+import { AO3_LINK } from "@/consts";
+
+const axiosInstance = axios.create({
+  httpsAgent: new (require("https").Agent)({
+    rejectUnauthorized: false,
+  }),
+});
 
 export async function getFanfic(fanficId: string): Promise<string> {
-  const url = `${consts.AO3_LINK}/works/${fanficId}?view_full_work=true&view_adult=true`;
-  const { body } = await got(url, httpsOptions);
-  return body;
+  const url = `${AO3_LINK}/works/${fanficId}?view_full_work=true&view_adult=true`;
+
+  try {
+    const response = await axiosInstance.get(url, {
+      responseType: "text",
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching fanfic: ${error}`);
+    throw new Error(`Failed to fetch fanfic: ${error}`);
+  }
 }
 
 export async function downloadFanfic(url: string, downloadPath: string) {
-  const downloadStream = got.stream(url, httpsOptions);
+  try {
+    const response = await axiosInstance({
+      url,
+      method: "GET",
+      responseType: "stream",
+    });
 
-  await new Promise((resolve, reject) => {
-    downloadStream
-      .pipe(fs.createWriteStream(downloadPath))
-      .on("finish", resolve)
-      .on("error", reject);
-  });
+    const fileStream = fs.createWriteStream(downloadPath);
+
+    await new Promise((resolve, reject) => {
+      response.data.pipe(fileStream).on("finish", resolve).on("error", reject);
+    });
+  } catch (error) {
+    console.error(`Error downloading fanfic: ${error}`);
+    throw new Error(`Failed to download fanfic: ${error}`);
+  }
 }

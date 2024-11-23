@@ -1,9 +1,8 @@
 "use client";
-import { updateFanfic } from "../db/db";
-import type { Fanfic, Section } from "../db/types";
-import { cn } from "../lib/utils";
-import { useSearchStore, useSectionsStore } from "../store";
-import FanficCard from "./FanficCard";
+import type { Fanfic, Section } from "@/db/types";
+import { cn } from "@/lib/utils";
+import { useSearchStore, useSectionsStore } from "@/store";
+import FanficCard from "@/components/FanficCard";
 import {
   Accordion,
   AccordionContent,
@@ -17,6 +16,7 @@ import {
   DropResult,
 } from "@hello-pangea/dnd";
 import { matchSorter } from "match-sorter";
+import { updateFic } from "@/server/updater";
 
 export default function SectionsView({
   fanfics,
@@ -38,7 +38,7 @@ export default function SectionsView({
       const fanficId = result.draggableId;
       const newSectionId = +destination.droppableId;
 
-      await updateFanfic(+fanficId, { sectionId: newSectionId });
+      await updateFic(+fanficId, { sectionId: newSectionId });
     }
   };
 

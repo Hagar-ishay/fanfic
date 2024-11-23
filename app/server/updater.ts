@@ -6,7 +6,7 @@ import { getFanfic } from "./ao3Client";
 import { fanficExtractor } from "./extractor";
 import { AO3_LINK } from "@/consts";
 
-// const nextRunCache = new NodeCache({ stdTTL: 7200, checkperiod: 120 });
+const nextRunCache = new NodeCache({ stdTTL: 7200, checkperiod: 120 });
 
 export async function checkForUpdates() {
   const updatedFanfics: string[] = [];
@@ -81,3 +81,7 @@ const errorMessage = (error: unknown) =>
   (typeof error === "string" && error) ||
   (error instanceof Error && error.message) ||
   "Unknown Error";
+
+export async function updateFic(fanficId: number, params: object) {
+  await updateFanfic(fanficId, params);
+}

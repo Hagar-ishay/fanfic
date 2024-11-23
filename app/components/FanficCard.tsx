@@ -22,9 +22,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { TAGS } from "@/consts";
-import { updateFanfic } from "@/db/db";
 import { Fanfic, Section } from "@/db/types";
 import { cn } from "@/lib/utils";
+import { updateFic } from "@/server/updater";
 import { CircleCheck, CircleChevronRight, ExpandIcon } from "lucide-react";
 import React from "react";
 
@@ -101,7 +101,7 @@ export default function FanficCard({
   };
 
   async function handleTranfser(newSectionId: number) {
-    await updateFanfic(fanfic.id, { sectionId: newSectionId });
+    await updateFic(fanfic.id, { sectionId: newSectionId });
   }
 
   return (
