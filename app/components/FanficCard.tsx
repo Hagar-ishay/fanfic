@@ -1,7 +1,7 @@
 "use client";
 
+import { DrawerDialog } from "@/components/base/DrawerDialog";
 import { DropdownMenu } from "@/components/base/Dropdown";
-import { Tooltip } from "@/components/base/Tooltip";
 import SendToKindle from "@/components/SendToKindle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,24 +13,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { TAGS } from "@/consts";
 import { Fanfic, Section } from "@/db/types";
 import { cn } from "@/lib/utils";
 import { updateFic } from "@/server/updater";
 import { CircleCheck, CircleChevronRight, ExpandIcon } from "lucide-react";
 import React from "react";
+import { useRouter } from "next/navigation";
 
 export default function FanficCard({
   fanfic,
-  sectionId,
   isDragging,
   transferableSections,
 }: {
@@ -39,6 +31,8 @@ export default function FanficCard({
   isDragging: boolean;
   transferableSections: Section[];
 }) {
+  const router = useRouter();
+
   const TagList = ({ category }: { category: string }) => {
     const values = fanfic.tags[category];
     return values?.map((value) => (
@@ -69,7 +63,7 @@ export default function FanficCard({
   const Title = ({ showComplete }: { showComplete: boolean }) => {
     return (
       <>
-        <h3 className="text-xl text-accent-foreground flex-row">
+        <div className="text-xl text-accent-foreground flex-row">
           <a
             href={fanfic.sourceUrl}
             target="_blank"
@@ -81,8 +75,8 @@ export default function FanficCard({
               <CircleCheck className="text-success" size="18" />
             )}
           </a>
-        </h3>
-        <h3 className="text-sm text-zinc-600">
+        </div>
+        <div className="text-sm text-zinc-600">
           {fanfic.authorUrl ? (
             <a
               href={fanfic.authorUrl}
@@ -95,13 +89,14 @@ export default function FanficCard({
           ) : (
             fanfic.author
           )}
-        </h3>
+        </div>
       </>
     );
   };
 
   async function handleTranfser(newSectionId: number) {
-    await updateFic(fanfic.id, { sectionId: newSectionId });
+    updateFic(fanfic.id, { sectionId: newSectionId });
+    router.refresh();
   }
 
   return (
@@ -114,50 +109,43 @@ export default function FanficCard({
             <Title showComplete />
           </CardTitle>
 
-          <Sheet>
-            <Tooltip description="Expand">
-              <SheetTrigger className="flex p-3">
-                <ExpandIcon size={20} />
-              </SheetTrigger>
-            </Tooltip>
-
-            <SheetContent side="bottom" className="bg-secondary ">
-              <SheetHeader>
-                <SheetTitle className="flex flex-col gap-2 items-center justify-center">
-                  <Title showComplete={false} />
-                </SheetTitle>
-                <SheetDescription>
-                  <div className="overflow-auto max-h-80 gap-1 flex flex-col mt-1 bg-secondary ml-10 mr-10">
-                    <Description />
-                  </div>
-                  <div className="flex flex-col flex-wrap gap-2 mt-5">
-                    <Separator />
-                    <div className="flex gap-2 flex-row flex-wrap text-xs justify-center">
-                      {fanfic.wordCount && (
-                        <Badge title="Word Count">
-                          Words: {fanfic.wordCount.toLocaleString()}
-                        </Badge>
-                      )}
-                      {fanfic.chapterCount && (
-                        <Badge title="Chapter Count">
-                          Chapters: {fanfic.chapterCount}
-                        </Badge>
-                      )}
-                      <TagList category={TAGS.RATING} />
-                      <TagList category={TAGS.FANDOM} />
-                    </div>
-                    <div className="flex gap-2 flex-row flex-wrap justify-center items-center text-xs">
-                      <Badge title="Status">
-                        {fanfic.completedAt ? <>Complete</> : <>In Progress</>}
-                      </Badge>
-                      <TagList category={TAGS.CATEGORIES} />
-                      <TagList category={TAGS.RELATIONSHIPS} />
-                    </div>
-                  </div>
-                </SheetDescription>
-              </SheetHeader>
-            </SheetContent>
-          </Sheet>
+          <DrawerDialog
+            tooltip="Expand"
+            trigger={<ExpandIcon size={20} />}
+            title={<Title showComplete={false} />}
+            description={
+              <div className="overflow-auto max-h-80 gap-1 flex flex-col mt-1 bg-secondary ml-10 mr-10">
+                <Description />
+              </div>
+            }
+          >
+            <>
+              <div className="flex flex-col flex-wrap gap-2 mt-5">
+                <Separator />
+                <div className="flex gap-2 flex-row flex-wrap text-xs justify-center">
+                  {fanfic.wordCount && (
+                    <Badge title="Word Count">
+                      Words: {fanfic.wordCount.toLocaleString()}
+                    </Badge>
+                  )}
+                  {fanfic.chapterCount && (
+                    <Badge title="Chapter Count">
+                      Chapters: {fanfic.chapterCount}
+                    </Badge>
+                  )}
+                  <TagList category={TAGS.RATING} />
+                  <TagList category={TAGS.FANDOM} />
+                </div>
+                <div className="flex gap-2 flex-row flex-wrap justify-center items-center text-xs">
+                  <Badge title="Status">
+                    {fanfic.completedAt ? <>Complete</> : <>In Progress</>}
+                  </Badge>
+                  <TagList category={TAGS.CATEGORIES} />
+                  <TagList category={TAGS.RELATIONSHIPS} />
+                </div>
+              </div>
+            </>
+          </DrawerDialog>
         </div>
       </CardHeader>
 

@@ -18,7 +18,7 @@ export function Tooltip({
 		<TooltipProvider>
 			<BaseTooltip>
 				<TooltipTrigger asChild>{children}</TooltipTrigger>
-				<TooltipContent>{description}</TooltipContent>
+				<TooltipContent >{description}</TooltipContent>
 			</BaseTooltip>
 		</TooltipProvider>
 	);

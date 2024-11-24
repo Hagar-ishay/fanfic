@@ -9,33 +9,46 @@ import { useState, useTransition } from "react";
 import { Button } from "./ui/button";
 import { SendHorizontal } from "lucide-react";
 import { DropdownMenu } from "./base/Dropdown";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SendToKindle({ fanfic }: { fanfic: Fanfic }) {
+  const { toast } = useToast();
+
   const kindleEmail = useSettingsStore((state) => state.kindleEmail);
   const translationLanguage = useSettingsStore((state) => state.languageCode);
   const [isPending, startTransition] = useTransition();
   const [isSuccess, setIsSuccess] = useState<undefined | boolean>(undefined);
 
   const handleSend = () => {
-    "hello";
-    // startTransition(async () => {
-    //   try {
-    //     const result = await KindleSender(
-    //       fanfic,
-    //       kindleEmail,
-    //       translationLanguage
-    //     );
-    //     setIsSuccess(result.success);
-    //     if (result.success) {
-    //       toast("Sent to Kindle successfully");
-    //     } else {
-    //       toast.error("Failed to send to Kindle");
-    //     }
-    //   } catch (error) {
-    //     console.error("Error sending to Kindle:", error);
-    //     toast.error("Failed to send to Kindle");
-    //   }
-    // });
+    startTransition(async () => {
+      try {
+        const result = await KindleSender(
+          fanfic,
+          kindleEmail,
+          translationLanguage
+        );
+        setIsSuccess(result.success);
+        if (result.success) {
+          toast({
+            title: "Send to Kindle:",
+            description: "Sent to Kindle successfully!",
+          });
+        } else {
+          toast({
+            title: "Send to Kindle:",
+            description: "Failed to send to Kindle",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Error sending to Kindle:", error);
+        toast({
+          title: "Send to Kindle:",
+          description: "Could not send to Kindle",
+          variant: "destructive",
+        });
+      }
+    });
   };
 
   const Trigger = ({ onClick }: { onClick?: typeof handleSend }) => {

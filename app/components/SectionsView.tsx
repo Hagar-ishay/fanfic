@@ -17,6 +17,8 @@ import {
 } from "@hello-pangea/dnd";
 import { matchSorter } from "match-sorter";
 import { updateFic } from "@/server/updater";
+import { useRouter } from "next/navigation";
+import { useOptimistic, useTransition } from "react";
 
 export default function SectionsView({
   fanfics,
@@ -28,22 +30,39 @@ export default function SectionsView({
   const openSections = useSectionsStore((state) => state.openSections);
   const setOpenSections = useSectionsStore((state) => state.setOpenSections);
   const searchInput = useSearchStore((state) => state.searchInput);
+  const [isPending, startTransition] = useTransition();
+  const [optimisticFanfics, addOptimistic] = useOptimistic(
+    fanfics,
+    (
+      fanficsState: Fanfic[],
+      action: { newSectionId: number; fanficId: number }
+    ) =>
+      fanficsState.map((fanficState) =>
+        fanficState.id === action.fanficId
+          ? { ...fanficState, sectionId: action.newSectionId }
+          : fanficState
+      )
+  );
+  const router = useRouter();
 
   const handleDragEnd = async (result: DropResult) => {
     if (!result.destination) return;
-
     const { source, destination } = result;
 
     if (source.droppableId !== destination.droppableId) {
-      const fanficId = result.draggableId;
+      const fanficId = +result.draggableId;
       const newSectionId = +destination.droppableId;
-
-      await updateFic(+fanficId, { sectionId: newSectionId });
+      startTransition(async () => {
+        addOptimistic({ newSectionId, fanficId });
+        await updateFic(fanficId, { sectionId: newSectionId }).then(() => {});
+        router.refresh();
+      });
     }
   };
 
   const sectionFanfics = (sectionId: number) => {
-    const filteredFanfics = fanfics.filter(
+    const fics = isPending ? optimisticFanfics : fanfics;
+    const filteredFanfics = fics.filter(
       (fanfic) => fanfic.sectionId === sectionId
     );
 
@@ -72,7 +91,7 @@ export default function SectionsView({
                   <AccordionTrigger className="w-full p-4 bg-secondary rounded-md">
                     <h2 className="text-xl font-bold text-secondary-foreground">{`${section.name} (${sectionFanfics(section.id).length})`}</h2>
                   </AccordionTrigger>
-                  <AccordionContent className="p-4 bg-primary-foreground border-t">
+                  <AccordionContent className="p-4 border-t">
                     <div className={cn("flex flex-col gap-4")}>
                       {sectionFanfics(section.id)?.map((fanfic, index) => (
                         <Draggable

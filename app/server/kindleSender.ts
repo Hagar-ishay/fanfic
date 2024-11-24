@@ -9,7 +9,7 @@ import { updateFanfic } from "../db/db";
 import type { Fanfic } from "../db/types";
 import { downloadFanfic } from "./ao3Client";
 import { ENV } from "../config";
-import { translateChapter, translateMetadata } from "./translator";
+import { translateChapter, translateMetadata } from "@/server/translator";
 
 const unlinkAsync = promisify(fs.unlink);
 const statAsync = promisify(fs.stat);
@@ -37,9 +37,10 @@ export async function KindleSender(
 
   try {
     await downloadFanfic(fanfic.downloadLink, downloadPath);
-
-    if (startingChapter || shouldTranslate) {
+    console.log({ startingChapter, shouldTranslate });
+    if (shouldTranslate) {
       console.log("Translating");
+
       const { translatedTitle, translatedAuthor } = await translateMetadata({
         title: fanfic.title,
         author: fanfic.author,
@@ -47,9 +48,8 @@ export async function KindleSender(
 
       title = translatedTitle;
       author = translatedAuthor;
-
-      console.log("Parsing");
-
+    }
+    if (shouldTranslate || startingChapter) {
       const chapters = await ParseFanfic(
         downloadPath,
         startingChapter,
@@ -66,15 +66,19 @@ export async function KindleSender(
       await buildNewEpub(data, downloadPath);
     }
 
-    await sendToKindle(kindleEmail, title, fileName, downloadPath);
     const stats = await statAsync(downloadPath);
     if (stats.size === 0) {
       await unlinkAsync(downloadPath);
       throw new Error("Downloaded file is empty.");
     }
 
+    await sendToKindle(kindleEmail, title, fileName, downloadPath);
+
     await unlinkAsync(downloadPath);
+
     updateFanfic(fanfic.id, { lastSent: new Date(Date.now()) });
+
+    console.log("am i here???");
     return { success: true, message: "" };
   } catch (error) {
     let errorMessage =
@@ -191,5 +195,7 @@ export async function sendToKindle(
     ],
   };
 
+  console.log({ mailOptions });
   await transporter.sendMail(mailOptions);
+  console.log("hello");
 }

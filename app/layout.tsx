@@ -6,9 +6,9 @@ import {
   SignInButton,
   SignedIn,
   SignedOut,
-  UserButton,
 } from "@clerk/nextjs";
 import Header from "./components/Header";
+import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -35,16 +35,18 @@ export default function RootLayout({
     <ClerkProvider>
       <html lang="en">
         <body>
-          <header>
+          <header className="flex flex-row items-center justify-between sticky top-0 z-50 p-4 shadow-md bg-muted gap-2">
             <SignedOut>
               <SignInButton />
-              <Header />
             </SignedOut>
             <SignedIn>
-              <UserButton />
+              <Header />
             </SignedIn>
           </header>
-          <main>{children}</main>
+          <SignedIn>
+            <main>{children}</main>
+            <Toaster />
+          </SignedIn>
         </body>
       </html>
     </ClerkProvider>
