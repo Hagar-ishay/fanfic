@@ -10,6 +10,7 @@ import { Button } from "./ui/button";
 import { SendHorizontal } from "lucide-react";
 import { DropdownMenu } from "./base/Dropdown";
 import { useToast } from "@/hooks/use-toast";
+import { boolean } from "drizzle-orm/mysql-core";
 
 export default function SendToKindle({ fanfic }: { fanfic: Fanfic }) {
   const { toast } = useToast();
@@ -18,6 +19,9 @@ export default function SendToKindle({ fanfic }: { fanfic: Fanfic }) {
   const translationLanguage = useSettingsStore((state) => state.languageCode);
   const [isPending, startTransition] = useTransition();
   const [isSuccess, setIsSuccess] = useState<undefined | boolean>(undefined);
+  const isDisabled = Boolean(
+    isPending || (fanfic.lastSent && fanfic.lastSent > fanfic.updatedAt)
+  );
 
   const handleSend = () => {
     startTransition(async () => {
@@ -54,7 +58,7 @@ export default function SendToKindle({ fanfic }: { fanfic: Fanfic }) {
   const Trigger = ({ onClick }: { onClick?: typeof handleSend }) => {
     return (
       <Button
-        disabled={isPending}
+        disabled={isDisabled}
         onClick={onClick ? () => onClick() : undefined}
       >
         <LoadableIcon
@@ -80,9 +84,8 @@ export default function SendToKindle({ fanfic }: { fanfic: Fanfic }) {
     fanfic.latestStartingChapter < latestFinalChapter &&
     fanfic.lastSent
   ) {
-    const title = `Send chapters ${fanfic.latestStartingChapter} - ${latestFinalChapter}`;
     items.push({
-      title: title,
+      title: `Send chapters ${fanfic.latestStartingChapter} - ${latestFinalChapter}`,
       onSelect: handleSend,
     });
   }
