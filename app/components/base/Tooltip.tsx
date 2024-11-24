@@ -1,10 +1,11 @@
+"use client";
+import type React from "react";
 import {
 	Tooltip as BaseTooltip,
 	TooltipContent,
 	TooltipProvider,
 	TooltipTrigger,
-} from "@/components/ui/tooltip";
-import type React from "react";
+} from "../ui/tooltip";
 
 export function Tooltip({
 	description,
@@ -17,7 +18,7 @@ export function Tooltip({
 		<TooltipProvider>
 			<BaseTooltip>
 				<TooltipTrigger asChild>{children}</TooltipTrigger>
-				<TooltipContent>{description}</TooltipContent>
+				<TooltipContent >{description}</TooltipContent>
 			</BaseTooltip>
 		</TooltipProvider>
 	);

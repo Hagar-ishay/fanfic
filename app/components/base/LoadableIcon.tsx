@@ -1,23 +1,24 @@
-import { cn } from "@/lib/utils";
+"use client";
 import { CheckCircle, Loader2, XCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function LoadableIcon({
-	DefaultIcon,
-	state,
-	successState,
+  DefaultIcon,
+  isPending,
+  successState,
 }: {
-	DefaultIcon: React.ComponentType;
-	state: "submitting" | "loading" | "idle";
-	successState?: boolean;
+  DefaultIcon: React.ComponentType;
+  isPending: boolean;
+  successState?: boolean;
 }) {
-	if (state === "submitting") {
-		return <Loader2 className={cn("w-fit", "animate-spin")} />;
-	}
-	if (successState === false) {
-		return <XCircle />;
-	}
-	if (successState) {
-		return <CheckCircle />;
-	}
-	return <DefaultIcon />;
+  if (isPending) {
+    return <Loader2 className={cn("w-fit", "animate-spin")} />;
+  }
+  if (successState === false) {
+    return <XCircle />;
+  }
+  if (successState) {
+    return <CheckCircle />;
+  }
+  return <DefaultIcon />;
 }
