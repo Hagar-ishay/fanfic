@@ -5,6 +5,7 @@ import { DropdownMenu } from "@/components/base/Dropdown";
 import SendToKindle from "@/components/SendToKindle";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Card,
   CardDescription,
@@ -12,14 +13,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 import { Separator } from "@/components/ui/separator";
-import { TAGS } from "@/consts";
-import { Fanfic, Section } from "@/db/types";
+import { Fanfic, Section, Tags } from "@/db/types";
 import { cn } from "@/lib/utils";
 import { updateFic } from "@/server/updater";
 import { CircleCheck, CircleChevronRight, ExpandIcon } from "lucide-react";
 import React from "react";
 import { useRouter } from "next/navigation";
+import { useMediaQuery } from "@/hooks/use-media-query";
+
+const MAX_TAGS_ITEM_LENGTH = 50;
 
 export default function FanficCard({
   fanfic,
@@ -31,20 +41,78 @@ export default function FanficCard({
   isDragging: boolean;
   transferableSections: Section[];
 }) {
+  const isDesktop = useMediaQuery("(min-width: 768px)");
   const router = useRouter();
 
-  const TagList = ({ category }: { category: string }) => {
-    const values = fanfic.tags[category];
-    return values?.map((value) => (
-      <Badge className="w-fit" key={value} title={category.toLowerCase()}>
-        {value}
-      </Badge>
-    ));
+  const tags: Tags = {
+    WORD_COUNT: [fanfic.wordCount?.toString() || ""],
+    CHAPTER_COUNT: [fanfic.chapterCount || ""],
+    ...fanfic.tags,
+  };
+
+  const TagList = () => {
+    type BadgeItem = {
+      category: string;
+      value: string;
+    };
+
+    type BadgeGroup = {
+      badges: BadgeItem[];
+      totalLength: number;
+    };
+
+    const badges: BadgeItem[] = Object.entries(tags).flatMap(
+      ([category, values]) =>
+        (values as string[]).map((value) => ({ category, value }))
+    );
+
+    const badgeGroups: BadgeGroup[] = badges.reduce(
+      (groups: BadgeGroup[], badge: BadgeItem) => {
+        const badgeLength = badge.value.length;
+
+        let currentGroup = groups[groups.length - 1];
+
+        if (
+          !currentGroup ||
+          currentGroup.totalLength + badgeLength > MAX_TAGS_ITEM_LENGTH ||
+          currentGroup.badges.length > 2
+        ) {
+          groups.push({ badges: [badge], totalLength: badgeLength });
+        } else {
+          currentGroup.badges.push(badge);
+          currentGroup.totalLength += badgeLength;
+        }
+
+        return groups;
+      },
+      []
+    );
+
+    return (
+      <>
+        {badgeGroups.map((group, index) => (
+          <CarouselItem
+            className="flex flex-row gap-3 justify-center text-sm items-center"
+            key={index}
+          >
+            {group.badges.map(({ category, value }) => (
+              <Badge
+                className="w-fit"
+                key={value}
+                title={category.toLowerCase().replace("_", " s")}
+              >
+                {value}
+              </Badge>
+            ))}
+          </CarouselItem>
+        ))}
+      </>
+    );
   };
 
   const Description = () => {
-    return fanfic.summary?.split("\n").map((line, index) => (
-      <span key={index}>
+    return fanfic.summary?.split("\n").map((line) => (
+      <span key={line}>
         {line}
         <br />
       </span>
@@ -112,37 +180,33 @@ export default function FanficCard({
           <DrawerDialog
             tooltip="Expand"
             trigger={<ExpandIcon size={20} />}
-            title={<Title showComplete={false} />}
-            description={
-              <div className="overflow-auto max-h-80 gap-1 flex flex-col mt-1 bg-secondary ml-10 mr-10">
-                <Description />
+            title={
+              <div className="flex flex-col items-center">
+                <Title showComplete={false} />
               </div>
+            }
+            description={
+              <ScrollArea className="overflow-auto max-h-40">
+                <Description />
+              </ScrollArea>
             }
           >
             <>
-              <div className="flex flex-col flex-wrap gap-2 mt-5">
+              <div className="flex flex-col flex-wrap gap-4 mt-5">
                 <Separator />
-                <div className="flex gap-2 flex-row flex-wrap text-xs justify-center">
-                  {fanfic.wordCount && (
-                    <Badge title="Word Count">
-                      Words: {fanfic.wordCount.toLocaleString()}
-                    </Badge>
-                  )}
-                  {fanfic.chapterCount && (
-                    <Badge title="Chapter Count">
-                      Chapters: {fanfic.chapterCount}
-                    </Badge>
-                  )}
-                  <TagList category={TAGS.RATING} />
-                  <TagList category={TAGS.FANDOM} />
-                </div>
-                <div className="flex gap-2 flex-row flex-wrap justify-center items-center text-xs">
-                  <Badge title="Status">
-                    {fanfic.completedAt ? <>Complete</> : <>In Progress</>}
-                  </Badge>
-                  <TagList category={TAGS.CATEGORIES} />
-                  <TagList category={TAGS.RELATIONSHIPS} />
-                </div>
+                <Carousel>
+                  <CarouselContent>
+                    <TagList />
+                  </CarouselContent>
+                  <CarouselPrevious
+                    variant="ghost"
+                    className={cn(isDesktop ? "ml-8" : "")}
+                  />
+                  <CarouselNext
+                    variant="ghost"
+                    className={cn(isDesktop ? "mr-8" : "")}
+                  />
+                </Carousel>
               </div>
             </>
           </DrawerDialog>

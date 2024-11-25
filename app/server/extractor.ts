@@ -54,14 +54,7 @@ export async function fanficExtractor(data: string, fanficId: string) {
           .map((_, tagEl) => $(tagEl).text().trim())
           .get();
 
-        if (category === consts.TAGS.RATING) {
-          const rating = tagList[0];
-          if (rating !== "Not Rated") {
-            tags[category] = [rating[0].toUpperCase()];
-          }
-        } else {
-          tags[category] = tagList;
-        }
+        tags[category] = tagList;
       }
     });
 

@@ -49,7 +49,9 @@ export function DrawerDialog({
         <DrawerHeader>
           {header}
           {title && <DrawerTitle>{title}</DrawerTitle>}
-          {description && <DrawerDescription>{description}</DrawerDescription>}
+          {description && (
+            <DrawerDescription asChild>{description}</DrawerDescription>
+          )}
         </DrawerHeader>
         <DrawerFooter> {children}</DrawerFooter>
         {addClose && (
@@ -67,7 +69,7 @@ export function DrawerDialog({
         <DialogHeader>
           {header}
           {title && <DialogTitle>{title}</DialogTitle>}
-          {description && <DialogDescription>{description}</DialogDescription>}
+          {description && <DialogDescription asChild>{description}</DialogDescription>}
         </DialogHeader>
         {children}
         {addClose && (
