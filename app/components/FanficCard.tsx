@@ -110,8 +110,8 @@ export default function FanficCard({
   };
 
   const Description = () => {
-    return fanfic.summary?.split("\n").map((line) => (
-      <span key={line}>
+    return fanfic.summary?.split("\n").map((line, index) => (
+      <span key={index}>
         {line}
         <br />
       </span>

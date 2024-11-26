@@ -1,39 +1,43 @@
 "use client";
 import {
-	DropdownMenu as BaseDropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
+  DropdownMenu as BaseDropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Tooltip } from "./Tooltip";
 
 export type Item = {
-	// biome-ignore lint/suspicious/noExplicitAny: It could be anything here
-	onSelect: (...args: any[]) => void;
-	title: string;
+  // biome-ignore lint/suspicious/noExplicitAny: It could be anything here
+  onSelect: (...args: any[]) => void;
+  title: string;
 };
 
 export function DropdownMenu({
-	tooltip,
-	trigger,
-	items,
-}: { tooltip?: string; trigger: React.ReactNode; items: Item[] }) {
-	return (
-		<BaseDropdownMenu>
-			{tooltip ? (
-				<Tooltip description={tooltip}>
-					<DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
-				</Tooltip>
-			) : (
-				<DropdownMenuTrigger>{trigger}</DropdownMenuTrigger>
-			)}
-			<DropdownMenuContent>
-				{items.map((item) => (
-					<DropdownMenuItem key={item.title} onSelect={item.onSelect}>
-						<span>{item.title}</span>
-					</DropdownMenuItem>
-				))}
-			</DropdownMenuContent>
-		</BaseDropdownMenu>
-	);
+  tooltip,
+  trigger,
+  items,
+}: {
+  tooltip?: string;
+  trigger: React.ReactNode;
+  items: Item[];
+}) {
+  return (
+    <BaseDropdownMenu>
+      {tooltip ? (
+        <Tooltip description={tooltip}>
+          <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+        </Tooltip>
+      ) : (
+        <DropdownMenuTrigger>{trigger}</DropdownMenuTrigger>
+      )}
+      <DropdownMenuContent>
+        {items.map((item) => (
+          <DropdownMenuItem key={item.title} onSelect={item.onSelect}>
+            <span>{item.title}</span>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </BaseDropdownMenu>
+  );
 }

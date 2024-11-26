@@ -28,16 +28,12 @@ export async function checkForUpdates() {
         const fanficId = fanfic.fanficId.toString();
         const updatedFic = await getFanfic(fanficId);
         const parsedFanfic = await fanficExtractor(updatedFic, fanficId);
-        const latestStartingChapter = parsedFanfic?.chapterCount.split("/")[0];
 
         if (
           parsedFanfic?.updatedAt &&
           parsedFanfic?.updatedAt > fanfic.updatedAt
         ) {
-          await updateFanfic(fanfic.id, {
-            ...parsedFanfic,
-            latestStartingChapter,
-          });
+          await updateFanfic(fanfic.id, parsedFanfic);
           updatedFanfics.push(fanfic.title);
         }
       })

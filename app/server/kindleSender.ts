@@ -22,25 +22,29 @@ interface Chapter {
 export async function KindleSender(
   fanfic: Fanfic,
   kindleEmail: string,
-  translationLanguage: string | null
+  translationLanguage: string | null,
+  sendLatestChapters: boolean,
+  latestFinalChapter: number
 ) {
-  const startingChapter = fanfic.latestStartingChapter;
+  const startingChapter = fanfic.latestStartingChapter
+    ? fanfic.latestStartingChapter + 1
+    : null;
   const shouldTranslate = Boolean(
     fanfic.language &&
       translationLanguage &&
       fanfic.language !== translationLanguage
   );
-  const fileName = `${fanfic.title.replace(" ", "_")}.epub`;
+
+  const fileName = sendLatestChapters
+    ? `${fanfic.title.replace(" ", " ")} - Chapters ${fanfic} - ${latestFinalChapter}.epub`
+    : `${fanfic.title.replace(" ", " ")}.epub`;
   const downloadPath = path.resolve(`/tmp/${fileName}`);
   let title = fanfic.title;
   let author = fanfic.author;
 
   try {
     await downloadFanfic(fanfic.downloadLink, downloadPath);
-    console.log({ startingChapter, shouldTranslate });
     if (shouldTranslate) {
-      console.log("Translating");
-
       const { translatedTitle, translatedAuthor } = await translateMetadata({
         title: fanfic.title,
         author: fanfic.author,
@@ -49,10 +53,11 @@ export async function KindleSender(
       title = translatedTitle;
       author = translatedAuthor;
     }
-    if (shouldTranslate || startingChapter) {
+    if (shouldTranslate || sendLatestChapters) {
       const chapters = await ParseFanfic(
         downloadPath,
         startingChapter,
+        sendLatestChapters,
         shouldTranslate
       );
 
@@ -76,9 +81,11 @@ export async function KindleSender(
 
     await unlinkAsync(downloadPath);
 
-    updateFanfic(fanfic.id, { lastSent: new Date(Date.now()) });
+    updateFanfic(fanfic.id, {
+      lastSent: new Date(Date.now()),
+      latestStartingChapter: latestFinalChapter,
+    });
 
-    console.log("am i here???");
     return { success: true, message: "" };
   } catch (error) {
     let errorMessage =
@@ -103,37 +110,47 @@ export async function KindleSender(
 async function ParseFanfic(
   downloadPath: string,
   startingChapter: number | null,
+  sendLatestChapters: boolean,
   shouldTranslate: boolean
 ) {
-  const epub = new EPub(downloadPath);
+  const imageDir = path.resolve("/tmp/images");
+  if (!fs.existsSync(imageDir)) {
+    fs.mkdirSync(imageDir, { recursive: true });
+  }
+
+  const epub = new EPub(downloadPath); // IMAGES DO NOT WORK!!! need to set the correct path to the <img src= /> in html :/
   const chapters: { data: string; title: string }[] = [];
 
-  epub.on("end", async (_, reject) => {
-    try {
-      const startingSlice = startingChapter || 0;
-      for (const chapter of epub.flow.slice(startingSlice) as Chapter[]) {
-        const chapterText = await getChapter(epub, chapter.id);
-        if (shouldTranslate) {
-          const chapterData = await translateChapter(
-            chapterText,
-            chapter.title
-          );
-          chapters.push(chapterData);
-        } else {
-          chapters.push({
-            data: chapterText,
-            title: chapter.title,
-          });
+  return new Promise<{ data: string; title: string }[]>((resolve, reject) => {
+    epub.on("end", async () => {
+      try {
+        const startingSlice =
+          sendLatestChapters && startingChapter ? startingChapter : 0;
+        for (const chapter of epub.flow.slice(startingSlice) as Chapter[]) {
+          const chapterText = await getChapter(epub, chapter.id);
+          if (shouldTranslate) {
+            const chapterData = await translateChapter(
+              chapterText,
+              chapter.title
+            );
+            chapters.push(chapterData);
+          } else {
+            chapters.push({
+              data: chapterText,
+              title: chapter.title,
+            });
+          }
         }
+        resolve(chapters);
+      } catch (error) {
+        reject(error);
       }
-    } catch (error) {
-      reject(error);
-    }
+    });
+
+    epub.parse();
+
+    return chapters;
   });
-
-  await epub.parse();
-
-  return chapters;
 }
 
 function getChapter(epub: EPub, chapterId: string): Promise<string> {
@@ -195,7 +212,5 @@ export async function sendToKindle(
     ],
   };
 
-  console.log({ mailOptions });
   await transporter.sendMail(mailOptions);
-  console.log("hello");
 }

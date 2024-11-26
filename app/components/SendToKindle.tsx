@@ -5,12 +5,13 @@ import { KindleSender } from "../server/kindleSender";
 import { useSettingsStore } from "../store";
 import { toast } from "sonner";
 import LoadableIcon from "./base/LoadableIcon";
-import { useState, useTransition } from "react";
+import { forwardRef, useState, useTransition } from "react";
 import { Button } from "./ui/button";
 import { SendHorizontal } from "lucide-react";
 import { DropdownMenu } from "./base/Dropdown";
 import { useToast } from "@/hooks/use-toast";
 import { boolean } from "drizzle-orm/mysql-core";
+import { Tooltip } from "@/components/base/Tooltip";
 
 export default function SendToKindle({ fanfic }: { fanfic: Fanfic }) {
   const { toast } = useToast();
@@ -19,17 +20,28 @@ export default function SendToKindle({ fanfic }: { fanfic: Fanfic }) {
   const translationLanguage = useSettingsStore((state) => state.languageCode);
   const [isPending, startTransition] = useTransition();
   const [isSuccess, setIsSuccess] = useState<undefined | boolean>(undefined);
-  const isDisabled = Boolean(
-    isPending || (fanfic.lastSent && fanfic.lastSent > fanfic.updatedAt)
-  );
+  const latestFinalChapter = Number(fanfic.chapterCount?.split("/")[0]);
 
-  const handleSend = () => {
+  // const isDisabled = Boolean(
+  //   isPending ||
+  //     isSuccess ||
+  //     (fanfic.lastSent && fanfic.lastSent > fanfic.updatedAt)
+  // );
+  const isDisabled = false;
+
+  const handleSend = ({
+    sendLatestChapters,
+  }: {
+    sendLatestChapters?: boolean;
+  }) => {
     startTransition(async () => {
       try {
         const result = await KindleSender(
           fanfic,
           kindleEmail,
-          translationLanguage
+          translationLanguage,
+          sendLatestChapters || false,
+          latestFinalChapter
         );
         setIsSuccess(result.success);
         if (result.success) {
@@ -55,20 +67,18 @@ export default function SendToKindle({ fanfic }: { fanfic: Fanfic }) {
     });
   };
 
-  const Trigger = ({ onClick }: { onClick?: typeof handleSend }) => {
-    return (
-      <Button
-        disabled={isDisabled}
-        onClick={onClick ? () => onClick() : undefined}
-      >
-        <LoadableIcon
-          DefaultIcon={SendHorizontal}
-          isPending={isPending}
-          successState={isSuccess}
-        />
-      </Button>
-    );
-  };
+  const Trigger = forwardRef<
+    HTMLButtonElement,
+    React.ComponentPropsWithoutRef<"button">
+  >((props, ref) => (
+    <Button ref={ref} disabled={isDisabled} {...props}>
+      <LoadableIcon
+        DefaultIcon={SendHorizontal}
+        isPending={isPending}
+        successState={isSuccess}
+      />
+    </Button>
+  ));
 
   const items = [
     {
@@ -77,8 +87,6 @@ export default function SendToKindle({ fanfic }: { fanfic: Fanfic }) {
     },
   ];
 
-  const latestFinalChapter = Number(fanfic.chapterCount?.split("/")[0]);
-
   if (
     fanfic.latestStartingChapter &&
     fanfic.latestStartingChapter < latestFinalChapter &&
@@ -86,7 +94,7 @@ export default function SendToKindle({ fanfic }: { fanfic: Fanfic }) {
   ) {
     items.push({
       title: `Send chapters ${fanfic.latestStartingChapter} - ${latestFinalChapter}`,
-      onSelect: handleSend,
+      onSelect: () => handleSend({ sendLatestChapters: true }),
     });
   }
 
@@ -97,6 +105,10 @@ export default function SendToKindle({ fanfic }: { fanfic: Fanfic }) {
       items={items}
     />
   ) : (
-    <Trigger onClick={handleSend} />
+    <Tooltip
+      description={kindleEmail ? "Send Fic to Kindle" : "Kindle Email not set"}
+    >
+      <Trigger onClick={() => handleSend({ sendLatestChapters: false })} />
+    </Tooltip>
   );
 }
