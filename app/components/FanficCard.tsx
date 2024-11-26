@@ -91,19 +91,18 @@ export default function FanficCard({
     return (
       <>
         {badgeGroups.map((group, index) => (
-          <CarouselItem
-            className="flex flex-row gap-3 justify-center text-sm items-center"
-            key={index}
-          >
-            {group.badges.map(({ category, value }) => (
-              <Badge
-                className="w-fit"
-                key={value}
-                title={category.toLowerCase().replace("_", " s")}
-              >
-                {value}
-              </Badge>
-            ))}
+          <CarouselItem className="flex justify-center" key={index}>
+            <div className="flex flex-row flex-wrap gap-3">
+              {group.badges.map(({ category, value }) => (
+                <Badge
+                  className="w-fit"
+                  key={value}
+                  title={category.toLowerCase().replace("_", " s")}
+                >
+                  {value}
+                </Badge>
+              ))}
+            </div>
           </CarouselItem>
         ))}
       </>
