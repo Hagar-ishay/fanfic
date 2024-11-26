@@ -22,12 +22,11 @@ export default function SendToKindle({ fanfic }: { fanfic: Fanfic }) {
   const [isSuccess, setIsSuccess] = useState<undefined | boolean>(undefined);
   const latestFinalChapter = Number(fanfic.chapterCount?.split("/")[0]);
 
-  // const isDisabled = Boolean(
-  //   isPending ||
-  //     isSuccess ||
-  //     (fanfic.lastSent && fanfic.lastSent > fanfic.updatedAt)
-  // );
-  const isDisabled = false;
+  const isDisabled = Boolean(
+    isPending ||
+      isSuccess ||
+      (fanfic.lastSent && fanfic.lastSent > fanfic.updatedAt)
+  );
 
   const handleSend = ({
     sendLatestChapters,
@@ -52,7 +51,7 @@ export default function SendToKindle({ fanfic }: { fanfic: Fanfic }) {
         } else {
           toast({
             title: "Send to Kindle:",
-            description: "Failed to send to Kindle",
+            description: `Failed to send to Kindle: ${result.message}`,
             variant: "destructive",
           });
         }
