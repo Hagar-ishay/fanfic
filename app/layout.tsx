@@ -9,6 +9,7 @@ import {
 } from "@clerk/nextjs";
 import Header from "./components/Header";
 import { Toaster } from "@/components/ui/toaster";
+import { Suspense } from "react";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -36,17 +37,21 @@ export default function RootLayout({
       <html lang="en">
         <body>
           <header className="flex flex-row items-center justify-between sticky top-0 z-50 p-4 shadow-md bg-muted gap-2">
-            <SignedOut>
-              <SignInButton />
-            </SignedOut>
-            <SignedIn>
-              <Header />
-            </SignedIn>
+            <Suspense>
+              <SignedOut>
+                <SignInButton />
+              </SignedOut>
+              <SignedIn>
+                <Header />
+              </SignedIn>
+            </Suspense>
           </header>
-          <SignedIn>
-            <main>{children}</main>
-            <Toaster />
-          </SignedIn>
+          <Suspense>
+            <SignedIn>
+              <main>{children}</main>
+              <Toaster />
+            </SignedIn>
+          </Suspense>
         </body>
       </html>
     </ClerkProvider>

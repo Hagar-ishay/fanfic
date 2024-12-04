@@ -1,23 +1,15 @@
 "use server";
 
-import NodeCache from "node-cache";
 import { insertFanfic, selectOngoingFanfics, updateFanfic } from "@/db/db";
 import { getFanfic } from "./ao3Client";
 import { fanficExtractor } from "./extractor";
 import { AO3_LINK } from "@/consts";
+import { revalidatePath } from "next/cache";
 
-const nextRunCache = new NodeCache({ stdTTL: 7200, checkperiod: 120 });
 
 export async function checkForUpdates() {
+  'use cache'
   const updatedFanfics: string[] = [];
-  if (nextRunCache.get("updated")) {
-    return {
-      success: true,
-      isCache: true,
-      data: { updatedFanfics },
-      message: "",
-    };
-  }
 
   try {
     const fanfics = await selectOngoingFanfics();
@@ -39,11 +31,9 @@ export async function checkForUpdates() {
       })
     );
 
-    nextRunCache.set("updated", true);
     return {
       success: true,
       data: { updatedFanfics },
-      isCache: false,
       message: "",
     };
   } catch (error) {
@@ -51,7 +41,6 @@ export async function checkForUpdates() {
     return {
       success: false,
       message: "An error occurred while checking updates",
-      isCache: false,
       data: { updatedFanfics },
     };
   }
@@ -67,7 +56,11 @@ export async function addFanfic(sectionId: number, fanficUrl: string) {
       await insertFanfic({ ...metadata, sectionId });
       return { success: true, message: "" };
     } catch (error) {
-      return { success: false, message: errorMessage(error) };
+      let err = errorMessage(error);
+      if (err.includes("duplicate key value violates unique constraint")) {
+        err = "This Fic already exists";
+      }
+      return { success: false, message: err };
     }
   }
   return { success: false, message: "Failed to create Fic" };
@@ -80,4 +73,5 @@ const errorMessage = (error: unknown) =>
 
 export async function updateFic(fanficId: number, params: object) {
   await updateFanfic(fanficId, params);
+  revalidatePath("/");
 }

@@ -50,7 +50,7 @@ export const selectOngoingFanfics = async () => {
 };
 
 export const selectSections = async () => {
-  return await db.select().from(sections);
+  return await db.select().from(sections).orderBy(sections.id);
 };
 
 export const getSectionByName = async (name: string) => {

@@ -13,17 +13,19 @@ import { DrawerDialog } from "@/components/base/DrawerDialog";
 
 export function SettingsModal() {
   const setEmail = useSettingsStore((state) => state.setEmail);
-  const setLanguageCode = useSettingsStore((state) => state.setLanguageCode);
   const kindleEmail = useSettingsStore((state) => state.kindleEmail);
+  const languageCode = useSettingsStore((state) => state.languageCode);
+  const setLanguageCode = useSettingsStore((state) => state.setLanguageCode);
 
-  const [shouldTranslate, setShouldTranslate] = React.useState(
-    useSettingsStore((state) => Boolean(state.languageCode))
-  );
+  const shouldTranslate = Boolean(languageCode);
 
   const handleSubmit = async (formData: FormData) => {
     const emailInput = formData.get("email") as string;
+    const enableTranslation = formData.get("enableTranslation") as
+      | string
+      | null;
     setEmail(emailInput);
-    setLanguageCode((shouldTranslate ? "en" : null) || null);
+    setLanguageCode(enableTranslation ? "en" : null);
   };
 
   return (
@@ -45,13 +47,12 @@ export function SettingsModal() {
           defaultValue={kindleEmail}
           placeholder="Kindle email"
         />
-        <div className="flex flex-row gap-2 justify-between text-sm font-medium">
+        <div className="flex flex-row gap-2 justify-between text-sm ">
           <Label className="ml-1">Translate to English</Label>
           <Switch
             id="enableTranslation"
             name="enableTranslation"
-            checked={shouldTranslate}
-            onCheckedChange={() => setShouldTranslate(!shouldTranslate)}
+            defaultChecked={shouldTranslate}
           />
         </div>
         <Separator />

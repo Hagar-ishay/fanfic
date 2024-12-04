@@ -33,8 +33,8 @@ export function DrawerDialog({
   children,
   formAction,
 }: {
-  tooltip: string;
-  trigger: React.ReactNode;
+  tooltip?: string;
+  trigger?: React.ReactNode;
   header?: React.ReactNode;
   children: React.ReactNode;
   title?: React.ReactNode;
@@ -43,6 +43,8 @@ export function DrawerDialog({
     string | ((formData: FormData) => void | Promise<void>) | undefined
   >;
 }) {
+  const asChild = Boolean(trigger);
+
   const ContentDrawer = ({ addClose }: { addClose: boolean }) => {
     return (
       <div className="flex flex-col justify-center mb-4">
@@ -50,12 +52,14 @@ export function DrawerDialog({
           {header}
           {title && <DrawerTitle>{title}</DrawerTitle>}
           {description && (
-            <DrawerDescription asChild>{description}</DrawerDescription>
+            <DrawerDescription asChild={asChild}>
+              {description}
+            </DrawerDescription>
           )}
         </DrawerHeader>
         <DrawerFooter> {children}</DrawerFooter>
         {addClose && (
-          <DrawerClose asChild>
+          <DrawerClose asChild={asChild}>
             <Button type="submit">Save changes</Button>
           </DrawerClose>
         )}
@@ -69,11 +73,15 @@ export function DrawerDialog({
         <DialogHeader>
           {header}
           {title && <DialogTitle>{title}</DialogTitle>}
-          {description && <DialogDescription asChild>{description}</DialogDescription>}
+          {description && (
+            <DialogDescription asChild={asChild}>
+              {description}
+            </DialogDescription>
+          )}
         </DialogHeader>
         {children}
         {addClose && (
-          <DialogClose asChild>
+          <DialogClose asChild={asChild}>
             <Button type="submit">Save changes</Button>
           </DialogClose>
         )}
@@ -86,9 +94,13 @@ export function DrawerDialog({
   if (isDesktop) {
     return (
       <Dialog>
-        <Tooltip description={tooltip}>
-          <DialogTrigger asChild>{trigger}</DialogTrigger>
-        </Tooltip>
+        {tooltip ? (
+          <Tooltip description={tooltip}>
+            <DialogTrigger asChild={asChild}>{trigger}</DialogTrigger>
+          </Tooltip>
+        ) : (
+          <DialogTrigger asChild={asChild}>{trigger}</DialogTrigger>
+        )}
         {formAction ? (
           <DialogContent>
             <Form action={formAction}>
@@ -106,9 +118,13 @@ export function DrawerDialog({
 
   return (
     <Drawer>
-      <Tooltip description={tooltip}>
-        <DrawerTrigger asChild>{trigger}</DrawerTrigger>
-      </Tooltip>
+      {tooltip ? (
+        <Tooltip description={tooltip}>
+          <DrawerTrigger asChild={asChild}>{trigger}</DrawerTrigger>
+        </Tooltip>
+      ) : (
+        <DrawerTrigger asChild={asChild}>{trigger}</DrawerTrigger>
+      )}
       {formAction ? (
         <DrawerContent>
           <Form action={formAction}>

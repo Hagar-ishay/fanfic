@@ -19,13 +19,19 @@ interface Chapter {
   id: string;
 }
 
-export async function KindleSender(
-  fanfic: Fanfic,
-  kindleEmail: string,
-  translationLanguage: string | null,
-  sendLatestChapters: boolean,
-  latestFinalChapter: number
-) {
+export async function kindleSender({
+  fanfic,
+  kindleEmail,
+  translationLanguage,
+  sendLatestChapters,
+  latestFinalChapter,
+}: {
+  fanfic: Fanfic;
+  kindleEmail: string;
+  translationLanguage: string | null;
+  sendLatestChapters: boolean;
+  latestFinalChapter: number;
+}) {
   const startingChapter = fanfic.latestStartingChapter
     ? fanfic.latestStartingChapter + 1
     : null;

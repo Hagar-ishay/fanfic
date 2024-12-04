@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import {
   DropdownMenu as BaseDropdownMenu,
   DropdownMenuContent,
@@ -13,23 +14,26 @@ export type Item = {
   title: string;
 };
 
-export function DropdownMenu({
-  tooltip,
-  trigger,
-  items,
-}: {
-  tooltip?: string;
-  trigger: React.ReactNode;
-  items: Item[];
-}) {
+export const DropdownMenu = React.forwardRef<
+  HTMLButtonElement,
+  {
+    tooltip?: string;
+    trigger: React.ReactNode;
+    items: Item[];
+  }
+>(({ tooltip, trigger, items }, ref) => {
   return (
     <BaseDropdownMenu>
       {tooltip ? (
         <Tooltip description={tooltip}>
-          <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
+          <DropdownMenuTrigger asChild>
+            {React.cloneElement(trigger as React.ReactElement, { ref })}
+          </DropdownMenuTrigger>
         </Tooltip>
       ) : (
-        <DropdownMenuTrigger>{trigger}</DropdownMenuTrigger>
+        <DropdownMenuTrigger asChild>
+          {React.cloneElement(trigger as React.ReactElement, { ref })}
+        </DropdownMenuTrigger>
       )}
       <DropdownMenuContent>
         {items.map((item) => (
@@ -40,4 +44,6 @@ export function DropdownMenu({
       </DropdownMenuContent>
     </BaseDropdownMenu>
   );
-}
+});
+
+DropdownMenu.displayName = "DropdownMenu";

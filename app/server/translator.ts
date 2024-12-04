@@ -52,6 +52,6 @@ export async function translateMetadata(contents: object) {
   const result = await model.generateContent(
     `${translationBookMetadataPrompt}\n${metadata}`
   );
-  const response = await result.response;
+  const response =  result.response;
   return JSON.parse(response.text());
 }

@@ -22,20 +22,19 @@ export default function Header() {
   const { searchInput, setSearchInput } = useSearchStore();
 
   async function handleCheckForUpdates() {
+    const title = "Checking for updates";
     startTransitionUpdates(async () => {
       const result = await checkForUpdates();
       if (result.success) {
-        if (!result.isCache) {
-          for (const fanficTitle of result.data.updatedFanfics)
-            toast({
-              title: "Checking for updates:",
-              description: `Fic ${fanficTitle} updated successfully`,
-            });
-        }
+        for (const fanficTitle of result.data.updatedFanfics)
+          toast({
+            title,
+            description: `Fic ${fanficTitle} updated successfully`,
+          });
       } else {
         toast({
-          title: "Checking for updates:",
-          description: `An error occurred: ${result.data}`,
+          title,
+          description: `An error occurred: ${result.message}`,
           variant: "destructive",
         });
       }
@@ -43,52 +42,35 @@ export default function Header() {
   }
 
   const handleAddFanficFromClipboard = async () => {
-    try {
-      const clipboardText = await navigator.clipboard.readText();
-      if (clipboardText.startsWith(`${AO3_LINK}/works/`)) {
-        startTransitionAdd(async () => {
-          const result = await addFanfic(3, clipboardText);
-          if (result.success) {
-            toast({
-              title: "Add Fanfic:",
-              description: "Added Successfully!",
-            });
-          } else if (
-            result.message?.includes(
-              "duplicate key value violates unique constraint"
-            )
-          ) {
-            toast({
-              title: "Add Fanfic:",
-              description: "This fic already exists :)",
-            });
-          } else {
-            toast({
-              title: "Add Fanfic:",
-              description: `An error occurred: ${result.message}`,
-              variant: "destructive",
-            });
-          }
-        });
-      } else {
-        toast({
-          title: "Add Fanfic:",
-          description: "Invalid URL. Please copy a valid AO3 fanfic URL",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error("Failed to read from clipboard: ", error);
+    const title = "Add Fanfic";
+    const clipboardText = await navigator.clipboard.readText();
+    if (clipboardText.startsWith(`${AO3_LINK}/works/`)) {
+      startTransitionAdd(async () => {
+        const result = await addFanfic(3, clipboardText);
+        if (result.success) {
+          toast({
+            title,
+            description: "Added Successfully!",
+          });
+        } else {
+          toast({
+            title,
+            description: result.message,
+            variant: "destructive",
+          });
+        }
+      });
+    } else {
       toast({
-        title: "Add Fanfic:",
-        description: "Failed to read from clipboard",
+        title,
+        description: "Invalid URL. Please copy a valid AO3 fanfic URL",
         variant: "destructive",
       });
     }
   };
 
   return (
-    <div className="flex flex-row items-center justify-between w-full">
+    <div className="flex flex-row items-center justify-between w-full gap-3">
       <div className="flex justify-start">
         <UserButton />
       </div>

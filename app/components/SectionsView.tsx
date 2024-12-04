@@ -17,7 +17,6 @@ import {
 } from "@hello-pangea/dnd";
 import { matchSorter } from "match-sorter";
 import { updateFic } from "@/server/updater";
-import { useRouter } from "next/navigation";
 import { useOptimistic, useTransition } from "react";
 
 export default function SectionsView({
@@ -43,7 +42,6 @@ export default function SectionsView({
           : fanficState
       )
   );
-  const router = useRouter();
 
   const handleDragEnd = async (result: DropResult) => {
     if (!result.destination) return;
@@ -54,8 +52,7 @@ export default function SectionsView({
       const newSectionId = +destination.droppableId;
       startTransition(async () => {
         addOptimistic({ newSectionId, fanficId });
-        await updateFic(fanficId, { sectionId: newSectionId }).then(() => {});
-        router.refresh();
+        await updateFic(fanficId, { sectionId: newSectionId });
       });
     }
   };
@@ -71,52 +68,35 @@ export default function SectionsView({
     });
   };
 
-  const orderedSections = sections.sort((section, nextSection) =>
-    section.id < nextSection.id ? -1 : 1
-  );
-
   return (
     <DragDropContext onDragEnd={handleDragEnd} enableDefaultSensors={true}>
       <Accordion
         type="multiple"
-        className="w-full p-1"
         value={openSections}
         onValueChange={(value: string[]) => setOpenSections(value)}
       >
-        {orderedSections.map((section) => (
+        {sections.map((section) => (
           <Droppable key={section.id} droppableId={section.id.toString()}>
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps}>
                 <AccordionItem value={section.name} className="p-2">
-                  <AccordionTrigger className="w-full p-4 bg-secondary rounded-md">
-                    <h2 className="text-xl font-bold text-secondary-foreground">{`${section.name} (${sectionFanfics(section.id).length})`}</h2>
+                  <AccordionTrigger className="p-4 ">
+                    <div className="flex flex-row gap-2 text-secondary-foreground">
+                      <h2>{`${section.name} (${sectionFanfics(section.id).length})`}</h2>
+                    </div>
                   </AccordionTrigger>
                   <AccordionContent className="p-4 border-t">
                     <div className={cn("flex flex-col gap-4")}>
                       {sectionFanfics(section.id)?.map((fanfic, index) => (
-                        <Draggable
-                          key={fanfic.id}
-                          draggableId={fanfic.id.toString()}
-                          index={index}
-                        >
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                            >
-                              <FanficCard
-                                fanfic={fanfic}
-                                sectionId={section.id}
-                                isDragging={snapshot.isDragging}
-                                transferableSections={sections.filter(
-                                  (transferSection) =>
-                                    transferSection.id !== section.id
-                                )}
-                              />
-                            </div>
+                        <FanficCard
+                          key={index}
+                          fanfic={fanfic}
+                          sectionId={section.id}
+                          transferableSections={sections.filter(
+                            (transferSection) =>
+                              transferSection.id !== section.id
                           )}
-                        </Draggable>
+                        />
                       ))}
                     </div>
                   </AccordionContent>
