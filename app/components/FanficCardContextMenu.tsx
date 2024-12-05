@@ -7,7 +7,7 @@ import { CircleChevronRight, SendHorizontal } from "lucide-react";
 import React from "react";
 import { kindleSender } from "../server/kindleSender";
 import { useSettingsStore } from "../store";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { FanficHeader } from "@/components/FanficHeader";
 
@@ -15,16 +15,19 @@ export function FanficCardContextMenu({
   fanfic,
   sections,
   trigger,
+  isPending,
+  startTransition,
 }: {
   fanfic: Fanfic;
   sections: Section[];
   trigger: React.ReactNode;
+  isPending: boolean;
+  startTransition: React.TransitionStartFunction;
 }) {
   const { toast } = useToast();
 
   const kindleEmail = useSettingsStore((state) => state.kindleEmail);
   const translationLanguage = useSettingsStore((state) => state.languageCode);
-  const [isPending, startTransition] = useTransition();
   const [isSuccess, setIsSuccess] = useState<undefined | boolean>(undefined);
 
   const isDisabled = Boolean(
