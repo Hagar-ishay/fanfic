@@ -8,13 +8,15 @@ import React from "react";
 import TagsCarousel from "@/components/Tags";
 import { FanficHeader } from "@/components/FanficHeader";
 import { FanficCardContextMenu } from "@/components/FanficCardContextMenu";
+import { cn } from "@/lib/utils";
 
 export default function FanficCard({
   fanfic,
+  isDragging,
   transferableSections,
 }: {
   fanfic: Fanfic;
-  sectionId: number;
+  isDragging: boolean;
   transferableSections: Section[];
 }) {
   const tags: Tags = {
@@ -49,7 +51,12 @@ export default function FanficCard({
             </ScrollArea>
           }
           trigger={
-            <Card className={"bg-accent shadow-md rounded"}>
+            <Card
+              className={cn(
+                "p-2 my-2 bg-accent shadow-md rounded -space-y-4",
+                isDragging ? "" : "transition-all duration-300 ease-in-out"
+              )}
+            >
               <CardContent>
                 <CardTitle className="mt-3 truncate">
                   <FanficHeader fanfic={fanfic} showComplete truncate />

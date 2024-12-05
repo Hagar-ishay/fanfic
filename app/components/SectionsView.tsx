@@ -88,15 +88,29 @@ export default function SectionsView({
                   <AccordionContent className="p-4 border-t">
                     <div className={cn("flex flex-col gap-4")}>
                       {sectionFanfics(section.id)?.map((fanfic, index) => (
-                        <FanficCard
-                          key={index}
-                          fanfic={fanfic}
-                          sectionId={section.id}
-                          transferableSections={sections.filter(
-                            (transferSection) =>
-                              transferSection.id !== section.id
+                        <Draggable
+                          key={fanfic.id}
+                          draggableId={fanfic.id.toString()}
+                          index={index}
+                        >
+                          {(provided, snapshot) => (
+                            <div
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              {...provided.dragHandleProps}
+                            >
+                              <FanficCard
+                                fanfic={fanfic}
+                                sectionId={section.id}
+                                isDragging={snapshot.isDragging}
+                                transferableSections={sections.filter(
+                                  (transferSection) =>
+                                    transferSection.id !== section.id
+                                )}
+                              />
+                            </div>
                           )}
-                        />
+                        </Draggable>
                       ))}
                     </div>
                   </AccordionContent>
