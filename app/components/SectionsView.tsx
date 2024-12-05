@@ -101,7 +101,6 @@ export default function SectionsView({
                             >
                               <FanficCard
                                 fanfic={fanfic}
-                                sectionId={section.id}
                                 isDragging={snapshot.isDragging}
                                 transferableSections={sections.filter(
                                   (transferSection) =>
