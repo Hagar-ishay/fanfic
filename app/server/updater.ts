@@ -1,14 +1,18 @@
 "use server";
 
-import { insertFanfic, selectOngoingFanfics, updateFanfic } from "@/db/db";
+import {
+  deleteFanfic,
+  insertFanfic,
+  selectOngoingFanfics,
+  updateFanfic,
+} from "@/db/db";
 import { getFanfic } from "./ao3Client";
 import { fanficExtractor } from "./extractor";
 import { AO3_LINK } from "@/consts";
-import { revalidatePath } from "next/cache";
-
+import { expirePath } from "next/dist/server/web/spec-extension/revalidate";
 
 export async function checkForUpdates() {
-  'use cache'
+  "use cache";
   const updatedFanfics: string[] = [];
 
   try {
@@ -73,5 +77,10 @@ const errorMessage = (error: unknown) =>
 
 export async function updateFic(fanficId: number, params: object) {
   await updateFanfic(fanficId, params);
-  revalidatePath("/");
+  expirePath("/");
+}
+
+export async function deleteFic(fanficId: number) {
+  await deleteFanfic(fanficId);
+  expirePath("/");
 }

@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 export type Option = {
   icon?: React.ReactNode;
@@ -77,7 +76,7 @@ export function ContextMenu({
           {option.icon}
           {option.name}
         </div>
-        <ChevronRight />
+        {option.subItems && <ChevronRight />}
       </Button>
     );
   };

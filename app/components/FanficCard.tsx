@@ -4,7 +4,7 @@ import { DrawerDialog } from "@/components/base/DrawerDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Fanfic, Section, Tags } from "@/db/types";
-import React, { useTransition } from "react";
+import React, { useState, useTransition } from "react";
 import TagsCarousel from "@/components/Tags";
 import { FanficHeader } from "@/components/FanficHeader";
 import { FanficCardContextMenu } from "@/components/FanficCardContextMenu";

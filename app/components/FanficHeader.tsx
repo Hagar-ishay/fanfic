@@ -13,24 +13,29 @@ export const FanficHeader = ({
 }) => {
   return (
     <>
-      <div
-        className={cn(
-          "text-sm font-mono text-accent-foreground",
-          showComplete && "flex flex-row justify-between"
-        )}
-      >
+      <div className="text-sm text-accent-foreground">
         <a
           href={fanfic.sourceUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className={cn("hover:underline gap-3", truncate && "truncate")}
+          className="hover:underline gap-3"
         >
-          {fanfic.title}
+          <div className="flex flex-row gap-3 font-mono font-bold mt-4 items-center min-w-0">
+            <div
+              className={cn(
+                truncate &&
+                  "truncate overflow-hidden text-ellipsis whitespace-nowrap min-w-0"
+              )}
+            >
+              {fanfic.title}
+            </div>
+            {showComplete && fanfic.completedAt && (
+              <CircleCheck className="text-success flex-shrink-0" size="18" />
+            )}
+          </div>
         </a>
-        {showComplete && fanfic.completedAt && (
-          <CircleCheck className="text-success" size="20" />
-        )}
       </div>
+
       <div className="text-xs font-mono text-muted-foreground">
         {fanfic.authorUrl ? (
           <a

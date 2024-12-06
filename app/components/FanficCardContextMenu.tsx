@@ -3,7 +3,7 @@
 import { ContextMenu, Option } from "@/components/base/Context";
 import { Fanfic, Section } from "@/db/types";
 import { updateFic } from "@/server/updater";
-import { CircleChevronRight, SendHorizontal } from "lucide-react";
+import { CircleChevronRight, SendHorizontal, Trash2 } from "lucide-react";
 import React from "react";
 import { kindleSender } from "../server/kindleSender";
 import { useSettingsStore } from "../store";

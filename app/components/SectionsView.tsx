@@ -18,6 +18,7 @@ import {
 import { matchSorter } from "match-sorter";
 import { updateFic } from "@/server/updater";
 import { useOptimistic, useTransition } from "react";
+import { Grip } from "lucide-react";
 
 export default function SectionsView({
   fanfics,
@@ -97,16 +98,24 @@ export default function SectionsView({
                             <div
                               ref={provided.innerRef}
                               {...provided.draggableProps}
-                              {...provided.dragHandleProps}
+                              className="flex items-center"
                             >
-                              <FanficCard
-                                fanfic={fanfic}
-                                isDragging={snapshot.isDragging}
-                                transferableSections={sections.filter(
-                                  (transferSection) =>
-                                    transferSection.id !== section.id
-                                )}
-                              />
+                              <div className="w-full min-w-0">
+                                <FanficCard
+                                  fanfic={fanfic}
+                                  isDragging={snapshot.isDragging}
+                                  transferableSections={sections.filter(
+                                    (transferSection) =>
+                                      transferSection.id !== section.id
+                                  )}
+                                />
+                              </div>
+                              <div
+                                {...provided.dragHandleProps}
+                                className="cursor-grab active:cursor-grabbing p-2"
+                              >
+                                <Grip className="w-4 h-4" />
+                              </div>
                             </div>
                           )}
                         </Draggable>

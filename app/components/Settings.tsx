@@ -41,13 +41,17 @@ export function SettingsModal() {
       formAction={handleSubmit}
     >
       <div className="gap-5 py-4 flex flex-col">
-        <Input
-          id="email"
-          name="email"
-          defaultValue={kindleEmail}
-          placeholder="Kindle email"
-        />
-        <div className="flex flex-row gap-2 justify-between text-sm ">
+        <div className="flex flex-row gap-2 justify-between text-sm items-center">
+          <Label>Email</Label>
+          <Input
+            id="email"
+            name="email"
+            defaultValue={kindleEmail}
+            placeholder="Kindle email"
+            className="border border-black "
+          />
+        </div>
+        <div className="flex flex-row gap-2 justify-between text-sm items-center">
           <Label className="ml-1">Translate to English</Label>
           <Switch
             id="enableTranslation"
