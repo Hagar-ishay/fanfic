@@ -13,8 +13,8 @@ export const FanficHeader = ({
 }) => {
   return (
     <>
-      <div className="text-md text-accent-foreground">
-        <div className="flex flex-row gap-3 font-semibold mt-4 items-center min-w-0">
+      <div className="text-md text-accent-foreground ">
+        <div className="flex flex-row gap-3 font-semibold mt-4 items-center min-w-0 ">
           <div
             className={cn(
               truncate &&

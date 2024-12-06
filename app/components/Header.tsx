@@ -74,21 +74,21 @@ export default function Header() {
       <div className="flex justify-start">
         <UserButton />
       </div>
-      <div className="flex flex-row items-center gap-2">
-        <div className="relative">
+      <div className="flex flex-row items-center gap-2 focus:outline-none focus:ring-2 focus:ring-yellow-400 ">
+        <div className="relative ">
           <Input
             value={searchInput}
             className="pl-8 bg-neutral-50"
             placeholder="Search"
             onChange={(event) => setSearchInput(event.target.value)}
           />
-          <Search className="pointer-events-none absolute left-2 top-1/2 size-4 -translate-y-1/2 select-none opacity-50" />
+          <Search className="pointer-events-none absolute left-2 top-1/2 size-4 -translate-y-1/2 select-none opacity-50 " />
           {searchInput && (
             <Button
               onClick={() => setSearchInput("")}
               variant="ghost"
               size="icon"
-              className="absolute right-1 top-1/2 -translate-y-1/2"
+              className="absolute right-1 top-1/2 -translate-y-1/2 "
             >
               <X />
             </Button>

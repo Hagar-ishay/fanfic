@@ -61,7 +61,7 @@ export default function FanficCard({
             <div className="relative">
               <Card
                 className={cn(
-                  "p-2 my-2 bg-accent shadow-md rounded -space-y-4",
+                  "p-2 my-2 bg-accent shadow-md rounded-lg -space-y-4 hover:shadow-lg border-l-4 px-6 py-4",
                   isDragging ? "" : "transition-all duration-300 ease-in-out"
                 )}
               >

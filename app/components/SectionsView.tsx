@@ -80,7 +80,10 @@ export default function SectionsView({
           <Droppable key={section.id} droppableId={section.id.toString()}>
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps}>
-                <AccordionItem value={section.name} className="p-2">
+                <AccordionItem
+                  value={section.name}
+                  className="p-2 border-t border-gray-200 my-2"
+                >
                   <AccordionTrigger className="p-4 ">
                     <div className="flex flex-row gap-2 text-secondary-foreground">
                       <h2>{`${section.name} (${sectionFanfics(section.id).length})`}</h2>
