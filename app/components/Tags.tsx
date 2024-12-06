@@ -8,7 +8,6 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { Separator } from "@/components/ui/separator";
 import { Tags } from "@/db/types";
 import { cn } from "@/lib/utils";
 import React from "react";
@@ -57,32 +56,29 @@ export default function TagsCarousel({ tags }: { tags: Tags }) {
   );
 
   return (
-    <div className="flex flex-col flex-wrap gap-4 mt-5">
-      <Separator />
-      <Carousel>
-        <CarouselContent>
-          {badgeGroups.map((group, index) => (
-            <CarouselItem className="flex justify-center" key={index}>
-              <div className="flex flex-row flex-wrap gap-3">
-                {group.badges.map(({ category, value }) => (
-                  <Badge
-                    className="w-fit"
-                    key={value}
-                    title={category.toLowerCase().replace("_", " s")}
-                  >
-                    {value}
-                  </Badge>
-                ))}
-              </div>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious
-          variant="ghost"
-          className={cn(isDesktop ? "ml-8" : "")}
-        />
-        <CarouselNext variant="ghost" className={cn(isDesktop ? "mr-8" : "")} />
-      </Carousel>
-    </div>
+    <Carousel>
+      <CarouselContent>
+        {badgeGroups.map((group, index) => (
+          <CarouselItem className="flex justify-center" key={index}>
+            <div className="flex flex-row flex-wrap gap-3">
+              {group.badges.map(({ category, value }) => (
+                <Badge
+                  className="w-fit"
+                  key={value}
+                  title={category.toLowerCase().replace("_", " ")}
+                >
+                  {value}
+                </Badge>
+              ))}
+            </div>
+          </CarouselItem>
+        ))}
+      </CarouselContent>
+      <CarouselPrevious
+        variant="ghost"
+        className={cn(isDesktop ? "ml-8" : "")}
+      />
+      <CarouselNext variant="ghost" className={cn(isDesktop ? "mr-8" : "")} />
+    </Carousel>
   );
 }

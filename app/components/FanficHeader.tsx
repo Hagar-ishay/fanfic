@@ -13,27 +13,27 @@ export const FanficHeader = ({
 }) => {
   return (
     <>
-      <div className="text-sm text-accent-foreground">
-        <a
-          href={fanfic.sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hover:underline gap-3"
-        >
-          <div className="flex flex-row gap-3 font-mono font-bold mt-4 items-center min-w-0">
-            <div
-              className={cn(
-                truncate &&
-                  "truncate overflow-hidden text-ellipsis whitespace-nowrap min-w-0"
-              )}
+      <div className="text-md text-accent-foreground">
+        <div className="flex flex-row gap-3 font-semibold mt-4 items-center min-w-0">
+          <div
+            className={cn(
+              truncate &&
+                "truncate overflow-hidden text-ellipsis whitespace-nowrap min-w-0"
+            )}
+          >
+            <a
+              href={fanfic.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline gap-3"
             >
               {fanfic.title}
-            </div>
-            {showComplete && fanfic.completedAt && (
-              <CircleCheck className="text-success flex-shrink-0" size="18" />
-            )}
+            </a>
           </div>
-        </a>
+          {showComplete && fanfic.completedAt && (
+            <CircleCheck className="text-success flex-shrink-0" size="18" />
+          )}
+        </div>
       </div>
 
       <div className="text-xs font-mono text-muted-foreground">

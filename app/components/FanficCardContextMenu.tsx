@@ -101,7 +101,11 @@ export function FanficCardContextMenu({
     <ContextMenu
       options={options}
       trigger={trigger}
-      title={<FanficHeader fanfic={fanfic} />}
+      title={
+        <div className="flex flex-col items-center">
+          <FanficHeader fanfic={fanfic} />
+        </div>
+      }
     />
   );
 }

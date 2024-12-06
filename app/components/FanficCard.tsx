@@ -10,6 +10,7 @@ import { FanficHeader } from "@/components/FanficHeader";
 import { FanficCardContextMenu } from "@/components/FanficCardContextMenu";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 export default function FanficCard({
   fanfic,
@@ -25,6 +26,7 @@ export default function FanficCard({
   const tags: Tags = {
     WORD_COUNT: [fanfic.wordCount?.toString() ?? ""],
     CHAPTER_COUNT: [fanfic.chapterCount ?? ""],
+    STATUS: [fanfic.completedAt ? "Complete" : "In Progress"],
     ...fanfic.tags,
   };
 
@@ -46,12 +48,12 @@ export default function FanficCard({
       trigger={
         <DrawerDialog
           title={
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center gap-3">
               <FanficHeader fanfic={fanfic} />
             </div>
           }
           description={
-            <ScrollArea className="overflow-auto max-h-40">
+            <ScrollArea className="overflow-auto max-h-40 max-w-md mx-auto px-6 mt-5 py-4 border border-muted rounded-lg shadow-md">
               <Description />
             </ScrollArea>
           }
@@ -75,7 +77,10 @@ export default function FanficCard({
             </div>
           }
         >
-          <TagsCarousel tags={tags} />
+          <div className="flex flex-col flex-wrap gap-4 mt-5">
+            <Separator />
+            <TagsCarousel tags={tags} />
+          </div>
         </DrawerDialog>
       }
     ></FanficCardContextMenu>
