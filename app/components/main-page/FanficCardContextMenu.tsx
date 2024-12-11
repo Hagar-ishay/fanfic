@@ -5,11 +5,11 @@ import { Fanfic, Section } from "@/db/types";
 import { updateFic } from "@/server/updater";
 import { CircleChevronRight, SendHorizontal, Trash2 } from "lucide-react";
 import React from "react";
-import { kindleSender } from "../server/kindleSender";
-import { useSettingsStore } from "../store";
+import { kindleSender } from "../../server/kindleSender";
+import { useSettingsStore } from "../../store";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { FanficHeader } from "@/components/FanficHeader";
+import { FanficHeader } from "@/components/main-page/FanficHeader";
 
 export function FanficCardContextMenu({
   fanfic,

@@ -56,11 +56,20 @@ export default function TagsCarousel({ tags }: { tags: Tags }) {
   );
 
   return (
-    <Carousel>
+    <Carousel className="w-full items-center">
       <CarouselContent>
         {badgeGroups.map((group, index) => (
-          <CarouselItem className="flex justify-center" key={index}>
-            <div className="flex flex-row flex-wrap gap-3">
+          <CarouselItem
+            className={cn(isDesktop ? "flex justify-center" : "")}
+            key={index}
+          >
+            <div
+              className={cn(
+                isDesktop
+                  ? "flex flex-row flex-wrap gap-3 flex-shrink-0"
+                  : "flex gap-3 truncate flex-grow min-w-0 justify-center"
+              )}
+            >
               {group.badges.map(({ category, value }) => (
                 <Badge
                   className="w-fit"
@@ -76,9 +85,12 @@ export default function TagsCarousel({ tags }: { tags: Tags }) {
       </CarouselContent>
       <CarouselPrevious
         variant="ghost"
-        className={cn(isDesktop ? "ml-8" : "")}
+        className={cn(isDesktop ? "ml-8" : "ml-9")}
       />
-      <CarouselNext variant="ghost" className={cn(isDesktop ? "mr-8" : "")} />
+      <CarouselNext
+        variant="ghost"
+        className={cn(isDesktop ? "mr-8" : "mr-9")}
+      />
     </Carousel>
   );
 }

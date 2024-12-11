@@ -5,7 +5,6 @@ import * as consts from "../consts";
 import { Tags } from "@/db/types";
 
 export async function fanficExtractor(data: string, fanficId: string) {
-  console.log({ data });
   try {
     const $ = cheerio.load(data);
     $("#admin-banner").remove();
@@ -15,9 +14,6 @@ export async function fanficExtractor(data: string, fanficId: string) {
     };
 
     const parseToDate = (selector: string): Date => {
-      console.log({ selector });
-      console.log($());
-      console.log({ blah: $(selector).text().trim() });
       return DateTime.fromISO($(selector).text().trim()).toJSDate();
     };
 

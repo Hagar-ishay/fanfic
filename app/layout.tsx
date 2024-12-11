@@ -7,7 +7,7 @@ import {
   SignedIn,
   SignedOut,
 } from "@clerk/nextjs";
-import Header from "./components/Header";
+import Header from "./components/header/Header";
 import { Toaster } from "@/components/ui/toaster";
 import { Suspense } from "react";
 

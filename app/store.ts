@@ -23,6 +23,7 @@ export const useSettingsStore = create(
     (set) => ({
       kindleEmail: "",
       languageCode: null,
+
       setEmail: (email: string) =>
         set((state) => ({
           ...state,

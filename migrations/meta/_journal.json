@@ -43,6 +43,20 @@
       "when": 1732018696372,
       "tag": "0005_adorable_lilandra",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1733840488786,
+      "tag": "0006_modern_mysterio",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1733937481580,
+      "tag": "0007_empty_jocasta",
+      "breakpoints": true
     }
   ]
 }

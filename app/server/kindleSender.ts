@@ -7,7 +7,7 @@ import EpubGen from "epub-gen";
 import nodemailer from "nodemailer";
 import { updateFanfic } from "../db/db";
 import type { Fanfic } from "../db/types";
-import { downloadFanfic } from "./ao3Client";
+import { getAo3Client } from "./ao3Client";
 import { ENV } from "../config";
 import { translateChapter, translateMetadata } from "@/server/translator";
 
@@ -49,7 +49,8 @@ export async function kindleSender({
   let author = fanfic.author;
 
   try {
-    await downloadFanfic(fanfic.downloadLink, downloadPath);
+    const ao3Client = await getAo3Client();
+    await ao3Client.downloadFanfic(fanfic.downloadLink, downloadPath);
     if (shouldTranslate) {
       const { translatedTitle, translatedAuthor } = await translateMetadata({
         title: fanfic.title,
@@ -87,7 +88,7 @@ export async function kindleSender({
 
     await unlinkAsync(downloadPath);
 
-    updateFanfic(fanfic.id, {
+    await updateFanfic(fanfic.id, {
       lastSent: new Date(Date.now()),
       latestStartingChapter: latestFinalChapter,
     });

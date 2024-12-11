@@ -2,8 +2,8 @@ import { neon } from "@neondatabase/serverless";
 import * as drizz from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-http";
 import { ENV } from "@/config";
-import { fanfics, sections } from "./schema";
-import type { NewFanfic } from "./types";
+import { fanfics, sections, credentials } from "./schema";
+import type { NewFanfic, SessionType } from "./types";
 
 if (!ENV.DATABASE_URL) {
   throw "Database URL string Was not set!";
@@ -53,6 +53,43 @@ export const selectSections = async () => {
   return await db.select().from(sections).orderBy(sections.id);
 };
 
-export const getSectionByName = async (name: string) => {
-  return await db.select().from(sections).where(drizz.eq(sections.name, name));
+export const getCredentials = async (type: SessionType) => {
+  const creds = await db
+    .select()
+    .from(credentials)
+    .where(drizz.eq(credentials.type, type));
+  if (creds.length > 0) {
+    return creds[0];
+  }
+  return null;
+};
+
+export const upsertCredentials = async (
+  username: string,
+  password: string,
+  type: SessionType
+) => {
+  const data = { username, password };
+  return db
+    .insert(credentials)
+    .values({ ...data, type })
+    .onConflictDoUpdate({
+      target: credentials.type,
+      targetWhere: drizz.eq(credentials.type, type),
+      set: data,
+    });
+};
+
+export const refreshSession = async (
+  type: SessionType,
+  newSession: {
+    key: string;
+    value: string;
+    expires: Date | null | "Infinity";
+  }[]
+) => {
+  return db
+    .update(credentials)
+    .set({ session: newSession })
+    .where(drizz.eq(credentials.type, type));
 };

@@ -4,7 +4,6 @@ import { CircleCheck } from "lucide-react";
 
 export const FanficHeader = ({
   fanfic,
-  showComplete,
   truncate,
 }: {
   fanfic: Fanfic;
@@ -12,9 +11,9 @@ export const FanficHeader = ({
   truncate?: boolean;
 }) => {
   return (
-    <>
-      <div className="text-md text-accent-foreground ">
-        <div className="flex flex-row gap-3 font-semibold mt-4 items-center min-w-0 ">
+    <div className="flex flex-col">
+      <div className="text-md text-accent-foreground">
+        <div className="gap-3 font-semibold mt-4 items-center min-w-0">
           <div
             className={cn(
               truncate &&
@@ -30,9 +29,6 @@ export const FanficHeader = ({
               {fanfic.title}
             </a>
           </div>
-          {showComplete && fanfic.completedAt && (
-            <CircleCheck className="text-success flex-shrink-0" size="18" />
-          )}
         </div>
       </div>
 
@@ -50,6 +46,6 @@ export const FanficHeader = ({
           fanfic.author
         )}
       </div>
-    </>
+    </div>
   );
 };

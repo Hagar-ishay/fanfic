@@ -1,14 +1,13 @@
 "use client";
 import type { Fanfic, Section } from "@/db/types";
-import { cn } from "@/lib/utils";
 import { useSearchStore, useSectionsStore } from "@/store";
-import FanficCard from "@/components/FanficCard";
+import FanficCard from "@/components/main-page/FanficCard";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "./ui/accordion";
+} from "../ui/accordion";
 import {
   DragDropContext,
   Draggable,
@@ -80,17 +79,14 @@ export default function SectionsView({
           <Droppable key={section.id} droppableId={section.id.toString()}>
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps}>
-                <AccordionItem
-                  value={section.name}
-                  className="p-2 border-t border-gray-200 my-2"
-                >
-                  <AccordionTrigger className="p-4 ">
-                    <div className="flex flex-row gap-2 text-secondary-foreground">
-                      <h2>{`${section.name} (${sectionFanfics(section.id).length})`}</h2>
+                <AccordionItem value={section.name} className="p-2 my-2">
+                  <AccordionTrigger className="p-4">
+                    <div>
+                      <h2 className="text-secondary-foreground">{`${section.name} (${sectionFanfics(section.id).length})`}</h2>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="p-4 border-t">
-                    <div className={cn("flex flex-col gap-4")}>
+                  <AccordionContent className="p-4">
+                    <div>
                       {sectionFanfics(section.id)?.map((fanfic, index) => (
                         <Draggable
                           key={fanfic.id}
