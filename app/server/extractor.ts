@@ -17,18 +17,12 @@ export async function fanficExtractor(data: string, fanficId: string) {
       return DateTime.fromISO($(selector).text().trim()).toJSDate();
     };
 
-    const summaryElement = $(
-      "#workskin div.summary.module blockquote.userstuff"
-    ).first();
-
-    const summary =
-      summaryElement && summaryElement.length > 0
-        ? summaryElement
-            .html()
-            ?.replace(/<\/p><p>/g, "\n")
-            .replace(/<[^>]+>/g, "\n")
-            .trim()
-        : "";
+    const summary = $("#workskin div.summary.module blockquote.userstuff")
+      .first()
+      .html()
+      ?.replace(/<\/p><p>/g, "\n")
+      .replace(/<[^>]+>/g, "\n")
+      .trim();
 
     const downloadLink =
       $("li.download ul.expandable.secondary > li > a")
@@ -58,18 +52,21 @@ export async function fanficExtractor(data: string, fanficId: string) {
       }
     });
 
+    const createdAt = parseToDate("dd.published");
+    const updatedAt = parseToDate("dd.status");
+
     const fanfic = {
       fanficId: +fanficId,
       sourceUrl: `${consts.AO3_LINK}/works/${fanficId}`,
       title: parseHtml("h2.title.heading"),
       author: parseHtml("a[rel=author]"),
       summary: summary || null,
-      updatedAt: parseToDate("dd.status"),
+      updatedAt: isNaN(updatedAt.getTime()) ? createdAt : updatedAt,
       completedAt: parseHtml("dt.status").startsWith("Completed")
         ? parseToDate("dd.status")
         : null,
       authorUrl: authorLink,
-      createdAt: parseToDate("dd.published"),
+      createdAt: createdAt,
       downloadLink: downloadLink,
       tags: tags,
       wordCount: +parseHtml("dd.words").replace(",", ""),

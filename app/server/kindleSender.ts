@@ -10,6 +10,7 @@ import type { Fanfic } from "../db/types";
 import { getAo3Client } from "./ao3Client";
 import { ENV } from "../config";
 import { translateChapter, translateMetadata } from "@/server/translator";
+import { errorMessage } from "@/lib/utils";
 
 const unlinkAsync = promisify(fs.unlink);
 const statAsync = promisify(fs.stat);
@@ -85,9 +86,6 @@ export async function kindleSender({
     }
 
     await sendToKindle(kindleEmail, title, fileName, downloadPath);
-
-    await unlinkAsync(downloadPath);
-
     await updateFanfic(fanfic.id, {
       lastSent: new Date(Date.now()),
       latestStartingChapter: latestFinalChapter,
@@ -95,22 +93,11 @@ export async function kindleSender({
 
     return { success: true, message: "" };
   } catch (error) {
-    let errorMessage =
-      (typeof error === "string" && error) ||
-      (error instanceof Error && error.message) ||
-      "";
-
-    if (
-      errorMessage.includes("The model is overloaded. Please try again later")
-    ) {
-      errorMessage =
-        "Gemini Translation is unavailable. Please try again later.";
-    }
-
+    return { success: false, message: errorMessage(error) };
+  } finally {
     if (fs.existsSync(downloadPath)) {
       await unlinkAsync(downloadPath);
     }
-    return { success: false, message: errorMessage };
   }
 }
 

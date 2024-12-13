@@ -1,6 +1,7 @@
 "use server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { ENV } from "@/config";
+import { errorMessage } from "@/lib/utils";
 
 const ERROR_MESSSAGE = "***ERROR FOUND***";
 
@@ -30,21 +31,32 @@ export async function translateChapter(
   chapterText: string,
   chapterTitle: string
 ) {
-  const response = await model.generateContentStream(
-    `${translationBookPrompt}\n${chapterText}`
-  );
-  let chapterChunks = "";
-  for await (const chunk of response.stream) {
-    const chunkText = chunk.text();
-    chapterChunks += chunkText;
+  try {
+    const response = await model.generateContentStream(
+      `${translationBookPrompt}\n${chapterText}`
+    );
+    let chapterChunks = "";
+    for await (const chunk of response.stream) {
+      const chunkText = chunk.text();
+      chapterChunks += chunkText;
+    }
+    const { translatedChapterTitle } = await translateMetadata({
+      chatperTitle: chapterTitle,
+    });
+    return {
+      title: translatedChapterTitle,
+      data: chapterChunks,
+    };
+  } catch (error) {
+    if (
+      errorMessage(error).includes(
+        "The model is overloaded. Please try again later"
+      )
+    ) {
+      throw Error("Gemini Translation is unavailable. Please try again later.");
+    }
+    throw error;
   }
-  const { translatedChapterTitle } = await translateMetadata({
-    chatperTitle: chapterTitle,
-  });
-  return {
-    title: translatedChapterTitle,
-    data: chapterChunks,
-  };
 }
 
 export async function translateMetadata(contents: object) {
@@ -52,6 +64,6 @@ export async function translateMetadata(contents: object) {
   const result = await model.generateContent(
     `${translationBookMetadataPrompt}\n${metadata}`
   );
-  const response =  result.response;
+  const response = result.response;
   return JSON.parse(response.text());
 }

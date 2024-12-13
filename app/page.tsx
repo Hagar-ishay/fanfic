@@ -9,14 +9,14 @@ export const metadata = {
 };
 
 export default async function MainPage() {
-  // const updatePromise = checkForUpdates();
+  const updatePromise = checkForUpdates();
 
   const [fanfics, sections] = await Promise.all([
     listFanfics(),
     selectSections(),
   ]);
 
-  // updatePromise.catch((err) => console.error("Update check failed:", err));
+  updatePromise.catch((err) => console.error("Update check failed:", err));
 
   return (
     <div>

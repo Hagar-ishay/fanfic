@@ -14,7 +14,7 @@ export function encryptPassword(password: string): string {
   const cipher = createCipheriv(algorithm, key, iv);
   let encrypted = cipher.update(password, "utf8", "hex");
   encrypted += cipher.final("hex");
-  return `${iv.toString("hex")}:${encrypted}`; // Include IV in the encrypted value
+  return `${iv.toString("hex")}:${encrypted}`;
 }
 
 export function decryptPassword(encryptedPassword: string): string {
@@ -24,3 +24,11 @@ export function decryptPassword(encryptedPassword: string): string {
   decrypted += decipher.final("utf8");
   return decrypted;
 }
+
+export const errorMessage = (error: unknown) => {
+  return (
+    (typeof error === "string" && error) ||
+    (error instanceof Error && error.message) ||
+    ""
+  );
+};

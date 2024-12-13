@@ -10,14 +10,6 @@ import {
 
 export const schema = pgSchema("fanfiction");
 
-export const ratingEnum = schema.enum("rating", [
-  "MASTERPIECE",
-  "AMAZING",
-  "GOOD",
-  "OK",
-  "MEH",
-]);
-
 export const credentialsType = schema.enum("credentials_type", ["AO3"]);
 
 export const sections = schema.table(
@@ -58,10 +50,14 @@ export const fanfics = schema.table(
       .$type<{ [category: string]: string[] }>()
       .notNull()
       .default({}),
+    edditableLabels: jsonb("edditable_labels")
+      .$type<string[]>()
+      .default([])
+      .notNull(),
+    comment: varchar(),
     wordCount: integer("word_count"),
     chapterCount: varchar("chapter_count"),
     language: varchar(),
-    rating: ratingEnum(),
     creationTime: timestamp("creation_time").notNull().defaultNow(),
     updateTime: timestamp("update_time").$onUpdate(() => new Date()),
   },

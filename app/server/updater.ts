@@ -12,6 +12,7 @@ import { AO3_LINK } from "@/consts";
 import { expirePath } from "next/dist/server/web/spec-extension/revalidate";
 import { SessionType } from "@/db/types";
 import { getAo3Client } from "@/server/ao3Client";
+import { errorMessage } from "@/lib/utils";
 
 export async function checkForUpdates() {
   "use cache";
@@ -46,8 +47,10 @@ export async function addFanfic(sectionId: number, fanficUrl: string) {
   try {
     const data = await ao3Client.getFanfic(fanficId);
     const metadata = await fanficExtractor(data, fanficId);
+
     if (metadata) {
       await insertFanfic({ ...metadata, sectionId });
+      expirePath("/");
       return { success: true, message: "" };
     }
   } catch (error) {
@@ -79,8 +82,3 @@ export async function setCredentials(
   await upsertCredentials(username, password, type);
   expirePath("/");
 }
-
-const errorMessage = (error: unknown) =>
-  (typeof error === "string" && error) ||
-  (error instanceof Error && error.message) ||
-  "Unknown Error";
