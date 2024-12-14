@@ -1,7 +1,6 @@
 import { listFanfics, selectSections } from "./db/db";
 import React from "react";
 import SectionsView from "@/components/main-page/SectionsView";
-import { checkForUpdates } from "@/server/updater";
 
 export const metadata = {
   title: "Penio Fanfic",
@@ -9,14 +8,10 @@ export const metadata = {
 };
 
 export default async function MainPage() {
-  // const updatePromise = checkForUpdates();
-
   const [fanfics, sections] = await Promise.all([
     listFanfics(),
     selectSections(),
   ]);
-
-  // updatePromise.catch((err) => console.error("Update check failed:", err));
 
   return (
     <div>
