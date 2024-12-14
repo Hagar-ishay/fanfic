@@ -27,8 +27,13 @@ export default function FanficCard({
       >
         <CardContent>
           <div className="flex flex-row items-center justify-between w-full">
-            <div className="truncate flex-grow min-w-0">
-              <FanficHeader fanfic={fanfic} showComplete truncate />
+            <div className="flex-grow min-w-0 flex flex-col whitespace-nowrap text-ellipsis overflow-hidden">
+              <div className="text-md gap-3 font-semibold mt-4 truncate">
+                <a>{fanfic.title}</a>
+              </div>
+              <div className="text-xs text-muted-foreground truncate">
+                <a>{fanfic.author}</a>
+              </div>
             </div>
             <div className="flex flex-row gap-2 flex-shrink-0 items-center">
               {fanfic.lastSent && fanfic.updatedAt > fanfic.lastSent && (

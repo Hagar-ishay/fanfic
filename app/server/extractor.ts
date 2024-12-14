@@ -44,7 +44,6 @@ export async function fanficExtractor(data: string, fanficId: string) {
       if (consts.TAGS[category]) {
         const tagElements = $(el).next("dd").find("ul.commas > li > a.tag");
         const tagList = tagElements
-          .slice(0, 2)
           .map((_, tagEl) => $(tagEl).text().trim())
           .get();
 

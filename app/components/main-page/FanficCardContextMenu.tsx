@@ -75,7 +75,7 @@ export function FanficCardContextMenu({
   ];
   if (fanfic.latestStartingChapter) {
     subOptions.push({
-      name: `Send Chapters ${fanfic.latestStartingChapter || 1} - ${latestFinalChapter}`,
+      name: `Send Chapters ${fanfic.latestStartingChapter} - ${latestFinalChapter}`,
       action: () => handleSend(true),
     });
   }

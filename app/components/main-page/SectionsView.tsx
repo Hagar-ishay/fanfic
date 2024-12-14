@@ -1,7 +1,6 @@
 "use client";
 import type { Fanfic, Section } from "@/db/types";
 import { useSearchStore, useSectionsStore } from "@/store";
-import FanficCard from "@/components/main-page/FanficCard";
 import {
   Accordion,
   AccordionContent,
@@ -18,6 +17,7 @@ import { matchSorter } from "match-sorter";
 import { updateFic } from "@/server/updater";
 import { useOptimistic, useTransition } from "react";
 import { Grip } from "lucide-react";
+import FanficView from "@/components/main-page/FanficView";
 
 export default function SectionsView({
   fanfics,
@@ -64,7 +64,13 @@ export default function SectionsView({
     );
 
     return matchSorter(filteredFanfics, searchInput, {
-      keys: ["title", "author", "tags.FANDOM", "tags.RELATIONSHIPS"],
+      keys: [
+        "title",
+        "author",
+        "tags.FANDOM",
+        "tags.RELATIONSHIPS",
+        "editableLabels",
+      ],
     });
   };
 
@@ -100,7 +106,7 @@ export default function SectionsView({
                               className="flex items-center"
                             >
                               <div className="w-full min-w-0">
-                                <FanficCard
+                                <FanficView
                                   fanfic={fanfic}
                                   isDragging={snapshot.isDragging}
                                   transferableSections={sections.filter(

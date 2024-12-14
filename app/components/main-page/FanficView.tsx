@@ -8,9 +8,11 @@ import TagsCarousel from "@/components/base/Tags";
 import { FanficHeader } from "@/components/main-page/FanficHeader";
 import { FanficCardContextMenu } from "@/components/main-page/FanficCardContextMenu";
 import { Separator } from "@/components/ui/separator";
-import InputLabels from "@/components/base/InputLabels";
+import InputLabels from "@/components/main-page/InputLabels";
 import FanficCard from "@/components/main-page/FanficCard";
 import { Button } from "@/components/ui/button";
+import { PlusIcon, Tag } from "lucide-react";
+import EditableLabels from "@/components/main-page/InputLabels";
 
 export default function FanficView({
   fanfic,
@@ -58,18 +60,18 @@ export default function FanficView({
             </ScrollArea>
           }
           trigger={
-            <FanficCard
-              fanfic={fanfic}
-              isDragging={isDragging}
-              isPending={isPending}
-            />
+            // don't remove div, required to open dialog
+            <div> 
+              <FanficCard
+                fanfic={fanfic}
+                isDragging={isDragging}
+                isPending={isPending}
+              />
+            </div>
           }
         >
-          <div className="flex flex-col flex-wrap gap-4 mt-5">
-            <div>
-              <InputLabels labels={fanfic.edditableLabels} />
-              <Button>Add</Button>
-            </div>
+          <div className="flex flex-col flex-wrap gap-4">
+            <EditableLabels fanficId={fanfic.id} labels={fanfic.editableLabels} />              
             <Separator />
             <TagsCarousel tags={tags} />
           </div>

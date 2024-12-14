@@ -50,10 +50,11 @@ export const fanfics = schema.table(
       .$type<{ [category: string]: string[] }>()
       .notNull()
       .default({}),
-    edditableLabels: jsonb("edditable_labels")
+    editableLabels: jsonb("edditable_labels")
       .$type<string[]>()
       .default([])
       .notNull(),
+    sortPriority: integer("sort_priority"),
     comment: varchar(),
     wordCount: integer("word_count"),
     chapterCount: varchar("chapter_count"),
