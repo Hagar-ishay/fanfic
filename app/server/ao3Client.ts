@@ -6,6 +6,7 @@ import axios, { AxiosInstance, AxiosResponse } from "axios";
 import { AO3_LINK } from "@/consts";
 import { wrapper } from "axios-cookiejar-support";
 import tough from "tough-cookie";
+import { CookieJar } from "tough-cookie";
 import { getCredentials, refreshSession } from "@/db/db";
 import { Credentials } from "@/db/types";
 import { decryptPassword } from "@/lib/utils";
@@ -21,13 +22,13 @@ export async function getAo3Client() {
 }
 
 class AO3Client {
-  private cookieJar: tough.CookieJar;
+  private cookieJar: CookieJar;
   private axiosInstance: AxiosInstance;
   private defaultHeaders: object = {
     "Content-Type": "application/x-www-form-urlencoded",
   };
   constructor(credentials: Credentials) {
-    this.cookieJar = new tough.CookieJar();
+    this.cookieJar = new CookieJar();
     this.axiosInstance = wrapper(
       axios.create({
         jar: this.cookieJar,
