@@ -173,7 +173,10 @@ async function buildNewEpub(newEpub: EpubGen.Options, downloadPath: string) {
   if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir, { recursive: true });
   }
-  const epub = new EpubGen({ ...newEpub, tempDir: tempDir }, downloadPath);
+  const epub = new EpubGen(
+    { ...newEpub, tempDir: tempDir } as EpubGen.Options,
+    downloadPath
+  );
   return epub.promise
     .then(() => {
       return {
