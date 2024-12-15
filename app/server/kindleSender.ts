@@ -42,9 +42,10 @@ export async function kindleSender({
       fanfic.language !== translationLanguage
   );
 
-  const fileName = sendLatestChapters && fanfic.latestStartingChapter
-    ? `${fanfic.title.replace(" ", " ")} - Chapters ${fanfic.latestStartingChapter} - ${latestFinalChapter}.epub`
-    : `${fanfic.title.replace(" ", " ")}.epub`;
+  const fileName =
+    sendLatestChapters && fanfic.latestStartingChapter
+      ? `${fanfic.title.replace(" ", " ")} - Chapters ${fanfic.latestStartingChapter} - ${latestFinalChapter}.epub`
+      : `${fanfic.title.replace(" ", " ")}.epub`;
   const downloadPath = path.resolve(`/tmp/${fileName}`);
   let title = fanfic.title;
   let author = fanfic.author;
@@ -93,6 +94,7 @@ export async function kindleSender({
 
     return { success: true, message: "" };
   } catch (error) {
+    console.error("Error sending to Kindle:", error);
     return { success: false, message: errorMessage(error) };
   } finally {
     if (fs.existsSync(downloadPath)) {

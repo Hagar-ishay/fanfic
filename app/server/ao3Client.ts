@@ -10,17 +10,12 @@ import { getCredentials, refreshSession } from "@/db/db";
 import { Credentials } from "@/db/types";
 import { decryptPassword } from "@/lib/utils";
 
-let ao3Client: AO3Client | null = null;
-
 export async function getAo3Client() {
-  if (ao3Client) {
-    return ao3Client;
-  }
   const credentials = await getCredentials("AO3");
   if (!credentials) {
     throw new Error("No AO3 credentials found");
   }
-  ao3Client = new AO3Client(credentials);
+  const ao3Client = new AO3Client(credentials);
   await ao3Client.login(credentials);
   return ao3Client;
 }
@@ -151,6 +146,7 @@ class AO3Client {
 
       await this.setSessionCookies(cookies);
     } catch (error) {
+      console.log(error);
       throw new Error(`Failed to login: ${error}`);
     }
   }
