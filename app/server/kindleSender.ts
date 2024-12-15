@@ -76,7 +76,7 @@ export async function kindleSender({
         publisher: "https://archiveofourown.org",
         content: chapters,
       };
-
+      await unlinkAsync(downloadPath);
       await buildNewEpub(data, downloadPath);
     }
 
