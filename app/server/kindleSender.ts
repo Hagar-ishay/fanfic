@@ -76,7 +76,9 @@ export async function kindleSender({
         content: chapters,
       };
       await unlinkAsync(downloadPath);
-      downloadPath = `/tmp/${fanfic.title.replace(" ", " ")} - Chapters ${fanfic.latestStartingChapter} - ${latestFinalChapter}.epub`;
+      downloadPath = path.resolve(
+        `/tmp/${fanfic.title.replace(" ", " ")} - Chapters ${fanfic.latestStartingChapter} - ${latestFinalChapter}.epub`
+      );
       await buildNewEpub(data, downloadPath);
     }
 
