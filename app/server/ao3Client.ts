@@ -5,8 +5,7 @@ import querystring from "querystring";
 import axios, { AxiosInstance, AxiosResponse } from "axios";
 import { AO3_LINK } from "@/consts";
 import { wrapper } from "axios-cookiejar-support";
-import tough from "tough-cookie";
-import { CookieJar } from "tough-cookie";
+import { CookieJar, Cookie } from "tough-cookie";
 import { getCredentials, refreshSession } from "@/db/db";
 import { Credentials } from "@/db/types";
 import { decryptPassword } from "@/lib/utils";
@@ -48,7 +47,7 @@ class AO3Client {
     }[]
   ) {
     cookies.map(({ key, value, expires }) => {
-      const cookie = new tough.Cookie({
+      const cookie = new Cookie({
         key,
         value,
         domain: AO3_LINK.replace(/^https?:\/\//, ""),
