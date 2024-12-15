@@ -42,11 +42,9 @@ export async function kindleSender({
       fanfic.language !== translationLanguage
   );
 
-  const fileName =
-    sendLatestChapters && fanfic.latestStartingChapter
-      ? `${fanfic.title.replace(" ", " ")} - Chapters ${fanfic.latestStartingChapter} - ${latestFinalChapter}.epub`
-      : `${fanfic.title.replace(" ", " ")}.epub`;
-  const downloadPath = path.resolve(`/tmp/${fileName}`);
+  let downloadPath = path.resolve(
+    `/tmp/${fanfic.title.replace(" ", " ")}.epub`
+  );
   let title = fanfic.title;
   let author = fanfic.author;
 
@@ -77,6 +75,7 @@ export async function kindleSender({
         content: chapters,
       };
       await unlinkAsync(downloadPath);
+      downloadPath = `${fanfic.title.replace(" ", " ")} - Chapters ${fanfic.latestStartingChapter} - ${latestFinalChapter}.epub`;
       await buildNewEpub(data, downloadPath);
     }
 
