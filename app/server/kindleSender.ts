@@ -169,10 +169,11 @@ function getChapter(epub: EPub, chapterId: string): Promise<string> {
 }
 
 async function buildNewEpub(newEpub: EpubGen.Options, downloadPath: string) {
-  if (!fs.existsSync("/tmp/tempDir")) {
-    fs.mkdirSync("/tmp/tempDir", { recursive: true });
+  const tempDir = path.resolve("/tmp/tempDir");
+  if (!fs.existsSync(tempDir)) {
+    fs.mkdirSync(tempDir, { recursive: true });
   }
-  const epub = new EpubGen(newEpub, downloadPath);
+  const epub = new EpubGen({ ...newEpub, tempDir: tempDir }, downloadPath);
   return epub.promise
     .then(() => {
       return {
