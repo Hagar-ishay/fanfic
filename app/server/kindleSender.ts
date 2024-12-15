@@ -11,6 +11,7 @@ import { getAo3Client } from "./ao3Client";
 import { ENV } from "../config";
 import { translateChapter, translateMetadata } from "@/server/translator";
 import { errorMessage } from "@/lib/utils";
+import { AO3_LINK } from "@/consts";
 
 const unlinkAsync = promisify(fs.unlink);
 const statAsync = promisify(fs.stat);
@@ -71,11 +72,11 @@ export async function kindleSender({
       const data = {
         title: title,
         author: author,
-        publisher: "https://archiveofourown.org",
+        publisher: AO3_LINK,
         content: chapters,
       };
       await unlinkAsync(downloadPath);
-      downloadPath = `${fanfic.title.replace(" ", " ")} - Chapters ${fanfic.latestStartingChapter} - ${latestFinalChapter}.epub`;
+      downloadPath = `/tmp/${fanfic.title.replace(" ", " ")} - Chapters ${fanfic.latestStartingChapter} - ${latestFinalChapter}.epub`;
       await buildNewEpub(data, downloadPath);
     }
 
@@ -85,7 +86,12 @@ export async function kindleSender({
       throw new Error("Downloaded file is empty.");
     }
 
-    await sendToKindle(kindleEmail, title, fileName, downloadPath);
+    await sendToKindle(
+      kindleEmail,
+      title,
+      downloadPath.replace("/tmp/", ""),
+      downloadPath
+    );
     await updateFanfic(fanfic.id, {
       lastSent: new Date(Date.now()),
       latestStartingChapter: latestFinalChapter,
