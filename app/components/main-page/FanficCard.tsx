@@ -3,7 +3,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Fanfic } from "@/db/types";
 import React from "react";
-import { FanficHeader } from "@/components/main-page/FanficHeader";
 import { cn } from "@/lib/utils";
 import { BookUp, BookUp2, CircleCheck, Loader2 } from "lucide-react";
 import { Tooltip } from "@/components/base/Tooltip";

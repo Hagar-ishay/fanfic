@@ -1,15 +1,9 @@
 "use server";
 
-import {
-  deleteFanfic,
-  insertFanfic,
-  updateFanfic,
-  upsertCredentials,
-} from "@/db/db";
+import { deleteFanfic, insertFanfic, updateFanfic } from "@/db/db";
 import { fanficExtractor } from "./extractor";
 import { AO3_LINK } from "@/consts";
 import { expirePath } from "next/dist/server/web/spec-extension/revalidate";
-import { SessionType } from "@/db/types";
 import { getAo3Client } from "@/server/ao3Client";
 import { errorMessage } from "@/lib/utils";
 
@@ -45,14 +39,5 @@ export async function updateFic(fanficId: number, params: object) {
 
 export async function deleteFic(fanficId: number) {
   await deleteFanfic(fanficId);
-  expirePath("/");
-}
-
-export async function setCredentials(
-  username: string,
-  password: string,
-  type: SessionType
-) {
-  await upsertCredentials(username, password, type);
   expirePath("/");
 }

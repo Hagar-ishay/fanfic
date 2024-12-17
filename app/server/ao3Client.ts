@@ -8,14 +8,14 @@ import { wrapper } from "axios-cookiejar-support";
 import { CookieJar, Cookie } from "tough-cookie";
 import { getCredentials, refreshSession } from "@/db/db";
 import { Credentials } from "@/db/types";
-import { decryptPassword } from "@/lib/utils";
+import { ENV } from "@/config";
 
 export async function getAo3Client() {
   const credentials = await getCredentials("AO3");
   if (!credentials) {
     throw new Error("No AO3 credentials found");
   }
-  const ao3Client = new AO3Client(credentials);
+  const ao3Client = new AO3Client();
   await ao3Client.login(credentials);
   return ao3Client;
 }
@@ -26,7 +26,7 @@ class AO3Client {
   private defaultHeaders: object = {
     "Content-Type": "application/x-www-form-urlencoded",
   };
-  constructor(credentials: Credentials) {
+  constructor() {
     this.cookieJar = new CookieJar();
     this.axiosInstance = wrapper(
       axios.create({
@@ -34,9 +34,6 @@ class AO3Client {
         withCredentials: true,
       })
     );
-    if (credentials.session && credentials.session?.length > 0) {
-      this.setSessionCookies(credentials.session);
-    }
   }
 
   private setCookies(
@@ -114,11 +111,10 @@ class AO3Client {
     const loginUrl = `${AO3_LINK}/users/login`;
     try {
       const tokenResponse = await this.axiosInstance.get(tokenUrl);
-      const decryptedPassword = decryptPassword(credentials?.password);
       const data = {
         authenticity_token: tokenResponse.data.token,
-        "user[login]": credentials?.username,
-        "user[password]": decryptedPassword,
+        "user[login]": ENV.AO3_USERNAME,
+        "user[password]": ENV.AO3_PASSWORD,
         "user[remember_me]": 1,
         commit: "Log in",
       };
@@ -130,7 +126,7 @@ class AO3Client {
           url: loginUrl,
           data: encodedData,
           headers: {
-            Referer: "https://archiveofourown.org/users/login",
+            Referer: `${AO3_LINK}/users/login`,
           },
         },
         false

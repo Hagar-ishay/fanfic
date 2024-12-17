@@ -2,7 +2,7 @@
 
 import { ContextMenu, Option } from "@/components/base/Context";
 import { Fanfic, Section } from "@/db/types";
-import { updateFic } from "@/server/updater";
+import { deleteFic, updateFic } from "@/server/updater";
 import { CircleChevronRight, SendHorizontal, Trash2 } from "lucide-react";
 import React from "react";
 import { kindleSender } from "../../server/kindleSender";
@@ -50,13 +50,13 @@ export function FanficCardContextMenu({
       setIsSuccess(result.success);
       if (result.success) {
         toast({
-          title: "Send to Kindle:",
-          description: "Sent to Kindle successfully!",
+          title: "Send to Kindle",
+          description: `Sent ${fanfic.title} successfully!`,
         });
       } else {
         toast({
-          title: "Send to Kindle:",
-          description: `Failed to send to Kindle: ${result.message}`,
+          title: "Send to Kindle",
+          description: `Failed to send ${fanfic.title}: ${result.message}`,
           variant: "destructive",
         });
       }
@@ -65,6 +65,10 @@ export function FanficCardContextMenu({
 
   async function handleTranfser(newSectionId: number) {
     updateFic(fanfic.id, { sectionId: newSectionId });
+  }
+
+  async function deleteFanfic() {
+    deleteFic(fanfic.id);
   }
 
   let subOptions = [
@@ -94,6 +98,11 @@ export function FanficCardContextMenu({
       name: "Send to Kindle",
       disabled: isDisabled,
       subItems: subOptions,
+    },
+    {
+      icon: <Trash2 size={17} />,
+      name: "Delete Fanfic",
+      action: deleteFanfic,
     },
   ];
 

@@ -74,8 +74,6 @@ export const credentials = schema.table(
   {
     id: serial().primaryKey(),
     type: credentialsType().notNull(),
-    username: varchar().notNull(),
-    password: varchar().notNull(),
     session:
       jsonb().$type<
         { key: string; value: string; expires: Date | null | "Infinity" }[]

@@ -18,6 +18,9 @@ import { updateFic } from "@/server/updater";
 import { useOptimistic, useTransition } from "react";
 import { Grip } from "lucide-react";
 import FanficView from "@/components/main-page/FanficView";
+import { useToast } from "@/hooks/use-toast";
+import React from "react";
+import { checkForUpdates } from "@/server/checkForUpdates";
 
 export default function SectionsView({
   fanfics,
@@ -26,6 +29,7 @@ export default function SectionsView({
   fanfics: Fanfic[];
   sections: Section[];
 }) {
+  const { toast } = useToast();
   const openSections = useSectionsStore((state) => state.openSections);
   const setOpenSections = useSectionsStore((state) => state.setOpenSections);
   const searchInput = useSearchStore((state) => state.searchInput);
@@ -42,6 +46,20 @@ export default function SectionsView({
           : fanficState
       )
   );
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      const result = await checkForUpdates(fanfics);
+      if (!result.success) {
+        toast({
+          title: "Check for updates",
+          description: `Failed to update: ${result.message}`,
+          variant: "destructive",
+        });
+      }
+    };
+    fetchData();
+  }, []);
 
   const handleDragEnd = async (result: DropResult) => {
     if (!result.destination) return;

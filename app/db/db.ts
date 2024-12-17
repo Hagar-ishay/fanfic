@@ -64,22 +64,6 @@ export const getCredentials = async (type: SessionType) => {
   return null;
 };
 
-export const upsertCredentials = async (
-  username: string,
-  password: string,
-  type: SessionType
-) => {
-  const data = { username, password };
-  return db
-    .insert(credentials)
-    .values({ ...data, type })
-    .onConflictDoUpdate({
-      target: credentials.type,
-      targetWhere: drizz.eq(credentials.type, type),
-      set: data,
-    });
-};
-
 export const refreshSession = async (
   type: SessionType,
   newSession: {
@@ -88,8 +72,13 @@ export const refreshSession = async (
     expires: Date | null | "Infinity";
   }[]
 ) => {
+  const data = { session: newSession };
   return db
-    .update(credentials)
-    .set({ session: newSession })
-    .where(drizz.eq(credentials.type, type));
+    .insert(credentials)
+    .values({ ...data, type })
+    .onConflictDoUpdate({
+      target: credentials.type,
+      targetWhere: drizz.eq(credentials.type, type),
+      set: data,
+    });
 };

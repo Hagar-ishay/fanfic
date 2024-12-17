@@ -3,10 +3,8 @@ import type React from "react";
 import { SettingsModal } from "@/components/header/Settings";
 import { AddFanficButton } from "@/components/header/AddFanficButton";
 import { SearchInput } from "@/components/header/SearchInput";
-import { getCredentials } from "@/db/db";
 
 export default async function Header() {
-  const credentials = await getCredentials("AO3");
   return (
     <div className="flex flex-row items-center justify-between w-full gap-3">
       <div className="flex justify-start">
@@ -16,7 +14,7 @@ export default async function Header() {
         <SearchInput />
         <div className="flex flex-row gap-2">
           <AddFanficButton />
-          <SettingsModal credentials={credentials} />
+          <SettingsModal />
         </div>
       </div>
     </div>
