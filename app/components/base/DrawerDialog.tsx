@@ -24,15 +24,7 @@ import {
 import { Tooltip } from "@/components/base/Tooltip";
 import Form from "next/form";
 
-export function DrawerDialog({
-  tooltip,
-  trigger,
-  header,
-  title,
-  description,
-  children,
-  formAction,
-}: {
+type DrawerDialogProps = {
   tooltip?: string;
   trigger?: React.ReactNode;
   header?: React.ReactNode;
@@ -42,7 +34,19 @@ export function DrawerDialog({
   formAction?: NonNullable<
     string | ((formData: FormData) => void | Promise<void>) | undefined
   >;
-}) {
+} & React.ComponentPropsWithoutRef<typeof Dialog> &
+  React.ComponentPropsWithoutRef<typeof Drawer>;
+
+export function DrawerDialog({
+  tooltip,
+  trigger,
+  header,
+  title,
+  description,
+  children,
+  formAction,
+  ...props
+}: DrawerDialogProps) {
   const asChild = Boolean(trigger);
 
   const ContentDrawer = ({ addClose }: { addClose: boolean }) => {
@@ -93,7 +97,7 @@ export function DrawerDialog({
 
   if (isDesktop) {
     return (
-      <Dialog>
+      <Dialog {...props}>
         {tooltip ? (
           <Tooltip description={tooltip}>
             <DialogTrigger asChild={asChild}>{trigger}</DialogTrigger>
@@ -117,7 +121,7 @@ export function DrawerDialog({
   }
 
   return (
-    <Drawer>
+    <Drawer {...props}>
       {tooltip ? (
         <Tooltip description={tooltip}>
           <DrawerTrigger asChild={asChild}>{trigger}</DrawerTrigger>

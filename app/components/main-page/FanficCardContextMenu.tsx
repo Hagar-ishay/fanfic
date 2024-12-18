@@ -10,6 +10,8 @@ import { useSettingsStore } from "../../store";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { FanficHeader } from "@/components/main-page/FanficHeader";
+import { DrawerDialog } from "@/components/base/DrawerDialog";
+import { Button } from "@/components/ui/button";
 
 export function FanficCardContextMenu({
   fanfic,
@@ -29,6 +31,7 @@ export function FanficCardContextMenu({
   const kindleEmail = useSettingsStore((state) => state.kindleEmail);
   const translationLanguage = useSettingsStore((state) => state.languageCode);
   const [isSuccess, setIsSuccess] = useState<undefined | boolean>(undefined);
+  const [shouldDelete, setShouldDelete] = useState<boolean>(false);
 
   const isDisabled = Boolean(
     isPending ||
@@ -102,19 +105,48 @@ export function FanficCardContextMenu({
     {
       icon: <Trash2 size={17} />,
       name: "Delete Fanfic",
-      action: deleteFanfic,
+      action: () => setShouldDelete(true),
     },
   ];
 
   return (
-    <ContextMenu
-      options={options}
-      trigger={trigger}
-      title={
-        <div className="flex flex-col items-center">
-          <FanficHeader fanfic={fanfic} />
+    <div>
+      <DrawerDialog
+        open={shouldDelete}
+        onOpenChange={setShouldDelete}
+        title={`Are you sure you want to delete ${fanfic.title}?`}
+      >
+        <div className="flex flex-row justify-end pr-3 gap-2">
+          <Button
+            type="submit"
+            variant="secondary"
+            onClick={() => {
+              setShouldDelete(false);
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="destructive"
+            onClick={() => {
+              deleteFanfic();
+              setShouldDelete(false);
+            }}
+          >
+            Delete
+          </Button>
         </div>
-      }
-    />
+      </DrawerDialog>
+      <ContextMenu
+        options={options}
+        trigger={trigger}
+        title={
+          <div className="flex flex-col items-center">
+            <FanficHeader fanfic={fanfic} />
+          </div>
+        }
+      />
+    </div>
   );
 }

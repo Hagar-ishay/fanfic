@@ -3,7 +3,7 @@
 import { DrawerDialog } from "@/components/base/DrawerDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Fanfic, Section, Tags } from "@/db/types";
-import React, { useTransition } from "react";
+import React from "react";
 import TagsCarousel from "@/components/base/Tags";
 import { FanficHeader } from "@/components/main-page/FanficHeader";
 import { FanficCardContextMenu } from "@/components/main-page/FanficCardContextMenu";
@@ -20,7 +20,7 @@ export default function FanficView({
   isDragging: boolean;
   transferableSections: Section[];
 }) {
-  const [isPending, startTransition] = useTransition();
+  const [isPending, startTransition] = React.useTransition();
 
   const tags: Tags = {
     WORD_COUNT: [fanfic.wordCount?.toString() ?? ""],

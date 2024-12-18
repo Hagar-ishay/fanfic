@@ -26,8 +26,8 @@ export async function checkForUpdates(fanfics: Fanfic[]) {
     );
     return { success: true, message: "" };
   } catch (err) {
+    console.error(err);
     const error = errorMessage(err);
-    console.error(error);
     return { success: false, message: error };
   }
 }
