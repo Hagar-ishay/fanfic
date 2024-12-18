@@ -11,18 +11,20 @@ export async function checkForUpdates(fanfics: Fanfic[]) {
   const ao3Client = await getAo3Client();
   try {
     await Promise.all(
-      fanfics.map(async (fanfic) => {
-        const fanficId = fanfic.fanficId.toString();
-        const updatedFic = await ao3Client.getFanfic(fanficId);
-        const parsedFanfic = await fanficExtractor(updatedFic, fanficId);
+      fanfics
+        .filter((fanfic) => !fanfic.completedAt)
+        .map(async (fanfic) => {
+          const fanficId = fanfic.fanficId.toString();
+          const updatedFic = await ao3Client.getFanfic(fanficId);
+          const parsedFanfic = await fanficExtractor(updatedFic, fanficId);
 
-        if (
-          parsedFanfic?.updatedAt &&
-          parsedFanfic?.updatedAt > fanfic.updatedAt
-        ) {
-          await updateFanfic(fanfic.id, parsedFanfic);
-        }
-      })
+          if (
+            parsedFanfic?.updatedAt &&
+            parsedFanfic?.updatedAt > fanfic.updatedAt
+          ) {
+            await updateFanfic(fanfic.id, parsedFanfic);
+          }
+        })
     );
     return { success: true, message: "" };
   } catch (err) {
