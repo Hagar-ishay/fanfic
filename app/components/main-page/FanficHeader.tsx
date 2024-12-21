@@ -1,6 +1,6 @@
-import { Fanfic } from "@/db/types";
+import { Fanfic, UserFanfic } from "@/db/types";
 
-export const FanficHeader = ({ fanfic }: { fanfic: Fanfic }) => {
+export const FanficHeader = ({ fanfic }: { fanfic: UserFanfic }) => {
   return (
     <div className="flex flex-col">
       <div className="text-md text-accent-foreground gap-3 font-semibold mt-4 items-center min-w-0">

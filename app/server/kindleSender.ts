@@ -6,7 +6,7 @@ import EPub from "epub";
 import EpubGen from "epub-gen";
 import nodemailer from "nodemailer";
 import { updateFanfic } from "../db/db";
-import type { Fanfic } from "../db/types";
+import type { Fanfic, UserFanfic } from "../db/types";
 import { getAo3Client } from "./ao3Client";
 import { ENV } from "../config";
 import { translateChapter, translateMetadata } from "@/server/translator";
@@ -28,7 +28,7 @@ export async function kindleSender({
   sendLatestChapters,
   latestFinalChapter,
 }: {
-  fanfic: Fanfic;
+  fanfic: UserFanfic;
   kindleEmail: string;
   translationLanguage: string | null;
   sendLatestChapters: boolean;

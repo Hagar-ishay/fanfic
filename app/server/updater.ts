@@ -1,6 +1,12 @@
 "use server";
 
-import { deleteFanfic, insertFanfic, updateFanfic } from "@/db/db";
+import {
+  deleteFanfic,
+  insertFanfic,
+  insertSectionFanfic,
+  updateFanfic,
+  updateSectionFanfics,
+} from "@/db/db";
 import { fanficExtractor } from "./extractor";
 import { AO3_LINK } from "@/consts";
 import { expirePath } from "next/dist/server/web/spec-extension/revalidate";
@@ -17,7 +23,8 @@ export async function addFanfic(sectionId: number, fanficUrl: string) {
     const metadata = await fanficExtractor(data, fanficId);
 
     if (metadata) {
-      await insertFanfic({ ...metadata, sectionId });
+      const fanficId = await insertFanfic({ ...metadata });
+      await insertSectionFanfic(fanficId, sectionId);
       expirePath("/");
       return { success: true, message: "" };
     }
@@ -34,6 +41,17 @@ export async function addFanfic(sectionId: number, fanficUrl: string) {
 
 export async function updateFic(fanficId: number, params: object) {
   await updateFanfic(fanficId, params);
+  expirePath("/");
+}
+
+export async function updateSectionFics(
+  toUpdate: {
+    sectionId: number;
+    sectionFanficId: number;
+    position: number;
+  }[]
+) {
+  await updateSectionFanfics(toUpdate);
   expirePath("/");
 }
 

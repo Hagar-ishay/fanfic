@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Fanfic } from "@/db/types";
+import { Fanfic, UserFanfic } from "@/db/types";
 import React from "react";
 import { cn } from "@/lib/utils";
 import { BookUp, BookUp2, CircleCheck, Loader2 } from "lucide-react";
@@ -12,7 +12,7 @@ export default function FanficCard({
   isDragging,
   isPending,
 }: {
-  fanfic: Fanfic;
+  fanfic: UserFanfic;
   isDragging: boolean;
   isPending: boolean;
 }) {

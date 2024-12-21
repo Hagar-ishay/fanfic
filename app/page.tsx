@@ -1,6 +1,7 @@
-import { listFanfics, selectSections } from "./db/db";
+import { listUserSections } from "./db/db";
 import React from "react";
 import SectionsView from "@/components/main-page/SectionsView";
+import { currentUser } from "@clerk/nextjs/server";
 
 export const metadata = {
   title: "Penio Fanfic",
@@ -8,14 +9,14 @@ export const metadata = {
 };
 
 export default async function MainPage() {
-  const [fanfics, sections] = await Promise.all([
-    listFanfics(),
-    selectSections(),
-  ]);
+  const user = await currentUser();
+  if (!user) return <div>Not signed in</div>;
+
+  const sections = await listUserSections(user.id);
 
   return (
     <div>
-      <SectionsView fanfics={fanfics} sections={sections} />
+      <SectionsView sections={sections} />
     </div>
   );
 }

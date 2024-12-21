@@ -1,5 +1,5 @@
 "use client";
-import type { Fanfic, Section } from "@/db/types";
+import type { UserSection } from "@/db/types";
 import { useSearchStore, useSectionsStore } from "@/store";
 import {
   Accordion,
@@ -14,7 +14,7 @@ import {
   DropResult,
 } from "@hello-pangea/dnd";
 import { matchSorter } from "match-sorter";
-import { updateFic } from "@/server/updater";
+import { updateFic, updateSectionFics } from "@/server/updater";
 import { useOptimistic, useTransition } from "react";
 import { Grip } from "lucide-react";
 import FanficView from "@/components/main-page/FanficView";
@@ -23,33 +23,51 @@ import React from "react";
 import { checkForUpdates } from "@/server/checkForUpdates";
 
 export default function SectionsView({
-  fanfics,
   sections,
 }: {
-  fanfics: Fanfic[];
-  sections: Section[];
+  sections: UserSection[];
 }) {
   const { toast } = useToast();
+
   const openSections = useSectionsStore((state) => state.openSections);
   const setOpenSections = useSectionsStore((state) => state.setOpenSections);
   const searchInput = useSearchStore((state) => state.searchInput);
-  const [isPending, startTransition] = useTransition();
-  const [optimisticFanfics, addOptimistic] = useOptimistic(
-    fanfics,
+  const [_, startTransition] = useTransition();
+  const [optimisticSections, addOptimistic] = useOptimistic(
+    sections,
     (
-      fanficsState: Fanfic[],
-      action: { newSectionId: number; fanficId: number }
+      sectionsState: UserSection[],
+      sectionsToUpdate: {
+        sectionId: number;
+        sectionFanficId: number;
+        position: number;
+      }[]
     ) =>
-      fanficsState.map((fanficState) =>
-        fanficState.id === action.fanficId
-          ? { ...fanficState, sectionId: action.newSectionId }
-          : fanficState
-      )
+      sectionsState
+        .map((sectionState) =>
+          sectionsToUpdate.reduce((acc, sectionToUpdate) => {
+            if (
+              sectionState.section_fanfics.id ===
+              sectionToUpdate.sectionFanficId
+            ) {
+              return {
+                ...sectionState,
+                section_fanfics: {
+                  ...sectionState.section_fanfics,
+                  position: sectionToUpdate.position,
+                  sectionId: sectionToUpdate.sectionId,
+                },
+              };
+            }
+            return acc;
+          }, sectionState)
+        )
+        .sort((a, b) => a.section_fanfics.position - b.section_fanfics.position)
   );
 
   React.useEffect(() => {
     const fetchData = async () => {
-      const result = await checkForUpdates(fanfics);
+      const result = await checkForUpdates();
       if (!result.success) {
         toast({
           title: "Check for updates",
@@ -64,22 +82,64 @@ export default function SectionsView({
   const handleDragEnd = async (result: DropResult) => {
     if (!result.destination) return;
     const { source, destination } = result;
+    const sectionFanficId = +result.draggableId;
+    const newSectionId = +destination.droppableId;
+    const oldSectionId = +source.droppableId;
+    let toUpdate = [];
 
-    if (source.droppableId !== destination.droppableId) {
-      const fanficId = +result.draggableId;
-      const newSectionId = +destination.droppableId;
-      startTransition(async () => {
-        addOptimistic({ newSectionId, fanficId });
-        await updateFic(fanficId, { sectionId: newSectionId });
-      });
-    }
+    return startTransition(async () => {
+      const newSectionFanfics = [
+        ...optimisticSections
+          .filter(
+            (section) =>
+              section.sections.id === newSectionId &&
+              section.section_fanfics.position >= destination.index
+          )
+          .map((section) => ({
+            sectionId: section.section_fanfics.sectionId,
+            sectionFanficId: section.section_fanfics.id,
+            position: section.section_fanfics.position + 1,
+          })),
+        {
+          sectionId: newSectionId,
+          sectionFanficId: sectionFanficId,
+          position: destination.index,
+        },
+      ];
+
+      toUpdate = [...newSectionFanfics];
+
+      if (oldSectionId !== newSectionId) {
+        const updatedOldSectionFanfics = optimisticSections
+          .filter(
+            (section) =>
+              section.sections.id === oldSectionId &&
+              section.fanfics.id !== sectionFanficId &&
+              section.section_fanfics.position >= source.index
+          )
+          .map((section) => ({
+            sectionId: section.section_fanfics.sectionId,
+            sectionFanficId: section.section_fanfics.id,
+            position: section.section_fanfics.position - 1,
+          }));
+
+        toUpdate = [...toUpdate, ...updatedOldSectionFanfics];
+      }
+      addOptimistic(toUpdate);
+      await updateSectionFics(toUpdate);
+    });
   };
 
   const sectionFanfics = (sectionId: number) => {
-    const fics = isPending ? optimisticFanfics : fanfics;
-    const filteredFanfics = fics.filter(
-      (fanfic) => fanfic.sectionId === sectionId
-    );
+    const filteredFanfics = optimisticSections
+      .filter((section) => section.sections.id === sectionId)
+      .sort((a, b) => a.section_fanfics.position - b.section_fanfics.position)
+      .map((section) => {
+        return {
+          ...section.fanfics,
+          ...section.section_fanfics,
+        };
+      });
 
     return matchSorter(filteredFanfics, searchInput, {
       keys: [
@@ -100,47 +160,58 @@ export default function SectionsView({
         value={openSections}
         onValueChange={(value: string[]) => setOpenSections(value)}
       >
-        {sections.map((section) => (
-          <Droppable key={section.id} droppableId={section.id.toString()}>
+        {optimisticSections.map((userSection) => (
+          <Droppable
+            key={userSection.sections.id}
+            droppableId={userSection.sections.id.toString()}
+          >
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps}>
-                <AccordionItem value={section.name}>
+                <AccordionItem value={userSection.sections.name}>
                   <AccordionTrigger className="p-4 sticky top-0 bg-white z-10 shadow-md">
-                    <h2 className="text-secondary-foreground">{`${section.name} (${sectionFanfics(section.id).length})`}</h2>
+                    <h2 className="text-secondary-foreground">{`${userSection.sections.name} (${sectionFanfics(userSection.sections.id).length})`}</h2>
                   </AccordionTrigger>
                   <AccordionContent className="p-4">
-                    {sectionFanfics(section.id)?.map((fanfic, index) => (
-                      <Draggable
-                        key={fanfic.id}
-                        draggableId={fanfic.id.toString()}
-                        index={index}
-                      >
-                        {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            className="flex items-center"
-                          >
-                            <div className="w-full min-w-0">
-                              <FanficView
-                                fanfic={fanfic}
-                                isDragging={snapshot.isDragging}
-                                transferableSections={sections.filter(
-                                  (transferSection) =>
-                                    transferSection.id !== section.id
-                                )}
-                              />
-                            </div>
+                    {sectionFanfics(userSection.sections.id)?.map(
+                      (sectionFanfic, index) => (
+                        <Draggable
+                          key={sectionFanfic.id}
+                          draggableId={sectionFanfic.id.toString()}
+                          index={index}
+                        >
+                          {(provided, snapshot) => (
                             <div
-                              {...provided.dragHandleProps}
-                              className="cursor-grab active:cursor-grabbing p-2"
+                              ref={provided.innerRef}
+                              {...provided.draggableProps}
+                              className="flex items-center"
                             >
-                              <Grip className="w-4 h-4" />
+                              <div className="w-full min-w-0">
+                                <FanficView
+                                  fanfic={sectionFanfic}
+                                  isDragging={snapshot.isDragging}
+                                  transferableSections={optimisticSections
+                                    .filter(
+                                      (transferSection) =>
+                                        transferSection.sections.id !==
+                                      userSection.sections.id
+                                    )
+                                    .map(
+                                      (transferSection) =>
+                                        transferSection.sections
+                                    )}
+                                />
+                              </div>
+                              <div
+                                {...provided.dragHandleProps}
+                                className="cursor-grab active:cursor-grabbing p-2"
+                              >
+                                <Grip className="w-4 h-4" />
+                              </div>
                             </div>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
+                          )}
+                        </Draggable>
+                      )
+                    )}
                     {provided.placeholder}
                   </AccordionContent>
                 </AccordionItem>

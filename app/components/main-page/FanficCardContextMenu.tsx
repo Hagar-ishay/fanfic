@@ -1,7 +1,7 @@
 "use client";
 
 import { ContextMenu, Option } from "@/components/base/Context";
-import { Fanfic, Section } from "@/db/types";
+import { Fanfic, Section, UserFanfic } from "@/db/types";
 import { deleteFic, updateFic } from "@/server/updater";
 import { CircleChevronRight, SendHorizontal, Trash2 } from "lucide-react";
 import React from "react";
@@ -20,7 +20,7 @@ export function FanficCardContextMenu({
   isPending,
   startTransition,
 }: {
-  fanfic: Fanfic;
+  fanfic: UserFanfic;
   sections: Section[];
   trigger: React.ReactNode;
   isPending: boolean;

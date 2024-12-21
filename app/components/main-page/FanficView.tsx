@@ -2,7 +2,7 @@
 
 import { DrawerDialog } from "@/components/base/DrawerDialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Fanfic, Section, Tags } from "@/db/types";
+import { Fanfic, Section, Tags, UserFanfic } from "@/db/types";
 import React from "react";
 import TagsCarousel from "@/components/base/Tags";
 import { FanficHeader } from "@/components/main-page/FanficHeader";
@@ -16,7 +16,7 @@ export default function FanficView({
   isDragging,
   transferableSections,
 }: {
-  fanfic: Fanfic;
+  fanfic: UserFanfic;
   isDragging: boolean;
   transferableSections: Section[];
 }) {
