@@ -6,3 +6,8 @@ export const TAGS = {
   RELATIONSHIPS: "RELATIONSHIPS",
   FREEDOM: "FREEDOM",
 };
+export const DEFAULT_SECTIONS = [
+  { name: "Reading", displayName: "Reading" },
+  { name: "Completed", displayName: "Completed" },
+  { name: "To Read", displayName: "To Read" },
+];

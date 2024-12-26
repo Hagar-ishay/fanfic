@@ -2,8 +2,9 @@ import { neon } from "@neondatabase/serverless";
 import * as drizz from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-http";
 import { ENV } from "@/config";
-import { fanfics, sections, credentials } from "./schema";
+import { fanfics, sections, sectionFanfics, credentials } from "./schema";
 import type { NewFanfic, SessionType } from "./types";
+import { DEFAULT_SECTIONS } from "@/consts";
 
 if (!ENV.DATABASE_URL) {
   throw "Database URL string Was not set!";
@@ -31,17 +32,6 @@ export const updateFanfic = async (ficId: number, { ...update }) => {
     .returning({ fanficId: fanfics.id });
 };
 
-export const selectFanfics = async (sectionId: number) => {
-  return await db
-    .select()
-    .from(fanfics)
-    .where(drizz.eq(fanfics.sectionId, sectionId));
-};
-
-export const listFanfics = async () => {
-  return await db.select().from(fanfics);
-};
-
 export const selectOngoingFanfics = async () => {
   return await db
     .select()
@@ -49,8 +39,35 @@ export const selectOngoingFanfics = async () => {
     .where(drizz.isNull(fanfics.completedAt));
 };
 
-export const selectSections = async () => {
-  return await db.select().from(sections).orderBy(sections.id);
+export const selectOrCreateSections = async (userId: string) => {
+  let userSections = await db
+    .select()
+    .from(sections)
+    .where(drizz.eq(sections.userId, userId));
+  if (userSections.length === 0) {
+    userSections = await db
+      .insert(sections)
+      .values(DEFAULT_SECTIONS.map((section) => ({ ...section, userId })))
+      .returning({
+        id: sections.id,
+        name: sections.name,
+        userId: sections.userId,
+        parentId: sections.parentId,
+        displayName: sections.displayName,
+        updateTime: sections.updateTime,
+        creationTime: sections.creationTime,
+      });
+  }
+  return userSections;
+};
+
+export const selectSectionFanfic = async (sectionIds: number[]) => {
+  return await db
+    .select()
+    .from(fanfics)
+    .innerJoin(sectionFanfics, drizz.eq(fanfics.id, sectionFanfics.fanficId))
+    .where(drizz.inArray(sectionFanfics.sectionId, sectionIds))
+    .orderBy(sectionFanfics.sectionId, sectionFanfics.position);
 };
 
 export const getCredentials = async (type: SessionType) => {

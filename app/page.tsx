@@ -1,21 +1,15 @@
-import { listFanfics, selectSections } from "./db/db";
+import { selectOrCreateSections, selectSectionFanfic } from "./db/db";
 import React from "react";
-import SectionsView from "@/components/main-page/SectionsView";
+import { currentUser } from "@clerk/nextjs/server";
+import Library from "@/components/Library";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export const metadata = {
   title: "Penio Fanfic",
   description: "A hub of fanfictions by the Penio de la Putz",
 };
 
-export default async function MainPage() {
-  const [fanfics, sections] = await Promise.all([
-    listFanfics(),
-    selectSections(),
-  ]);
-
-  return (
-    <div>
-      <SectionsView fanfics={fanfics} sections={sections} />
-    </div>
-  );
+export default function MainPage() {
+  redirect("/library");
 }

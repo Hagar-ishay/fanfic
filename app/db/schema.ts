@@ -15,11 +15,13 @@ export const credentialsType = schema.enum("credentials_type", ["AO3"]);
 export const sections = schema.table(
   "sections",
   {
-    id: serial().primaryKey(),
+    id: serial().primaryKey().notNull(),
     name: varchar().notNull(),
+    parentId: integer("parent_id").references((): any => sections.id),
     displayName: varchar("display_name").notNull(),
     creationTime: timestamp("creation_time").notNull().defaultNow(),
     updateTime: timestamp("update_time").$onUpdate(() => new Date()),
+    userId: varchar("user_id").notNull(),
   },
   (table) => ({
     sectionsNameUnique: uniqueIndex("sections_name_unique").on(table.name),
@@ -34,28 +36,16 @@ export const fanfics = schema.table(
     title: varchar().notNull(),
     summary: varchar(),
     author: varchar().notNull(),
-    sectionId: integer("section_id")
-      .references(() => sections.id)
-      .notNull()
-      .default(1),
     authorUrl: varchar("author_url"),
     sourceUrl: varchar("source_url").notNull(),
     downloadLink: varchar("download_link").notNull(),
     createdAt: timestamp("created_at").notNull(),
     updatedAt: timestamp("updated_at").notNull(),
     completedAt: timestamp("completed_at"),
-    lastSent: timestamp("last_sent"),
-    latestStartingChapter: integer("latest_starting_chapter"),
     tags: jsonb()
       .$type<{ [category: string]: string[] }>()
       .notNull()
       .default({}),
-    editableLabels: jsonb("edditable_labels")
-      .$type<string[]>()
-      .default([])
-      .notNull(),
-    sortPriority: integer("sort_priority"),
-    comment: varchar(),
     wordCount: integer("word_count"),
     chapterCount: varchar("chapter_count"),
     language: varchar(),
@@ -66,6 +56,33 @@ export const fanfics = schema.table(
     fanficsfanficIdUnique: uniqueIndex("fanfics_fanfic_id_unique").on(
       table.fanficId
     ),
+  })
+);
+
+export const sectionFanfics = schema.table(
+  "section_fanfics",
+  {
+    id: serial().primaryKey(),
+    sectionId: integer("section_id")
+      .references(() => sections.id)
+      .notNull(),
+    fanficId: integer("fanfic_id")
+      .references(() => fanfics.id)
+      .notNull(),
+    position: integer().notNull(),
+    creationTime: timestamp("creation_time").notNull().defaultNow(),
+    updateTime: timestamp("update_time").$onUpdate(() => new Date()),
+    lastSent: timestamp("last_sent"),
+    latestStartingChapter: integer("latest_starting_chapter"),
+    editableLabels: jsonb("edditable_labels")
+      .$type<string[]>()
+      .default([])
+      .notNull(),
+  },
+  (table) => ({
+    sectionFanficsUniquePosition: uniqueIndex(
+      "section_fanfics_position_unique"
+    ).on(table.sectionId, table.position),
   })
 );
 
