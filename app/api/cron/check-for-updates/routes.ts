@@ -1,9 +1,9 @@
 "use server";
-import { selectOngoingFanfics, updateFanfic } from "@/db/db";
 import { errorMessage } from "@/lib/utils";
-import { getAo3Client } from "@/server/ao3Client";
-import { fanficExtractor } from "@/server/extractor";
+import { getAo3Client } from "@/lib/ao3Client";
+import { htmlParser } from "@/lib/htmlParser";
 import { NextResponse } from "next/server";
+import { selectOngoingFanfics, updateFanfic } from "@/db/fanfics";
 
 export async function GET() {
   const ao3Client = await getAo3Client();
@@ -13,7 +13,7 @@ export async function GET() {
       fanfics.map(async (fanfic) => {
         const fanficId = fanfic.fanficId.toString();
         const updatedFic = await ao3Client.getFanfic(fanficId);
-        const parsedFanfic = await fanficExtractor(updatedFic, fanficId);
+        const parsedFanfic = await htmlParser(updatedFic, fanficId);
 
         if (
           parsedFanfic?.updatedAt &&

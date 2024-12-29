@@ -5,13 +5,13 @@ import { promisify } from "node:util";
 import EPub from "epub";
 import EpubGen from "epub-gen";
 import nodemailer from "nodemailer";
-import { updateFanfic } from "../db/db";
-import type { Fanfic } from "../db/types";
-import { getAo3Client } from "./ao3Client";
-import { ENV } from "../config";
-import { translateChapter, translateMetadata } from "@/server/translator";
+import type { UserFanfic } from "@/db/types";
+import { getAo3Client } from "@/lib/ao3Client";
+import { ENV } from "../../../../config";
+import { translateChapter, translateMetadata } from "@/library/sections/[sectionId]/(server)/translator";
 import { errorMessage } from "@/lib/utils";
 import { AO3_LINK } from "@/consts";
+import { updateFanfic } from "@/db/fanfics";
 
 const unlinkAsync = promisify(fs.unlink);
 const statAsync = promisify(fs.stat);
@@ -28,7 +28,7 @@ export async function kindleSender({
   sendLatestChapters,
   latestFinalChapter,
 }: {
-  fanfic: Fanfic;
+  fanfic: UserFanfic;
   kindleEmail: string;
   translationLanguage: string | null;
   sendLatestChapters: boolean;

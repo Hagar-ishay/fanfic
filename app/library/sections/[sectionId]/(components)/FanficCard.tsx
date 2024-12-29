@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Fanfic } from "@/db/types";
+import { UserFanfic } from "@/db/types";
 import React from "react";
 import { cn } from "@/lib/utils";
 import { BookUp, BookUp2, CircleCheck, Loader2 } from "lucide-react";
@@ -12,7 +12,7 @@ export default function FanficCard({
   isDragging,
   isPending,
 }: {
-  fanfic: Fanfic;
+  fanfic: UserFanfic;
   isDragging: boolean;
   isPending: boolean;
 }) {
@@ -20,18 +20,18 @@ export default function FanficCard({
     <div className="relative">
       <Card
         className={cn(
-          "my-1 bg-accent shadow-md rounded-lg -space-y-4 hover:shadow-lg border-l-4",
+          "cursor-pointer p-4 border-none border-0 shadow-none",
           isDragging ? "" : "transition-all duration-300 ease-in-out"
         )}
       >
-        <CardContent>
+        <CardContent className="">
           <div className="flex flex-row items-center justify-between w-full">
             <div className="flex-grow min-w-0 flex flex-col whitespace-nowrap text-ellipsis overflow-hidden">
               <div className="text-md gap-3 font-semibold mt-4 truncate">
-                <a>{fanfic.title}</a>
+                {fanfic.title}
               </div>
               <div className="text-xs text-muted-foreground truncate">
-                <a>{fanfic.author}</a>
+                {fanfic.author}
               </div>
             </div>
             <div className="flex flex-row gap-2 flex-shrink-0 items-center">

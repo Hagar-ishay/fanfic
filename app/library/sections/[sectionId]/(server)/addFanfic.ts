@@ -1,23 +1,34 @@
 "use server";
 
-import { deleteFanfic, insertFanfic, updateFanfic } from "@/db/db";
-import { fanficExtractor } from "./extractor";
 import { AO3_LINK } from "@/consts";
 import { expirePath } from "next/dist/server/web/spec-extension/revalidate";
-import { getAo3Client } from "@/server/ao3Client";
+import { getAo3Client } from "@/lib/ao3Client";
 import { errorMessage } from "@/lib/utils";
+import { insertFanfic, insertSectionFanfic } from "@/db/fanfics";
+import { getSection } from "@/db/sections";
+import { htmlParser } from "@/lib/htmlParser";
 
-export async function addFanfic(sectionId: number, fanficUrl: string) {
+export async function addFanfic(
+  sectionId: number,
+  userId: string,
+  fanficUrl: string
+) {
+  const section = await getSection(sectionId);
+  if (section?.userId !== userId) {
+    return { success: false, message: "Invalid section request" };
+  }
+
   const ao3Client = await getAo3Client();
   const fanficId =
     fanficUrl.toString().replace(`${AO3_LINK}/works/`, "").split("/")[0] ?? "";
-
   try {
     const data = await ao3Client.getFanfic(fanficId);
-    const metadata = await fanficExtractor(data, fanficId);
+    const metadata = await htmlParser(data, fanficId);
 
     if (metadata) {
-      await insertFanfic({ ...metadata, sectionId });
+      const newFanficId = await insertFanfic({ ...metadata });
+      await insertSectionFanfic(sectionId, userId, newFanficId);
+
       expirePath("/");
       return { success: true, message: "" };
     }
@@ -30,14 +41,4 @@ export async function addFanfic(sectionId: number, fanficUrl: string) {
   }
 
   return { success: false, message: "Failed to create Fic" };
-}
-
-export async function updateFic(fanficId: number, params: object) {
-  await updateFanfic(fanficId, params);
-  expirePath("/");
-}
-
-export async function deleteFic(fanficId: number) {
-  await deleteFanfic(fanficId);
-  expirePath("/");
 }

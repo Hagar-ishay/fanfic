@@ -1,0 +1,2 @@
+ALTER TABLE "fanfiction"."section_fanfics" ADD COLUMN "user_id" varchar NOT NULL;--> statement-breakpoint
+CREATE UNIQUE INDEX IF NOT EXISTS "user_fanfics_unique" ON "fanfiction"."section_fanfics" USING btree ("user_id","fanfic_id");

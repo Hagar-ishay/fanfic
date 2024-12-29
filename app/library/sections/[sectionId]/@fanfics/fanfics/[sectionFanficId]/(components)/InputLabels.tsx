@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tag, X } from "lucide-react";
-import { updateFic } from "@/server/updater";
+import { updateSectionFanfic } from "@/db/fanfics";
 
 export default function EditableLabels({
   fanficId,
@@ -45,7 +45,7 @@ export default function EditableLabels({
         }
         if (newLabels !== currentLabels) {
           addOptimistic(newLabels);
-          await updateFic(fanficId, { editableLabels: newLabels });
+          await updateSectionFanfic(fanficId, { editableLabels: newLabels });
         }
       });
     } else {

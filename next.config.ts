@@ -10,6 +10,13 @@ const nextConfig: NextConfig = {
   experimental: {
     dynamicIO: true,
   },
+  redirects: async () => [
+    {
+      source: '/',
+      destination: '/library',
+      permanent: true,
+    },
+  ],
 };
 
 export default nextConfig;

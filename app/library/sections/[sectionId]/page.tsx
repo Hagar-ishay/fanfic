@@ -1,42 +1,60 @@
 import Link from "next/link";
-import { db } from "@/db/db";
-import { sections } from "@/db/schema";
-import * as drizz from "drizzle-orm";
-import { selectSectionFanfic } from "@/db/db";
+import { Section } from "@/library/(components)/Section";
+import { notFound } from "next/navigation";
+import { getSection, listChildSections } from "@/db/sections";
+import { selectSectionFanfic } from "@/db/fanfics";
+import FanficCard from "@/library/sections/[sectionId]/(components)/FanficCard";
 
-export default async function Page({ params }: { params: { sectionId: string } }) {
-  const sectionId = parseInt(params.sectionId);
-  const currentSection = await db
-    .select()
-    .from(sections)
-    .where(drizz.eq(sections.id, sectionId))
-    .limit(1);
+type Props = {
+  params: Promise<{ sectionId: string }>;
+};
 
-  const parentLink = currentSection[0]?.parentId
-    ? `/library/sections/${currentSection[0].parentId}`
-    : "/library";
+export async function generateMetadata({ params }: Props) {
+  const requestParams = await params;
+  const sectionId = parseInt(requestParams.sectionId);
+  const currentSection = await getSection(sectionId);
+  if (!currentSection) {
+    return notFound();
+  }
+  const displayName = currentSection.displayName;
 
-  const childSections = await db
-    .select()
-    .from(sections)
-    .where(drizz.eq(sections.parentId, sectionId));
+  return {
+    title: `Penio Fanfic - ${displayName}`,
+  };
+}
 
-  const fanfics = await selectSectionFanfic([sectionId]);
+export default async function Page({ params }: Props) {
+  const requestParams = await params;
+
+  const sectionId = parseInt(requestParams.sectionId);
+
+  const [childSections, fanfics] = await Promise.all([
+    listChildSections(sectionId),
+    selectSectionFanfic([sectionId]),
+  ]);
 
   return (
-    <div>
-      <Link href={parentLink}>Back</Link>
-      <h2>Child Sections:</h2>
+    <div className="flex flex-col space-y-4">
       {childSections.map((child) => (
-        <div key={child.id}>
-          <Link href={`/library/sections/${child.id}`}>{child.displayName}</Link>
-        </div>
+        <Link key={child.id} href={`/library/sections/${child.id}`}>
+          <Section displayName={child.displayName} />
+        </Link>
       ))}
-      <h2>Fanfics:</h2>
-      {fanfics.map((f) => (
-        <div key={f.fanfics.id}>
-          <Link href="#">{f.fanfics.title}</Link>
-        </div>
+      {fanfics.map((fanfic) => (
+        <Link
+          key={fanfic.section_fanfics.id}
+          href={`/library/sections/${sectionId}/fanfics/${fanfic.section_fanfics.id}`}
+        >
+          <FanficCard
+            fanfic={{
+              ...fanfic.fanfics,
+              ...fanfic.section_fanfics,
+              id: fanfic.section_fanfics.id,
+            }}
+            isDragging={false}
+            isPending={false}
+          />
+        </Link>
       ))}
     </div>
   );

@@ -36,8 +36,10 @@ DrawerOverlay.displayName = DrawerPrimitive.Overlay.displayName;
 
 const DrawerContent = React.forwardRef<
   React.ElementRef<typeof DrawerPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content>
->(({ className, children, ...props }, ref) => (
+  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & {
+    optionsMenu?: React.ReactNode;
+  }
+>(({ className, children, optionsMenu, ...props }, ref) => (
   <DrawerPortal>
     <DrawerOverlay />
     <DrawerPrimitive.Content
@@ -49,6 +51,9 @@ const DrawerContent = React.forwardRef<
       {...props}
     >
       <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
+      {optionsMenu && (
+        <div className="absolute right-4 top-10 ">{optionsMenu}</div>
+      )}
       {children}
     </DrawerPrimitive.Content>
   </DrawerPortal>

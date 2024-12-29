@@ -1,4 +1,5 @@
 "use client";
+
 import { useSearchStore } from "@/store";
 import type React from "react";
 
@@ -10,10 +11,10 @@ export function SearchInput() {
   const { searchInput, setSearchInput } = useSearchStore();
 
   return (
-    <div className="relative ">
+    <div className="relative">
       <Input
         value={searchInput}
-        className="pl-8 bg-neutral-50"
+        className="pl-8 bg-muted-2"
         placeholder="Search"
         onChange={(event) => setSearchInput(event.target.value)}
       />

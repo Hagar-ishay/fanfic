@@ -85,6 +85,13 @@
       "when": 1735152411074,
       "tag": "0011_tough_bedlam",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1735239525786,
+      "tag": "0012_freezing_dagger",
+      "breakpoints": true
     }
   ]
 }

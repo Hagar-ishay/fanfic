@@ -24,7 +24,10 @@ export const sections = schema.table(
     userId: varchar("user_id").notNull(),
   },
   (table) => ({
-    sectionsNameUnique: uniqueIndex("sections_name_unique").on(table.name),
+    sectionFanficsUnique: uniqueIndex("sections_id_name_unique").on(
+      table.userId,
+      table.name
+    ),
   })
 );
 
@@ -70,6 +73,7 @@ export const sectionFanfics = schema.table(
       .references(() => fanfics.id)
       .notNull(),
     position: integer().notNull(),
+    userId: varchar("user_id").notNull(),
     creationTime: timestamp("creation_time").notNull().defaultNow(),
     updateTime: timestamp("update_time").$onUpdate(() => new Date()),
     lastSent: timestamp("last_sent"),
@@ -83,6 +87,10 @@ export const sectionFanfics = schema.table(
     sectionFanficsUniquePosition: uniqueIndex(
       "section_fanfics_position_unique"
     ).on(table.sectionId, table.position),
+    sectionFanficsUnique: uniqueIndex("user_fanfics_unique").on(
+      table.userId,
+      table.fanficId
+    ),
   })
 );
 

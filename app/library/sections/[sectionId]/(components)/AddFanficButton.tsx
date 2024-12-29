@@ -4,37 +4,36 @@ import { Tooltip } from "@/components/base/Tooltip";
 import { Button } from "@/components/ui/button";
 import { AO3_LINK } from "@/consts";
 import { useToast } from "@/hooks/use-toast";
-import { addFanfic } from "@/server/updater";
+import { addFanfic } from "@/library/sections/[sectionId]/(server)/addFanfic";
+import { useUser } from "@clerk/nextjs";
 import { ClipboardPlus } from "lucide-react";
 import { useTransition } from "react";
 
-export function AddFanficButton() {
+export function AddFanficButton({ sectionId }: { sectionId: number }) {
   const { toast } = useToast();
-
   const [isPending, startTransition] = useTransition();
+  const { user } = useUser();
+
+  if (!user) {
+    return null;
+  }
+
   const handleAddFanficFromClipboard = async () => {
     const title = "Add Fanfic";
     const clipboardText = await navigator.clipboard.readText();
     if (clipboardText.startsWith(`${AO3_LINK}/works/`)) {
       startTransition(async () => {
-        const result = await addFanfic(3, clipboardText);
+        const result = await addFanfic(sectionId, user.id, clipboardText);
         if (result.success) {
-          toast({
-            title,
-            description: "Added Successfully!",
-          });
+          toast({ title, description: "Added Successfully!" });
         } else {
-          toast({
-            title,
-            description: result.message,
-            variant: "destructive",
-          });
+          toast({ title, description: result.message, variant: "destructive" });
         }
       });
     } else {
       toast({
         title,
-        description: "Invalid URL. Please copy a valid AO3 fanfic URL",
+        description: "Invalid URL. Please copy a valid AO3 fanfic link",
         variant: "destructive",
       });
     }

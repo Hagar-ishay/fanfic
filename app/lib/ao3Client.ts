@@ -6,9 +6,9 @@ import axios, { AxiosInstance, AxiosResponse } from "axios";
 import { AO3_LINK } from "@/consts";
 import { wrapper } from "axios-cookiejar-support";
 import { CookieJar, Cookie } from "tough-cookie";
-import { getCredentials, refreshSession } from "@/db/db";
 import { Credentials } from "@/db/types";
 import { ENV } from "@/config";
+import { getCredentials, refreshSession } from "@/db/credentials";
 
 export async function getAo3Client() {
   const credentials = await getCredentials("AO3");

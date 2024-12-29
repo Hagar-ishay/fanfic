@@ -1,21 +1,27 @@
 "use client";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { Separator } from "../ui/separator";
+
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
 
 import { useSettingsStore } from "../../store";
-import { SettingsIcon } from "lucide-react";
+import { Moon, SettingsIcon, Sun } from "lucide-react";
 import React from "react";
 
-import { Switch } from "../ui/switch";
+import { Switch } from "../../components/ui/switch";
 import { DrawerDialog } from "@/components/base/DrawerDialog";
+import { useTheme } from "next-themes";
 
 export function SettingsModal() {
+  const { theme, systemTheme, setTheme } = useTheme();
   const setEmail = useSettingsStore((state) => state.setEmail);
   const kindleEmail = useSettingsStore((state) => state.kindleEmail);
   const languageCode = useSettingsStore((state) => state.languageCode);
   const setLanguageCode = useSettingsStore((state) => state.setLanguageCode);
+
+  const isCurrentThemeLight = Boolean(
+    theme ? theme === "light" : systemTheme === "light"
+  );
 
   const shouldTranslate = Boolean(languageCode);
 
@@ -41,6 +47,15 @@ export function SettingsModal() {
       formAction={handleSubmit}
     >
       <div className="gap-5 py-4 flex flex-col">
+        <div className="flex justify-end items-center">
+          <Button
+            onClick={() => setTheme(isCurrentThemeLight ? "dark" : "light")}
+            variant="outline"
+            size="icon"
+          >
+            {isCurrentThemeLight ? <Sun /> : <Moon />}
+          </Button>
+        </div>
         <div className="flex flex-row gap-2 justify-between text-sm items-center">
           <Label className="ml-1">Email</Label>
           <Input

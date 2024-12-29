@@ -4,7 +4,7 @@ import { DateTime } from "luxon";
 import * as consts from "../consts";
 import { Tags } from "@/db/types";
 
-export async function fanficExtractor(data: string, fanficId: string) {
+export async function htmlParser(data: string, fanficId: string) {
   try {
     const $ = cheerio.load(data);
     $("#admin-banner").remove();

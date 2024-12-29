@@ -86,7 +86,9 @@ export function DrawerDialog({
         {children}
         {addClose && (
           <DialogClose asChild={asChild}>
-            <Button type="submit">Save changes</Button>
+            <div className="flex justify-end">
+              <Button type="submit">Save changes</Button>
+            </div>
           </DialogClose>
         )}
       </>
