@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Section } from "@/library/(components)/Section";
 import { notFound } from "next/navigation";
-import { getSection, listChildSections } from "@/db/sections";
+import { getSection, listChildSections, listUserSections } from "@/db/sections";
 import { selectSectionFanfic } from "@/db/fanfics";
 import FanficCard from "@/library/sections/[sectionId]/(components)/FanficCard";
 
@@ -34,10 +34,10 @@ export default async function Page({ params }: Props) {
   ]);
 
   return (
-    <div className="flex flex-col space-y-4">
+    <div className="flex flex-col">
       {childSections.map((child) => (
         <Link key={child.id} href={`/library/sections/${child.id}`}>
-          <Section displayName={child.displayName} />
+          <Section section={child} transferableSections={[]} />
         </Link>
       ))}
       {fanfics.map((fanfic) => (

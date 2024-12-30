@@ -2,9 +2,11 @@
 import * as drizzle from "drizzle-orm";
 
 import { db } from "@/db/db";
-import { sections } from "@/db/schema";
+import { sectionFanfics, sections } from "@/db/schema";
 import { DEFAULT_SECTIONS } from "@/consts";
 import { expirePath } from "next/dist/server/web/spec-extension/revalidate";
+import { PgTransaction } from "drizzle-orm/pg-core";
+import { NeonHttpQueryResultHKT } from "drizzle-orm/neon-http";
 
 export const selectOrCreateSections = async (userId: string) => {
   let userSections = await listUserSections(userId);
@@ -49,6 +51,62 @@ export const insertSection = async ({
     .returning({ id: sections.id });
   expirePath(`/library/sections/${parentId}`);
   return result[0].id;
+};
+
+export const deleteSection = async (
+  sectionId: number,
+  tx: PgTransaction<
+    NeonHttpQueryResultHKT,
+    Record<string, never>,
+    drizzle.ExtractTablesWithRelations<Record<string, never>>
+  > | null = null
+) => {
+  const isTopLevel = !tx;
+  const currentTx = tx || (await db.transaction(async (trx) => trx));
+
+  const deleteFunc = async (
+    innerTx: PgTransaction<
+      NeonHttpQueryResultHKT,
+      Record<string, never>,
+      drizzle.ExtractTablesWithRelations<Record<string, never>>
+    >
+  ) => {
+    const childSections = await innerTx
+      .select()
+      .from(sections)
+      .where(drizzle.eq(sections.parentId, sectionId));
+
+    await Promise.all(
+      childSections.map((child) => deleteSection(child.id, innerTx))
+    );
+
+    await innerTx
+      .delete(sectionFanfics)
+      .where(drizzle.eq(sectionFanfics.sectionId, sectionId));
+    await innerTx.delete(sections).where(drizzle.eq(sections.id, sectionId));
+  };
+
+  if (isTopLevel) {
+    await db.transaction(async (newTx) => {
+      await deleteFunc(newTx);
+      expirePath(`/library/sections/${sectionId}`);
+    });
+  } else {
+    if (currentTx) {
+      await deleteFunc(currentTx);
+    }
+  }
+};
+
+export const transferSection = async (
+  sectionId: number,
+  parentId: number | null
+) => {
+  await db
+    .update(sections)
+    .set({ parentId })
+    .where(drizzle.eq(sections.id, sectionId));
+  expirePath(`/library/sections/${parentId}`);
 };
 
 export const getSectionByNameUser = async (userId: string, name: string) => {

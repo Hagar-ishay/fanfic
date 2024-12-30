@@ -10,4 +10,6 @@ export const DEFAULT_SECTIONS = [
   { name: "Reading", displayName: "Reading" },
   { name: "Completed", displayName: "Completed" },
   { name: "To Read", displayName: "To Read" },
+  { name: "Shelved", displayName: "Shelved" },
+  { name: "Abandoned", displayName: "Abandoned" },
 ];

@@ -92,6 +92,13 @@
       "when": 1735239525786,
       "tag": "0012_freezing_dagger",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1735538508245,
+      "tag": "0013_sharp_thundra",
+      "breakpoints": true
     }
   ]
 }

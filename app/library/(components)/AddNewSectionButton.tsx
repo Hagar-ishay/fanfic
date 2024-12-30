@@ -18,7 +18,7 @@ import {
   DrawerDialogTitle,
   DrawerDialogFooter,
   DrawerDialogClose,
-} from "@/components/base/DrawerDialogV2";
+} from "@/components/base/DrawerDialog";
 
 export function AddNewSectionButton({
   sectionId,

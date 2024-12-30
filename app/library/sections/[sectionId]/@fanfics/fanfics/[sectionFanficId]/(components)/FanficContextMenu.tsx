@@ -6,28 +6,11 @@ import React from "react";
 import { useSettingsStore } from "@/store";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
 import { kindleSender } from "@/library/sections/[sectionId]/(server)/kindleSender";
 import { deleteSectionFanfic, updateSectionFanfic } from "@/db/fanfics";
-import {
-  DrawerDialog,
-  DrawerDialogContent,
-  DrawerDialogDescription,
-  DrawerDialogHeader,
-  DrawerDialogTitle,
-  DrawerDialogTrigger,
-} from "@/components/base/DrawerDialogV2";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-} from "@/components/ui/dropdown-menu";
-import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { FanficHeader } from "@/library/sections/[sectionId]/@fanfics/fanfics/[sectionFanficId]/(components)/FanficHeader";
+import { ContextMenu } from "@/components/base/ContentMenu";
+import { Delete } from "@/components/base/Delete";
 
 export function FanficContextMenu({
   fanfic,
@@ -40,13 +23,11 @@ export function FanficContextMenu({
 }) {
   const { toast } = useToast();
   const [isPending, startTransition] = React.useTransition();
-  const isDesktop = useMediaQuery("(min-width: 768px)");
 
   const kindleEmail = useSettingsStore((state) => state.kindleEmail);
   const translationLanguage = useSettingsStore((state) => state.languageCode);
   const [isSuccess, setIsSuccess] = useState<undefined | boolean>(undefined);
   const [shouldDelete, setShouldDelete] = useState<boolean>(false);
-  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
 
   type Option = {
     icon?: React.ReactNode;
@@ -126,114 +107,17 @@ export function FanficContextMenu({
 
   return (
     <div>
-      <DrawerDialog open={shouldDelete} onOpenChange={setShouldDelete}>
-        <DrawerDialogContent>
-          <DrawerDialogHeader>
-            <DrawerDialogTitle>
-              <FanficHeader fanfic={fanfic} />
-            </DrawerDialogTitle>
-            <DrawerDialogDescription />
-          </DrawerDialogHeader>
-          <div className="flex flex-row justify-end pr-3 gap-2">
-            <Button
-              type="submit"
-              variant="secondary"
-              onClick={() => {
-                setShouldDelete(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="destructive"
-              onClick={() => {
-                deleteSectionFanfic(fanfic.id);
-                setShouldDelete(false);
-              }}
-            >
-              Delete
-            </Button>
-          </div>
-        </DrawerDialogContent>
-      </DrawerDialog>
-      {isDesktop ? (
-        <DropdownMenu>
-          <DropdownMenuTrigger>{trigger}</DropdownMenuTrigger>
-          <DropdownMenuContent>
-            {options.map((option, index) => {
-              return option.subItems && !option.disabled ? (
-                <DropdownMenuSub key={index}>
-                  <DropdownMenuSubTrigger
-                    disabled={option.disabled}
-                    className="gap-3 text-sm"
-                  >
-                    {option.icon}
-                    {option.name}
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent>
-                    {option.subItems.map((subOption, index) => (
-                      <DropdownMenuItem
-                        key={index}
-                        onSelect={subOption.action}
-                        disabled={subOption.disabled}
-                        className="gap-3 text-sm"
-                      >
-                        {subOption.icon}
-                        {subOption.name}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuSubContent>
-                </DropdownMenuSub>
-              ) : (
-                <DropdownMenuItem
-                  key={index}
-                  onSelect={option.action}
-                  disabled={option.disabled}
-                  className="gap-3 text-sm"
-                >
-                  {option.icon}
-                  {option.name}
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ) : (
-        <DrawerDialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-          <DrawerDialogTrigger>{trigger}</DrawerDialogTrigger>
-          <DrawerDialogContent>
-            <DrawerDialogHeader>
-              <DrawerDialogTitle>
-                <FanficHeader fanfic={fanfic} />
-              </DrawerDialogTitle>
-              <DrawerDialogDescription />
-            </DrawerDialogHeader>
-            <div className="flex flex-col gap-4">
-              {options.map((option, index) => (
-                <Button
-                  key={index}
-                  variant="ghost"
-                  onClick={() => {
-                    if (option.subItems && option.subItems.length > 0) {
-                    } else if (option.action) {
-                      option.action();
-                      setIsDrawerOpen(false);
-                    }
-                  }}
-                  disabled={option.disabled}
-                  className="justify-between text-sm"
-                >
-                  <div className="gap-3 flex flex-row items-center">
-                    {option.icon}
-                    {option.name}
-                  </div>
-                </Button>
-              ))}
-            </div>
-          </DrawerDialogContent>
-        </DrawerDialog>
-      )}
+      <Delete
+        onDelete={() => deleteSectionFanfic(fanfic.id)}
+        open={shouldDelete}
+        onOpenChange={setShouldDelete}
+        header={`Are you sure you want to delete ${fanfic.title}`}
+      />
+      <ContextMenu
+        options={options}
+        trigger={trigger}
+        header={<FanficHeader fanfic={fanfic} />}
+      />
     </div>
   );
 }

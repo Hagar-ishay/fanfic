@@ -4,6 +4,7 @@ import { getFanficById } from "@/db/fanfics";
 import Fanfic from "@/library/sections/[sectionId]/@fanfics/fanfics/[sectionFanficId]/(components)/Fanfic";
 import { currentUser } from "@clerk/nextjs/server";
 import { listUserSections } from "@/db/sections";
+import { cn } from "@/lib/utils";
 
 export async function generateMetadata({
   params,

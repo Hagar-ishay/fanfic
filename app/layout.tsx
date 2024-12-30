@@ -11,6 +11,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Suspense } from "react";
 import { ThemeProvider } from "@/components/base/theme";
 import TopBar from "./(top-bar)/(components)/TopBar";
+import { SignIn } from "@/components/SignIn";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -44,15 +45,17 @@ export default function RootLayout({
           >
             <header className="flex flex-row items-center justify-between sticky top-0 z-50 p-4 shadow-md bg-muted gap-2">
               <Suspense>
-                <SignedOut>
-                  <SignInButton />
-                </SignedOut>
                 <SignedIn>
                   <TopBar />
                 </SignedIn>
               </Suspense>
             </header>
             <Suspense>
+              <SignedOut>
+                <main>
+                  <SignIn />
+                </main>
+              </SignedOut>
               <SignedIn>
                 <main>{children}</main>
                 <Toaster />

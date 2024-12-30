@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Tag, X } from "lucide-react";
 import { updateSectionFanfic } from "@/db/fanfics";
 
-export default function EditableLabels({
+export default function InputLabels({
   fanficId,
   labels,
 }: {

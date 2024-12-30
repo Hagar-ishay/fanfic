@@ -1,10 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-type sectionState = {
-  openSections: string[];
-  setOpenSections: (sectionList: string[]) => void;
-};
+import React from "react";
 
 type SettingsState = {
   kindleEmail: string;
@@ -16,6 +12,11 @@ type SettingsState = {
 type SearchState = {
   searchInput: string;
   setSearchInput: (input: string) => void;
+};
+
+type SectionTransitionState = {
+  isPending: boolean;
+  startTransition: (callback: () => void) => void;
 };
 
 export const useSettingsStore = create(
@@ -41,22 +42,6 @@ export const useSettingsStore = create(
   )
 );
 
-export const useSectionsStore = create(
-  persist<sectionState>(
-    (set) => ({
-      openSections: [],
-      setOpenSections: (sectionList: string[]) =>
-        set((state) => ({
-          ...state,
-          openSections: sectionList,
-        })),
-    }),
-    {
-      name: "sections-storage",
-    }
-  )
-);
-
 export const useSearchStore = create<SearchState>((set) => ({
   searchInput: "",
   setSearchInput: (input: string) =>
@@ -64,3 +49,30 @@ export const useSearchStore = create<SearchState>((set) => ({
       searchInput: input,
     })),
 }));
+
+export const useTransitionStore = create<SectionTransitionState>((set) => ({
+  isPending: false,
+  startTransition: () => {},
+}));
+
+export function useStoreTransition() {
+  const storeStartTransition = useTransitionStore(
+    (state) => state.startTransition
+  );
+  const [isPending, startTransition] = React.useTransition();
+
+  React.useEffect(() => {
+    useTransitionStore.setState({ isPending });
+  }, [isPending]);
+
+  React.useEffect(() => {
+    useTransitionStore.setState({
+      startTransition: (cb: () => void) => startTransition(cb),
+    });
+  }, [startTransition]);
+
+  return {
+    isPending,
+    startTransition: storeStartTransition,
+  };
+}

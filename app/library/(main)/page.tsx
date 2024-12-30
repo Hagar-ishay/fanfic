@@ -21,7 +21,12 @@ const Page: FC = async () => {
     <div className="flex flex-col space-y-4">
       {topLevelSections.map((section) => (
         <Link key={section.id} href={`/library/sections/${section.id}`}>
-          <Section displayName={section.displayName} />
+          <Section
+            section={section}
+            transferableSections={sections.filter(
+              (tranfser) => tranfser.id !== section.id
+            )}
+          />
         </Link>
       ))}
     </div>
