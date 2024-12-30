@@ -95,6 +95,7 @@ export default function SectionsView({
   return (
     <DragDropContext onDragEnd={handleDragEnd} enableDefaultSensors={true}>
       <Accordion
+        className="relative max-h-screen overflow-auto"
         type="multiple"
         value={openSections}
         onValueChange={(value: string[]) => setOpenSections(value)}
@@ -103,50 +104,46 @@ export default function SectionsView({
           <Droppable key={section.id} droppableId={section.id.toString()}>
             {(provided) => (
               <div ref={provided.innerRef} {...provided.droppableProps}>
-                <AccordionItem value={section.name} className="p-2 my-2">
-                  <AccordionTrigger className="p-4">
-                    <div>
-                      <h2 className="text-secondary-foreground">{`${section.name} (${sectionFanfics(section.id).length})`}</h2>
-                    </div>
+                <AccordionItem value={section.name}>
+                  <AccordionTrigger className="p-4 sticky top-0 bg-white z-10 shadow-md">
+                    <h2 className="text-secondary-foreground">{`${section.name} (${sectionFanfics(section.id).length})`}</h2>
                   </AccordionTrigger>
                   <AccordionContent className="p-4">
-                    <div>
-                      {sectionFanfics(section.id)?.map((fanfic, index) => (
-                        <Draggable
-                          key={fanfic.id}
-                          draggableId={fanfic.id.toString()}
-                          index={index}
-                        >
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              className="flex items-center"
-                            >
-                              <div className="w-full min-w-0">
-                                <FanficView
-                                  fanfic={fanfic}
-                                  isDragging={snapshot.isDragging}
-                                  transferableSections={sections.filter(
-                                    (transferSection) =>
-                                      transferSection.id !== section.id
-                                  )}
-                                />
-                              </div>
-                              <div
-                                {...provided.dragHandleProps}
-                                className="cursor-grab active:cursor-grabbing p-2"
-                              >
-                                <Grip className="w-4 h-4" />
-                              </div>
+                    {sectionFanfics(section.id)?.map((fanfic, index) => (
+                      <Draggable
+                        key={fanfic.id}
+                        draggableId={fanfic.id.toString()}
+                        index={index}
+                      >
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            className="flex items-center"
+                          >
+                            <div className="w-full min-w-0">
+                              <FanficView
+                                fanfic={fanfic}
+                                isDragging={snapshot.isDragging}
+                                transferableSections={sections.filter(
+                                  (transferSection) =>
+                                    transferSection.id !== section.id
+                                )}
+                              />
                             </div>
-                          )}
-                        </Draggable>
-                      ))}
-                    </div>
+                            <div
+                              {...provided.dragHandleProps}
+                              className="cursor-grab active:cursor-grabbing p-2"
+                            >
+                              <Grip className="w-4 h-4" />
+                            </div>
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
                   </AccordionContent>
                 </AccordionItem>
-                {provided.placeholder}
               </div>
             )}
           </Droppable>

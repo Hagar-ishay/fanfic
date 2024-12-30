@@ -1,11 +1,11 @@
 "use server";
 
 import { deleteFanfic, insertFanfic, updateFanfic } from "@/db/db";
-import { fanficExtractor } from "./extractor";
 import { AO3_LINK } from "@/consts";
 import { expirePath } from "next/dist/server/web/spec-extension/revalidate";
 import { getAo3Client } from "@/server/ao3Client";
 import { errorMessage } from "@/lib/utils";
+import { extractFanfic } from "@/server/extractor";
 
 export async function addFanfic(sectionId: number, fanficUrl: string) {
   const ao3Client = await getAo3Client();
@@ -14,10 +14,10 @@ export async function addFanfic(sectionId: number, fanficUrl: string) {
 
   try {
     const data = await ao3Client.getFanfic(fanficId);
-    const metadata = await fanficExtractor(data, fanficId);
+    const parsedFanfic = await extractFanfic(data, fanficId);
 
-    if (metadata) {
-      await insertFanfic({ ...metadata, sectionId });
+    if (parsedFanfic) {
+      await insertFanfic({ ...parsedFanfic, sectionId });
       expirePath("/");
       return { success: true, message: "" };
     }
