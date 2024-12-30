@@ -1,16 +1,17 @@
 import { notFound } from "next/navigation";
-import React, { use } from "react";
+import React from "react";
 import { getFanficById } from "@/db/fanfics";
 import Fanfic from "@/library/sections/[sectionId]/@fanfics/fanfics/[sectionFanficId]/(components)/Fanfic";
 import { currentUser } from "@clerk/nextjs/server";
 import { listUserSections } from "@/db/sections";
-import { cn } from "@/lib/utils";
+import { connection } from "next/server";
 
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ sectionId: string; sectionFanficId: string }>;
 }) {
+  await connection();
   const requestParams = await params;
   const sectionId = parseInt(requestParams.sectionId);
   const fanficId = parseInt(requestParams.sectionFanficId);

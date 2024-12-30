@@ -4,12 +4,14 @@ import { notFound } from "next/navigation";
 import { getSection, listChildSections, listUserSections } from "@/db/sections";
 import { selectSectionFanfic } from "@/db/fanfics";
 import FanficCard from "@/library/sections/[sectionId]/(components)/FanficCard";
+import { connection } from "next/server";
 
 type Props = {
   params: Promise<{ sectionId: string }>;
 };
 
 export async function generateMetadata({ params }: Props) {
+  await connection();
   const requestParams = await params;
   const sectionId = parseInt(requestParams.sectionId);
   const currentSection = await getSection(sectionId);
