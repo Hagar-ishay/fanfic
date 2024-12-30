@@ -1,7 +1,10 @@
-import type { credentials, fanfics, sections } from "./schema";
+import { credentials, fanfics, sectionFanfics, sections } from "@/db/schema";
 
 export type NewFanfic = typeof fanfics.$inferInsert;
 export type Fanfic = typeof fanfics.$inferSelect;
+export type SectionFanfic = typeof sectionFanfics.$inferSelect;
+export type UserFanfic = Fanfic & SectionFanfic;
+
 export interface Tags {
   [key: string]: string[];
 }

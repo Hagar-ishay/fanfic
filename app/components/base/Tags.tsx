@@ -56,7 +56,9 @@ export default function TagsCarousel({ tags }: { tags: Tags }) {
   );
 
   return (
-    <Carousel className="w-full items-center">
+    <Carousel
+      className={cn("w-full items-center mt-5", !isDesktop ? "pt-3" : "")}
+    >
       <CarouselContent>
         {badgeGroups.map((group, index) => (
           <CarouselItem
@@ -67,12 +69,12 @@ export default function TagsCarousel({ tags }: { tags: Tags }) {
               className={cn(
                 isDesktop
                   ? "flex flex-row flex-wrap gap-3 flex-shrink-0"
-                  : "flex gap-3 truncate flex-grow min-w-0 justify-center"
+                  : "flex gap-3 whitespace-nowrap text-ellipsis overflow-hidden flex-grow min-w-0 justify-center"
               )}
             >
               {group.badges.map(({ category, value }) => (
                 <Badge
-                  className="w-fit"
+                  className="inline-block py-2 px-3 overflow-hidden text-ellipsis whitespace-nowrap max-w-xs"
                   key={value}
                   title={category.toLowerCase().replace("_", " ")}
                 >
@@ -85,11 +87,11 @@ export default function TagsCarousel({ tags }: { tags: Tags }) {
       </CarouselContent>
       <CarouselPrevious
         variant="ghost"
-        className={cn(isDesktop ? "ml-8" : "ml-9")}
+        className={cn(isDesktop ? "ml-8" : "ml-6 pt-3 opacity-20")}
       />
       <CarouselNext
         variant="ghost"
-        className={cn(isDesktop ? "mr-8" : "mr-9")}
+        className={cn(isDesktop ? "mr-8" : "mr-6 pt-3  opacity-20")}
       />
     </Carousel>
   );

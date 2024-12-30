@@ -1,9 +1,9 @@
 "use server";
-import { updateFanfic } from "@/db/db";
+import { updateFanfic } from "@/db/fanfics";
 import { Fanfic } from "@/db/types";
 import { errorMessage } from "@/lib/utils";
-import { getAo3Client } from "@/server/ao3Client";
-import { extractFanfic } from "@/server/extractor";
+import { getAo3Client } from "@/lib/ao3Client";
+import { htmlParser } from "@/lib/htmlParser";
 
 export async function checkForUpdates(fanfics: Fanfic[]) {
   "use cache";
@@ -15,7 +15,7 @@ export async function checkForUpdates(fanfics: Fanfic[]) {
         .map(async (fanfic) => {
           const fanficId = fanfic.fanficId.toString();
           const updatedFic = await ao3Client.getFanfic(fanficId);
-          const parsedFanfic = await extractFanfic(updatedFic, fanficId);
+          const parsedFanfic = await htmlParser(updatedFic, fanficId);
 
           if (
             parsedFanfic?.updatedAt &&

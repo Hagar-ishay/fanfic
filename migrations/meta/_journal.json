@@ -78,6 +78,27 @@
       "when": 1734458763442,
       "tag": "0010_fresh_tenebrous",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1735152411074,
+      "tag": "0011_tough_bedlam",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1735239525786,
+      "tag": "0012_freezing_dagger",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1735538508245,
+      "tag": "0013_sharp_thundra",
+      "breakpoints": true
     }
   ]
 }

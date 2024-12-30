@@ -1,12 +1,12 @@
-import * as React from "react";
+"use client";
 
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -21,125 +21,72 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
-import { Tooltip } from "@/components/base/Tooltip";
-import Form from "next/form";
+import { ComponentProps } from "react";
 
-type DrawerDialogProps = {
-  tooltip?: string;
-  trigger?: React.ReactNode;
-  header?: React.ReactNode;
-  children: React.ReactNode;
-  title?: React.ReactNode;
-  description?: React.ReactNode;
-  formAction?: NonNullable<
-    string | ((formData: FormData) => void | Promise<void>) | undefined
-  >;
-} & React.ComponentPropsWithoutRef<typeof Dialog> &
-  React.ComponentPropsWithoutRef<typeof Drawer>;
+const isDesktop = () => useMediaQuery("(min-width: 768px)");
 
-export function DrawerDialog({
-  tooltip,
-  trigger,
-  header,
-  title,
-  description,
-  children,
-  formAction,
-  ...props
-}: DrawerDialogProps) {
-  const asChild = Boolean(trigger);
+export function DrawerDialog(
+  props: ComponentProps<typeof Dialog> | ComponentProps<typeof Drawer>
+) {
+  const Component = isDesktop() ? Dialog : Drawer;
+  return <Component {...props} />;
+}
 
-  const ContentDrawer = ({ addClose }: { addClose: boolean }) => {
-    return (
-      <div className="flex flex-col justify-center mb-4">
-        <DrawerHeader>
-          {header}
-          {title && <DrawerTitle>{title}</DrawerTitle>}
-          {description && (
-            <DrawerDescription asChild={asChild}>
-              {description}
-            </DrawerDescription>
-          )}
-        </DrawerHeader>
-        <DrawerFooter> {children}</DrawerFooter>
-        {addClose && (
-          <DrawerClose asChild={asChild}>
-            <Button type="submit">Save changes</Button>
-          </DrawerClose>
-        )}
-      </div>
-    );
-  };
+export function DrawerDialogClose(
+  props: ComponentProps<typeof DialogClose> | ComponentProps<typeof DrawerClose>
+) {
+  const Component = isDesktop() ? DialogClose : DrawerClose;
+  return <Component {...props} />;
+}
 
-  const ContentDialog = ({ addClose }: { addClose: boolean }) => {
-    return (
-      <>
-        <DialogHeader>
-          {header}
-          {title && <DialogTitle>{title}</DialogTitle>}
-          {description && (
-            <DialogDescription asChild={asChild}>
-              {description}
-            </DialogDescription>
-          )}
-        </DialogHeader>
-        {children}
-        {addClose && (
-          <DialogClose asChild={asChild}>
-            <Button type="submit">Save changes</Button>
-          </DialogClose>
-        )}
-      </>
-    );
-  };
+export function DrawerDialogContent(
+  props:
+    | ComponentProps<typeof DialogContent>
+    | ComponentProps<typeof DrawerContent>
+) {
+  const Component = isDesktop() ? DialogContent : DrawerContent;
+  return <Component {...props} />;
+}
 
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+export function DrawerDialogDescription(
+  props:
+    | ComponentProps<typeof DialogDescription>
+    | ComponentProps<typeof DrawerDescription>
+) {
+  const Component = isDesktop() ? DialogDescription : DrawerDescription;
+  return <Component {...props} />;
+}
 
-  if (isDesktop) {
-    return (
-      <Dialog {...props}>
-        {tooltip ? (
-          <Tooltip description={tooltip}>
-            <DialogTrigger asChild={asChild}>{trigger}</DialogTrigger>
-          </Tooltip>
-        ) : (
-          <DialogTrigger asChild={asChild}>{trigger}</DialogTrigger>
-        )}
-        {formAction ? (
-          <DialogContent>
-            <Form action={formAction}>
-              <ContentDialog addClose />
-            </Form>
-          </DialogContent>
-        ) : (
-          <DialogContent>
-            <ContentDialog addClose={false} />
-          </DialogContent>
-        )}
-      </Dialog>
-    );
-  }
+export function DrawerDialogFooter(
+  props:
+    | ComponentProps<typeof DialogFooter>
+    | ComponentProps<typeof DrawerFooter>
+) {
+  const Component = isDesktop() ? DialogFooter : DrawerFooter;
+  return <Component {...props} />;
+}
 
-  return (
-    <Drawer {...props}>
-      {tooltip ? (
-        <Tooltip description={tooltip}>
-          <DrawerTrigger asChild={asChild}>{trigger}</DrawerTrigger>
-        </Tooltip>
-      ) : (
-        <DrawerTrigger asChild={asChild}>{trigger}</DrawerTrigger>
-      )}
-      {formAction ? (
-        <DrawerContent>
-          <Form action={formAction}>
-            <ContentDrawer addClose={true} />
-          </Form>
-        </DrawerContent>
-      ) : (
-        <DrawerContent>
-          <ContentDrawer addClose={false} />
-        </DrawerContent>
-      )}
-    </Drawer>
-  );
+export function DrawerDialogHeader(
+  props:
+    | ComponentProps<typeof DialogHeader>
+    | ComponentProps<typeof DrawerHeader>
+) {
+  const Component = isDesktop() ? DialogHeader : DrawerHeader;
+  return <Component {...props} />;
+}
+
+export function DrawerDialogTitle(
+  props: ComponentProps<typeof DialogTitle> | ComponentProps<typeof DrawerTitle>
+) {
+  const Component = isDesktop() ? DialogTitle : DrawerTitle;
+  return <Component {...props} />;
+}
+
+export function DrawerDialogTrigger(
+  props:
+    | ComponentProps<typeof DialogTrigger>
+    | ComponentProps<typeof DrawerTrigger>
+) {
+  const Component = isDesktop() ? DialogTrigger : DrawerTrigger;
+  return <Component {...props} />;
 }

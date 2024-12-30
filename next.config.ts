@@ -7,9 +7,13 @@ const nextConfig: NextConfig = {
     "tough-cookie",
     "axios-cookiejar-support",
   ],
-  experimental: {
-    dynamicIO: true,
-  },
+  redirects: async () => [
+    {
+      source: "/",
+      destination: "/library",
+      permanent: true,
+    },
+  ],
 };
 
 export default nextConfig;
