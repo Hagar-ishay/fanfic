@@ -30,8 +30,9 @@ export default async function Page({
 }: {
   params: Promise<{ sectionId: string; sectionFanficId: string }>;
 }) {
-  const user = await currentUser();
+  await connection();
   const requestParams = await params;
+  const user = await currentUser();
   const sectionId = parseInt(requestParams.sectionId);
   const fanficId = parseInt(requestParams.sectionFanficId);
   const fanfic = await getFanficById(fanficId);
@@ -44,5 +45,9 @@ export default async function Page({
     (section) => section.id !== sectionId
   );
 
-  return <Fanfic fanfic={fanfic} transferableSections={transferableSections} />;
+  return (
+    <div className="w-full">
+      <Fanfic fanfic={fanfic} transferableSections={transferableSections} />
+    </div>
+  );
 }

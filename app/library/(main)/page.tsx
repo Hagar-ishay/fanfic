@@ -4,12 +4,15 @@ import Link from "next/link";
 import { Metadata } from "next";
 import { FC } from "react";
 import { selectOrCreateSections } from "@/db/sections";
+import { connection } from "next/server";
 
 export const metadata: Metadata = {
   title: "Penio Fanfic - Library",
 };
 
 const Page: FC = async () => {
+  await connection();
+
   const user = await currentUser();
   if (!user) {
     return null;

@@ -26,6 +26,7 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function Page({ params }: Props) {
+  await connection();
   const requestParams = await params;
 
   const sectionId = parseInt(requestParams.sectionId);
