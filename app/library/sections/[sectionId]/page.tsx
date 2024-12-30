@@ -12,12 +12,14 @@ type Props = {
 
 export async function generateMetadata({ params }: Props) {
   await connection();
-  const requestParams = await params;
-  const sectionId = parseInt(requestParams.sectionId);
+  const resolvedParams = await params;
+  const sectionId = parseInt(resolvedParams.sectionId);
   const currentSection = await getSection(sectionId);
+
   if (!currentSection) {
     return notFound();
   }
+
   const displayName = currentSection.displayName;
 
   return {
@@ -27,9 +29,8 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function Page({ params }: Props) {
   await connection();
-  const requestParams = await params;
-
-  const sectionId = parseInt(requestParams.sectionId);
+  const resolvedParams = await params;
+  const sectionId = parseInt(resolvedParams.sectionId);
 
   const [childSections, fanfics] = await Promise.all([
     listChildSections(sectionId),
