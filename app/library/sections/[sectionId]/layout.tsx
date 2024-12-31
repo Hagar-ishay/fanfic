@@ -28,7 +28,7 @@ export default async function Layout({
 
   return (
     <>
-      <Header title={currentSection.displayName}>
+      <Header title={`Library - ${currentSection.displayName}`}>
         <AddFanficButton sectionId={sectionId} />
         <AddNewSectionButton sectionId={sectionId} />
       </Header>
