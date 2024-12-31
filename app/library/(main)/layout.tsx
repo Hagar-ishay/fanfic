@@ -11,12 +11,10 @@ export default async function Layout({
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Header title="Library">
+      <Header segments={[{ label: "Library", href: "/library" }]}>
         <AddNewSectionButton sectionId={null} />
       </Header>
-      <div className="flex-grow">
-        {children}
-      </div>
+      <div className="flex-grow">{children}</div>
     </div>
   );
 }

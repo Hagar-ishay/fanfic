@@ -26,9 +26,43 @@ export default async function Layout({
     return notFound();
   }
 
+  async function getBreadcrumbs(
+    sectionId: number,
+    displayName: string,
+    parentId: number | null
+  ) {
+    let breadcrumbs = [
+      {
+        label: displayName,
+        href: `/library/sections/${sectionId}`,
+      },
+    ];
+    if (parentId) {
+      const parentSection = await getSection(parentId);
+      if (parentSection) {
+        const parentBreadcrumbs = await getBreadcrumbs(
+          parentSection.id,
+          parentSection.displayName,
+          parentSection.parentId
+        );
+        breadcrumbs = [...parentBreadcrumbs, ...breadcrumbs];
+      }
+    }
+    return breadcrumbs;
+  }
+
   return (
     <>
-      <Header title={`Library - ${currentSection.displayName}`}>
+      <Header
+        segments={[
+          { label: "Library", href: "/library" },
+          ...(await getBreadcrumbs(
+            sectionId,
+            currentSection.displayName,
+            currentSection.parentId
+          )),
+        ]}
+      >
         <AddFanficButton sectionId={sectionId} />
         <AddNewSectionButton sectionId={sectionId} />
       </Header>

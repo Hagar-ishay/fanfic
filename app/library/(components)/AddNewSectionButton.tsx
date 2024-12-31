@@ -44,21 +44,23 @@ export function AddNewSectionButton({
 
   const onSubmit = async (data: { displayName: string; name: string }) => {
     const title = "Add Section";
-    startTransition(async () => {
-      try {
-        await insertSection({
-          name: data.name,
-          displayName: data.displayName,
-          userId: user.id,
-          parentId: sectionId,
-        });
-        toast({ title, description: "Added Successfully!" });
-        setShouldAddSection(false);
-      } catch (err) {
-        const error = errorMessage(err);
-        console.error(err);
-        toast({ title, description: error, variant: "destructive" });
-      }
+    startTransition(() => {
+      (async () => {
+        try {
+          await insertSection({
+            name: data.name,
+            displayName: data.displayName,
+            userId: user.id,
+            parentId: sectionId,
+          });
+          toast({ title, description: "Added Successfully!" });
+          setShouldAddSection(false);
+        } catch (err) {
+          const error = errorMessage(err);
+          console.error(err);
+          toast({ title, description: error, variant: "destructive" });
+        }
+      })();
     });
   };
 

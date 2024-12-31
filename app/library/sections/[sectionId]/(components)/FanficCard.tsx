@@ -4,14 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { UserFanfic } from "@/db/types";
 import React from "react";
 import { cn } from "@/lib/utils";
-import {
-  BookUp,
-  BookUp2,
-  CircleCheck,
-  Grid,
-  Grip,
-  Loader2,
-} from "lucide-react";
+import { BookUp, BookUp2, CircleCheck, Grip, Loader2 } from "lucide-react";
 import { Tooltip } from "@/components/base/Tooltip";
 import { Button } from "@/components/ui/button";
 
