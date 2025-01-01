@@ -1,9 +1,9 @@
 "use server";
-import { errorMessage } from "@/lib/utils";
+import { selectOngoingFanfics, updateFanfic } from "@/db/fanfics";
 import { getAo3Client } from "@/lib/ao3Client";
 import { htmlParser } from "@/lib/htmlParser";
+import { errorMessage } from "@/lib/utils";
 import { NextResponse } from "next/server";
-import { selectOngoingFanfics, updateFanfic } from "@/db/fanfics";
 
 export async function GET(request: Request) {
   // Verify that the request is coming from Vercel Cron
@@ -32,7 +32,10 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error(errorMessage(error));
     // Return error status for monitoring purposes
-    return NextResponse.json({ ok: false, error: errorMessage(error) }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: errorMessage(error) },
+      { status: 500 }
+    );
   }
   return NextResponse.json({ ok: true });
 }
