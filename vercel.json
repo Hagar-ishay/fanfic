@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/check-for-updates",
-      "schedule": "@daily"
+      "schedule": "0 0 * * *"
     }
   ]
 }
