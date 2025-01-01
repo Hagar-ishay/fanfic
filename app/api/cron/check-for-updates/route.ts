@@ -26,6 +26,7 @@ export async function GET(request: Request) {
           parsedFanfic?.updatedAt > fanfic.updatedAt
         ) {
           await updateFanfic(fanfic.id, parsedFanfic);
+          console.log(`updated fanfic ${fanfic.title}: ID ${fanficId}`);
         }
       })
     );
