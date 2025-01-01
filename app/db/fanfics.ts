@@ -4,6 +4,7 @@ import * as drizzle from "drizzle-orm";
 import { db } from "@/db/db";
 import { fanfics, sectionFanfics } from "@/db/schema";
 import { NewFanfic } from "@/db/types";
+import { expirePath } from "next/cache";
 
 export const updateFanfic = async (ficId: number, { ...update }) => {
   return await db
@@ -17,10 +18,11 @@ export const updateSectionFanfic = async (
   sectionFanficId: number,
   { ...update }
 ) => {
-  return await db
+  await db
     .update(sectionFanfics)
     .set(update)
     .where(drizzle.eq(sectionFanfics.id, sectionFanficId));
+  expirePath("/library/sections/[sectionId]/@fanfics/fanfics");
 };
 
 export const selectOngoingFanfics = async () => {
@@ -89,4 +91,30 @@ export const deleteSectionFanfic = async (userFanficId: number) => {
     .delete(sectionFanfics)
     .where(drizzle.eq(sectionFanfics.id, userFanficId))
     .returning({ fanficId: fanfics.id });
+};
+
+export const reorderFanfics = async (
+  sectionId: number,
+  fromIndex: number,
+  toIndex: number
+) => {
+  const fanfics = await db
+    .select()
+    .from(sectionFanfics)
+    .where(drizzle.eq(sectionFanfics.sectionId, sectionId))
+    .orderBy(sectionFanfics.position);
+
+  const [movedFanfic] = fanfics.splice(fromIndex, 1);
+  fanfics.splice(toIndex, 0, movedFanfic);
+
+  await Promise.all(
+    fanfics.map((fanfic, index) =>
+      db
+        .update(sectionFanfics)
+        .set({ position: index })
+        .where(drizzle.eq(sectionFanfics.id, fanfic.id))
+    )
+  );
+
+  return fanfics;
 };

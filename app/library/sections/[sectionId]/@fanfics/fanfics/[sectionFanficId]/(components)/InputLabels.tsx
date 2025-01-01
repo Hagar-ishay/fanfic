@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useRef, useTransition, useOptimistic } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Tag, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { updateSectionFanfic } from "@/db/fanfics";
+import { Tag, X } from "lucide-react";
+import type React from "react";
+import { useOptimistic, useRef, useState, useTransition } from "react";
 
 export default function InputLabels({
   fanficId,

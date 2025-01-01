@@ -1,17 +1,20 @@
 "use server";
+import { AO3_LINK } from "@/consts";
+import { updateSectionFanfic } from "@/db/fanfics";
+import type { UserFanfic } from "@/db/types";
+import { getAo3Client } from "@/lib/ao3Client";
+import { errorMessage } from "@/lib/utils";
+import {
+  translateChapter,
+  translateMetadata,
+} from "@/library/sections/[sectionId]/(server)/translator";
+import EPub from "epub";
+import EpubGen from "epub-gen";
 import fs from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
-import EPub from "epub";
-import EpubGen from "epub-gen";
 import nodemailer from "nodemailer";
-import type { UserFanfic } from "@/db/types";
-import { getAo3Client } from "@/lib/ao3Client";
 import { ENV } from "../../../../config";
-import { translateChapter, translateMetadata } from "@/library/sections/[sectionId]/(server)/translator";
-import { errorMessage } from "@/lib/utils";
-import { AO3_LINK } from "@/consts";
-import { updateFanfic } from "@/db/fanfics";
 
 const unlinkAsync = promisify(fs.unlink);
 const statAsync = promisify(fs.stat);
@@ -94,7 +97,8 @@ export async function kindleSender({
       downloadPath.replace("/tmp/", ""),
       downloadPath
     );
-    await updateFanfic(fanfic.id, {
+    console.log("Sent to Kindle:", title);
+    await updateSectionFanfic(fanfic.id, {
       lastSent: new Date(Date.now()),
       latestStartingChapter: latestFinalChapter,
     });

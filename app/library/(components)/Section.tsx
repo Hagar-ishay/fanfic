@@ -4,8 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Section as DbSection } from "@/db/types";
 import { SectionContextMenu } from "@/library/(components)/SectionContextMenu";
+import { useSectionTransition } from "@/library/(components)/SectionTransitionContext";
 import { ChevronRight, EllipsisVertical, Loader2 } from "lucide-react";
-import { useTransitionStore } from "@/store";
 
 export function Section({
   section,
@@ -14,12 +14,12 @@ export function Section({
   section: DbSection;
   transferableSections: DbSection[];
 }) {
-  const isPending = useTransitionStore((state) => state.isPending);
+  const { isPending } = useSectionTransition();
 
   return (
     <>
       <Card className="cursor-pointer p-4 border-none border-0 shadow-none hover:bg-accent/50 transition-colors relative">
-        {isPending && (
+        {isPending(section.id) && (
           <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px] z-50 flex items-center justify-center">
             <Loader2 className="h-6 w-6 animate-spin" />
           </div>

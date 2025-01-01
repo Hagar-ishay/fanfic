@@ -1,9 +1,11 @@
-import { Header } from "@/library/(components)/Header";
 import { getSection } from "@/db/sections";
-import { notFound } from "next/navigation";
-import { ShowHideModal } from "@/library/sections/[sectionId]/(components)/ShowHideModal";
-import { AddFanficButton } from "@/library/sections/[sectionId]/(components)/AddFanficButton";
 import { AddNewSectionButton } from "@/library/(components)/AddNewSectionButton";
+import { Header } from "@/library/(components)/Header";
+import { AddFanficButton } from "@/library/sections/[sectionId]/(components)/AddFanficButton";
+import { SectionTransitionProvider } from "@/library/(components)/SectionTransitionContext";
+import { ShowHideModal } from "@/library/sections/[sectionId]/(components)/ShowHideModal";
+import { FanficTransitionProvider } from "@/library/sections/[sectionId]/@fanfics/fanfics/[sectionFanficId]/(components)/FanficTransitionContext";
+import { notFound } from "next/navigation";
 import { connection } from "next/server";
 
 type Props = { params: Promise<{ sectionId: string }> };
@@ -52,22 +54,24 @@ export default async function Layout({
   }
 
   return (
-    <>
-      <Header
-        segments={[
-          { label: "Library", href: "/library" },
-          ...(await getBreadcrumbs(
-            sectionId,
-            currentSection.displayName,
-            currentSection.parentId
-          )),
-        ]}
-      >
-        <AddFanficButton sectionId={sectionId} />
-        <AddNewSectionButton sectionId={sectionId} />
-      </Header>
-      {children}
-      <ShowHideModal>{fanfics}</ShowHideModal>
-    </>
+    <SectionTransitionProvider>
+      <FanficTransitionProvider>
+        <Header
+          segments={[
+            { label: "Library", href: "/library" },
+            ...(await getBreadcrumbs(
+              sectionId,
+              currentSection.displayName,
+              currentSection.parentId
+            )),
+          ]}
+        >
+          <AddFanficButton sectionId={sectionId} />
+          <AddNewSectionButton sectionId={sectionId} />
+        </Header>
+        {children}
+        <ShowHideModal>{fanfics}</ShowHideModal>
+      </FanficTransitionProvider>
+    </SectionTransitionProvider>
   );
 }

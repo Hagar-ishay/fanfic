@@ -69,8 +69,6 @@ export function AddNewSectionButton({
     return !isExists.length;
   };
 
-  const displayName = watch("displayName");
-
   return (
     <>
       <Tooltip description="Add new Section">

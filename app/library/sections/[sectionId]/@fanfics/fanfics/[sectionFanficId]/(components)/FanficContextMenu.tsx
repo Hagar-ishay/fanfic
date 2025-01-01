@@ -1,16 +1,17 @@
 "use client";
 
-import { Section, UserFanfic } from "@/db/types";
-import { CircleChevronRight, SendHorizontal, Trash2 } from "lucide-react";
-import React from "react";
-import { useSettingsStore } from "@/store";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { kindleSender } from "@/library/sections/[sectionId]/(server)/kindleSender";
-import { deleteSectionFanfic, updateSectionFanfic } from "@/db/fanfics";
-import { FanficHeader } from "@/library/sections/[sectionId]/@fanfics/fanfics/[sectionFanficId]/(components)/FanficHeader";
 import { ContextMenu } from "@/components/base/ContentMenu";
 import { Delete } from "@/components/base/Delete";
+import { deleteSectionFanfic, updateSectionFanfic } from "@/db/fanfics";
+import type { Section, UserFanfic } from "@/db/types";
+import { useToast } from "@/hooks/use-toast";
+import { kindleSender } from "@/library/sections/[sectionId]/(server)/kindleSender";
+import { FanficHeader } from "@/library/sections/[sectionId]/@fanfics/fanfics/[sectionFanficId]/(components)/FanficHeader";
+import { useFanficTransition } from "@/library/sections/[sectionId]/@fanfics/fanfics/[sectionFanficId]/(components)/FanficTransitionContext";
+import { useSettingsStore } from "@/store";
+import { CircleChevronRight, SendHorizontal, Trash2 } from "lucide-react";
+import { redirect } from "next/navigation";
+import { useState } from "react";
 
 export function FanficContextMenu({
   fanfic,
@@ -22,7 +23,7 @@ export function FanficContextMenu({
   trigger: React.ReactNode;
 }) {
   const { toast } = useToast();
-  const [isPending, startTransition] = React.useTransition();
+  const { isPending, startTransition } = useFanficTransition();
 
   const kindleEmail = useSettingsStore((state) => state.kindleEmail);
   const translationLanguage = useSettingsStore((state) => state.languageCode);
@@ -38,7 +39,7 @@ export function FanficContextMenu({
   };
 
   const isDisabled = Boolean(
-    isPending ||
+    isPending(fanfic.id) ||
       isSuccess ||
       (fanfic.lastSent && fanfic.lastSent > fanfic.updatedAt)
   );
@@ -46,7 +47,7 @@ export function FanficContextMenu({
   const latestFinalChapter = Number(fanfic.chapterCount?.split("/")[0]);
 
   const handleSend = (sendLatestChapters?: boolean) => {
-    startTransition(async () => {
+    startTransition(fanfic.id, async () => {
       const result = await kindleSender({
         fanfic,
         kindleEmail,
@@ -70,7 +71,7 @@ export function FanficContextMenu({
     });
   };
 
-  let subOptions = [
+  const subOptions = [
     {
       name: "Send entire work",
       action: () => handleSend(false),
@@ -89,7 +90,11 @@ export function FanficContextMenu({
       name: "Move section",
       subItems: sections.map((section) => ({
         name: section.displayName,
-        action: () => updateSectionFanfic(fanfic.id, { sectionId: section.id }),
+        action: () =>
+          startTransition(fanfic.id, async () => {
+            await updateSectionFanfic(fanfic.id, { sectionId: section.id });
+            redirect(`/library/sections/${section.id}`);
+          }),
       })),
     },
     {
@@ -108,7 +113,11 @@ export function FanficContextMenu({
   return (
     <div>
       <Delete
-        onDelete={() => deleteSectionFanfic(fanfic.id)}
+        onDelete={() =>
+          startTransition(fanfic.id, async () => {
+            deleteSectionFanfic(fanfic.id);
+          })
+        }
         open={shouldDelete}
         onOpenChange={setShouldDelete}
         header={`Are you sure you want to delete ${fanfic.title}`}

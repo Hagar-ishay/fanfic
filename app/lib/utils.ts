@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 const algorithm = "aes-256-cbc";
 const key = Buffer.from("1209r2$9ubb398F1!0@G9fCw9#r6$ur2", "utf8");
@@ -32,3 +33,5 @@ export const errorMessage = (error: unknown) => {
     ""
   );
 };
+
+export const getIsDesktop = () => useMediaQuery("(min-width: 768px)");

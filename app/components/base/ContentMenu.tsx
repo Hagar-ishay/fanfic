@@ -1,8 +1,5 @@
 "use client";
 
-import React from "react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
   DrawerDialog,
   DrawerDialogContent,
@@ -11,7 +8,7 @@ import {
   DrawerDialogTitle,
   DrawerDialogTrigger,
 } from "@/components/base/DrawerDialog";
-import { useMediaQuery } from "@/hooks/use-media-query";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,7 +17,10 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 
 export type Option = {
   icon?: React.ReactNode;
@@ -41,6 +41,14 @@ export function ContextMenu({
 }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
+  const router = useRouter();
+
+  function handleSelect(option: Option) {
+    if (option.action) {
+      option.action();
+    }
+    router.back();
+  }
 
   return isDesktop ? (
     <DropdownMenu>
@@ -60,7 +68,7 @@ export function ContextMenu({
                 {option.subItems.map((subOption, index) => (
                   <DropdownMenuItem
                     key={index}
-                    onSelect={subOption.action}
+                    onSelect={() => handleSelect(subOption)}
                     disabled={subOption.disabled}
                     className="gap-3 text-sm"
                   >
@@ -73,7 +81,7 @@ export function ContextMenu({
           ) : (
             <DropdownMenuItem
               key={index}
-              onSelect={option.action}
+              onSelect={() => handleSelect(option)}
               disabled={option.disabled}
               className="gap-3 text-sm"
             >

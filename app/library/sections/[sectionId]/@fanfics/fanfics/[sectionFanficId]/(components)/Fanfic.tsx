@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 import {
   DrawerDialog,
   DrawerDialogContent,
-  DrawerDialogDescription,
   DrawerDialogFooter,
   DrawerDialogHeader,
   DrawerDialogTitle,
@@ -77,19 +76,17 @@ export default function Fanfic({
           </DrawerDialogTitle>
         </DrawerDialogHeader>
 
-        <DrawerDialogDescription className="flex-1">
+        <div className="flex-1">
           <ScrollArea className="overflow-auto mx-auto py-4 px-6 border border-muted rounded-lg shadow-sm bg-muted/5">
             <div className="space-y-2 text-pretty">
-              {fanfic.summary
-                ?.split("\n")
-                .map((line: string, index: number) => (
-                  <p key={index} className="text-sm text-muted-foreground">
-                    {line}
-                  </p>
-                ))}
+              {fanfic.summary?.split("\n").map((line: string, index: number) => (
+                <span key={index} className="block text-sm text-muted-foreground">
+                  {line}
+                </span>
+              ))}
             </div>
           </ScrollArea>
-        </DrawerDialogDescription>
+        </div>
 
         <div className="space-y-6">
           <EditableLabels
