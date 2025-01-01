@@ -1,12 +1,4 @@
 {
-  "git": {
-    "deploymentEnabled": {
-      "main": true
-    }
-  },
-  "github": {
-    "enabled": true
-  },
   "crons": [
     {
       "path": "/api/cron/check-for-updates",
