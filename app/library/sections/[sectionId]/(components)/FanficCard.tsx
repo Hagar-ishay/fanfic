@@ -1,14 +1,13 @@
 "use client";
 
 import { Tooltip } from "@/components/base/Tooltip";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { UserFanfic } from "@/db/types";
 import { cn } from "@/lib/utils";
+import { useFanficTransition } from "@/library/sections/[sectionId]/@fanfics/fanfics/[sectionFanficId]/(components)/FanficTransitionContext";
 import { Draggable } from "@hello-pangea/dnd";
 import { BookUp, BookUp2, CircleCheck, Grip, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { useFanficTransition } from "../@fanfics/fanfics/[sectionFanficId]/(components)/FanficTransitionContext";
 
 export default function FanficCard({
   fanfic,
@@ -20,17 +19,20 @@ export default function FanficCard({
   const { isPending } = useFanficTransition();
 
   return (
-    <Draggable draggableId={`fanfic-${fanfic.id}`} index={index}>
+    <Draggable draggableId={`fanfic-${fanfic.id.toString()}`} index={index}>
       {(provided, snapshot) => (
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          className="relative"
+          style={provided.draggableProps.style}
+          className={cn("relative", snapshot.isDragging && "z-50")}
         >
           <Card
             className={cn(
               "pt-3 pb-3 border-none border-0 shadow-none hover:bg-accent/30",
-              snapshot.isDragging ? "opacity-50" : "transition-all duration-300 ease-in-out"
+              snapshot.isDragging
+                ? "shadow-lg opacity-90 bg-background"
+                : "transition-all duration-300 ease-in-out"
             )}
           >
             <CardContent className="p-5">
@@ -39,12 +41,9 @@ export default function FanficCard({
                   <div className="flex flex-row items-center gap-3">
                     <div
                       {...provided.dragHandleProps}
-                      onClick={(e) => e.stopPropagation()}
-                      className="cursor-grab active:cursor-grabbing"
+                      className="cursor-grab active:cursor-grabbing p-2"
                     >
-                      <Button size="icon" variant="ghost">
-                        <Grip />
-                      </Button>
+                      <Grip className="w-4 h-4" />
                     </div>
                     <Link
                       href={`/library/sections/${fanfic.sectionId}/fanfics/${fanfic.id}`}

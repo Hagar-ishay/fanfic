@@ -1,13 +1,5 @@
 "use client";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Section, Tags, UserFanfic } from "@/db/types";
-import React from "react";
-import TagsCarousel from "@/components/base/Tags";
-import { FanficHeader } from "@/library/sections/[sectionId]/@fanfics/fanfics/[sectionFanficId]/(components)/FanficHeader";
-import { Separator } from "@/components/ui/separator";
-import EditableLabels from "@/library/sections/[sectionId]/@fanfics/fanfics/[sectionFanficId]/(components)/InputLabels";
-import { useRouter } from "next/navigation";
 import {
   DrawerDialog,
   DrawerDialogContent,
@@ -15,11 +7,20 @@ import {
   DrawerDialogHeader,
   DrawerDialogTitle,
 } from "@/components/base/DrawerDialog";
+import TagsCarousel from "@/components/base/Tags";
 import { Button } from "@/components/ui/button";
-import { Ellipsis, EllipsisVertical } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Section, Tags, UserFanfic } from "@/db/types";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { FanficContextMenu } from "./FanficContextMenu";
 import { cn } from "@/lib/utils";
+import { FanficHeader } from "@/library/sections/[sectionId]/@fanfics/fanfics/[sectionFanficId]/(components)/FanficHeader";
+import EditableLabels from "@/library/sections/[sectionId]/@fanfics/fanfics/[sectionFanficId]/(components)/InputLabels";
+import { SummaryContent } from "@/library/sections/[sectionId]/@fanfics/fanfics/[sectionFanficId]/(components)/Summary";
+import { Ellipsis, EllipsisVertical } from "lucide-react";
+import { useRouter } from "next/navigation";
+import React from "react";
+import { FanficContextMenu } from "./FanficContextMenu";
 
 export default function Fanfic({
   fanfic,
@@ -77,14 +78,8 @@ export default function Fanfic({
         </DrawerDialogHeader>
 
         <div className="flex-1">
-          <ScrollArea className="overflow-auto mx-auto py-4 px-6 border border-muted rounded-lg shadow-sm bg-muted/5">
-            <div className="space-y-2 text-pretty">
-              {fanfic.summary?.split("\n").map((line: string, index: number) => (
-                <span key={index} className="block text-sm text-muted-foreground">
-                  {line}
-                </span>
-              ))}
-            </div>
+          <ScrollArea className="overflow-auto max-h-80 mx-auto py-4 px-6 border border-muted rounded-lg shadow-sm bg-muted/5">
+            <SummaryContent summary={fanfic.summary ?? ""} />
           </ScrollArea>
         </div>
 

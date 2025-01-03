@@ -18,11 +18,13 @@ export const updateSectionFanfic = async (
   sectionFanficId: number,
   { ...update }
 ) => {
-  await db
+  const sectionFanfic = await db
     .update(sectionFanfics)
     .set(update)
-    .where(drizzle.eq(sectionFanfics.id, sectionFanficId));
-  expirePath("/library/sections/[sectionId]/@fanfics/fanfics");
+    .where(drizzle.eq(sectionFanfics.id, sectionFanficId))
+    .returning({ sectionId: sectionFanfics.sectionId });
+  const sectionId = sectionFanfic[0].sectionId;
+  expirePath(`/library/sections/${sectionId}/fanfics/${sectionFanficId}`);
 };
 
 export const selectOngoingFanfics = async () => {
@@ -39,6 +41,17 @@ export const selectSectionFanfic = async (sectionIds: number[]) => {
     .innerJoin(sectionFanfics, drizzle.eq(fanfics.id, sectionFanfics.fanficId))
     .where(drizzle.inArray(sectionFanfics.sectionId, sectionIds))
     .orderBy(sectionFanfics.sectionId, sectionFanfics.position);
+};
+
+export const getFanficByExternalId = async (external: number) => {
+  const fanfic = await db
+    .select()
+    .from(fanfics)
+    .where(drizzle.eq(fanfics.fanficId, external));
+  if (fanfic.length === 0) {
+    return null;
+  }
+  return fanfic[0];
 };
 
 export const getFanficById = async (sectionFanficId: number) => {
@@ -83,14 +96,17 @@ export const insertSectionFanfic = async (
     .insert(sectionFanfics)
     .values({ sectionId, fanficId, position, userId })
     .returning({ fanficId: fanfics.id });
+  expirePath(`/library/sections/${sectionId}`);
   return result[0].fanficId;
 };
 
 export const deleteSectionFanfic = async (userFanficId: number) => {
-  return await db
+  const sectionFanfic = await db
     .delete(sectionFanfics)
     .where(drizzle.eq(sectionFanfics.id, userFanficId))
-    .returning({ fanficId: fanfics.id });
+    .returning({ fanficId: fanfics.id, sectionId: sectionFanfics.sectionId });
+  const sectionId = sectionFanfic[0].sectionId;
+  expirePath(`/library/sections/${sectionId}/fanfics/${userFanficId}`);
 };
 
 export const reorderFanfics = async (
@@ -98,23 +114,35 @@ export const reorderFanfics = async (
   fromIndex: number,
   toIndex: number
 ) => {
-  const fanfics = await db
-    .select()
-    .from(sectionFanfics)
-    .where(drizzle.eq(sectionFanfics.sectionId, sectionId))
-    .orderBy(sectionFanfics.position);
+  return await db.transaction(async (tx) => {
+    const fanfics = await tx
+      .select()
+      .from(sectionFanfics)
+      .where(drizzle.eq(sectionFanfics.sectionId, sectionId))
+      .orderBy(sectionFanfics.position);
 
-  const [movedFanfic] = fanfics.splice(fromIndex, 1);
-  fanfics.splice(toIndex, 0, movedFanfic);
+    const [movedFanfic] = fanfics.splice(fromIndex, 1);
+    fanfics.splice(toIndex, 0, movedFanfic);
 
-  await Promise.all(
-    fanfics.map((fanfic, index) =>
-      db
-        .update(sectionFanfics)
-        .set({ position: index })
-        .where(drizzle.eq(sectionFanfics.id, fanfic.id))
-    )
-  );
+    await Promise.all(
+      fanfics.map((fanfic) =>
+        tx
+          .update(sectionFanfics)
+          .set({ position: -(fanfics.indexOf(fanfic) + 1) })
+          .where(drizzle.eq(sectionFanfics.id, fanfic.id))
+      )
+    );
 
-  return fanfics;
+    await tx
+      .update(sectionFanfics)
+      .set({ position: drizzle.sql`-position - 1` })
+      .where(
+        drizzle.and(
+          drizzle.eq(sectionFanfics.sectionId, sectionId),
+          drizzle.lt(sectionFanfics.position, 0)
+        )
+      );
+
+    return fanfics;
+  });
 };

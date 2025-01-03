@@ -38,7 +38,7 @@ export function Section({
               />
             </div>
             <span className="pl-2 text-lg font-semibold text-foreground/90">
-              {section.displayName}
+              {section.name}
             </span>
           </div>
           <ChevronRight className="ml-2 h-4 w-4 text-muted-foreground" />

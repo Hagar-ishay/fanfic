@@ -4,7 +4,7 @@ import { Section } from "@/db/types";
 import { SendHorizontal, Trash2 } from "lucide-react";
 import React from "react";
 
-import { ContextMenu } from "@/components/base/ContentMenu";
+import { ContextMenu } from "@/components/base/ContextMenu";
 import { Delete } from "@/components/base/Delete";
 import { deleteSection, transferSection } from "@/db/sections";
 import { useSectionTransition } from "@/library/(components)/SectionTransitionContext";
@@ -21,7 +21,7 @@ export function SectionContextMenu({
   const { isPending, startTransition } = useSectionTransition();
   const [open, setOpen] = React.useState(false);
 
-  const pending = isPending(section.id)
+  const pending = isPending(section.id);
 
   async function onDelete() {
     startTransition(section.id, async () => {
@@ -67,15 +67,11 @@ export function SectionContextMenu({
 
   return (
     <>
-      <ContextMenu
-        header={section.displayName}
-        options={options}
-        trigger={trigger}
-      />
+      <ContextMenu header={section.name} options={options} trigger={trigger} />
       <Delete
         header={
           <div>
-            Are you sure you want to delete section ${section.displayName}?
+            Are you sure you want to delete section ${section.name}?
             <div className="text-sm">
               Fics and Child sections belonging to this section will be removed
               from your library

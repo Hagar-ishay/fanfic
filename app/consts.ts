@@ -7,9 +7,9 @@ export const TAGS = {
   FREEDOM: "FREEDOM",
 };
 export const DEFAULT_SECTIONS = [
-  { name: "Reading", displayName: "Reading" },
-  { name: "Completed", displayName: "Completed" },
-  { name: "To Read", displayName: "To Read" },
-  { name: "Shelved", displayName: "Shelved" },
-  { name: "Abandoned", displayName: "Abandoned" },
+  "Reading",
+  "Completed",
+  "To Read",
+  "Shelved",
+  "Abandoned",
 ];

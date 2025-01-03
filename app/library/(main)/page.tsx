@@ -1,10 +1,10 @@
+import { selectOrCreateSections } from "@/db/sections";
 import { Section } from "@/library/(components)/Section";
 import { currentUser } from "@clerk/nextjs/server";
-import Link from "next/link";
 import { Metadata } from "next";
-import { FC } from "react";
-import { selectOrCreateSections } from "@/db/sections";
+import Link from "next/link";
 import { connection } from "next/server";
+import { FC } from "react";
 
 export const metadata: Metadata = {
   title: "Penio Fanfic - Library",
@@ -21,7 +21,7 @@ const Page: FC = async () => {
   const topLevelSections = sections.filter((sec) => sec.parentId === null);
 
   return (
-    <div className="flex flex-col space-y-4">
+    <div className="flex flex-col">
       {topLevelSections.map((section) => (
         <Link key={section.id} href={`/library/sections/${section.id}`}>
           <Section

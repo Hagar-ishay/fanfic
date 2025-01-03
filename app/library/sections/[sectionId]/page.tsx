@@ -1,11 +1,11 @@
-import Link from "next/link";
-import { Section } from "@/library/(components)/Section";
-import { notFound } from "next/navigation";
-import { getSection, listUserSections } from "@/db/sections";
 import { selectSectionFanfic } from "@/db/fanfics";
-import { connection } from "next/server";
-import { currentUser } from "@clerk/nextjs/server";
+import { getSection, listUserSections } from "@/db/sections";
+import { Section } from "@/library/(components)/Section";
 import FanficList from "@/library/sections/[sectionId]/(components)/FanficList";
+import { currentUser } from "@clerk/nextjs/server";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { connection } from "next/server";
 
 type Props = {
   params: Promise<{ sectionId: string }>;
@@ -21,10 +21,8 @@ export async function generateMetadata({ params }: Props) {
     return notFound();
   }
 
-  const displayName = currentSection.displayName;
-
   return {
-    title: `Penio Fanfic - ${displayName}`,
+    title: `Penio Fanfic - ${currentSection.name}`,
   };
 }
 

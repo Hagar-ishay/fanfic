@@ -18,7 +18,6 @@ export const sections = schema.table(
     id: serial().primaryKey().notNull(),
     name: varchar().notNull(),
     parentId: integer("parent_id").references((): any => sections.id),
-    displayName: varchar("display_name").notNull(),
     creationTime: timestamp("creation_time").notNull().defaultNow(),
     updateTime: timestamp("update_time").$onUpdate(() => new Date()),
     userId: varchar("user_id").notNull(),

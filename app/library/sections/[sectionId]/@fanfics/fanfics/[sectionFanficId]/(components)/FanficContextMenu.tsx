@@ -1,6 +1,6 @@
 "use client";
 
-import { ContextMenu } from "@/components/base/ContentMenu";
+import { ContextMenu } from "@/components/base/ContextMenu";
 import { Delete } from "@/components/base/Delete";
 import { deleteSectionFanfic, updateSectionFanfic } from "@/db/fanfics";
 import type { Section, UserFanfic } from "@/db/types";
@@ -89,7 +89,7 @@ export function FanficContextMenu({
       icon: <CircleChevronRight size={17} />,
       name: "Move section",
       subItems: sections.map((section) => ({
-        name: section.displayName,
+        name: section.name,
         action: () =>
           startTransition(fanfic.id, async () => {
             await updateSectionFanfic(fanfic.id, { sectionId: section.id });

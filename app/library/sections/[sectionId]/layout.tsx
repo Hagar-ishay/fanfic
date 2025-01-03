@@ -1,8 +1,8 @@
 import { getSection } from "@/db/sections";
 import { AddNewSectionButton } from "@/library/(components)/AddNewSectionButton";
 import { Header } from "@/library/(components)/Header";
-import { AddFanficButton } from "@/library/sections/[sectionId]/(components)/AddFanficButton";
 import { SectionTransitionProvider } from "@/library/(components)/SectionTransitionContext";
+import { AddFanficButton } from "@/library/sections/[sectionId]/(components)/AddFanficButton";
 import { ShowHideModal } from "@/library/sections/[sectionId]/(components)/ShowHideModal";
 import { FanficTransitionProvider } from "@/library/sections/[sectionId]/@fanfics/fanfics/[sectionFanficId]/(components)/FanficTransitionContext";
 import { notFound } from "next/navigation";
@@ -44,7 +44,7 @@ export default async function Layout({
       if (parentSection) {
         const parentBreadcrumbs = await getBreadcrumbs(
           parentSection.id,
-          parentSection.displayName,
+          parentSection.name,
           parentSection.parentId
         );
         breadcrumbs = [...parentBreadcrumbs, ...breadcrumbs];
@@ -61,7 +61,7 @@ export default async function Layout({
             { label: "Library", href: "/library" },
             ...(await getBreadcrumbs(
               sectionId,
-              currentSection.displayName,
+              currentSection.name,
               currentSection.parentId
             )),
           ]}

@@ -1,24 +1,24 @@
 "use client";
+import {
+  DrawerDialog,
+  DrawerDialogClose,
+  DrawerDialogContent,
+  DrawerDialogFooter,
+  DrawerDialogHeader,
+  DrawerDialogTitle,
+} from "@/components/base/DrawerDialog";
 import LoadableIcon from "@/components/base/LoadableIcon";
 import { Tooltip } from "@/components/base/Tooltip";
 import { Button } from "@/components/ui/button";
-import { getSectionByNameUser, insertSection } from "@/db/sections";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { insertSection } from "@/db/sections";
 import { useToast } from "@/hooks/use-toast";
 import { errorMessage } from "@/lib/utils";
 import { useUser } from "@clerk/nextjs";
 import { ListPlus } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  DrawerDialog,
-  DrawerDialogContent,
-  DrawerDialogHeader,
-  DrawerDialogTitle,
-  DrawerDialogFooter,
-  DrawerDialogClose,
-} from "@/components/base/DrawerDialog";
 
 export function AddNewSectionButton({
   sectionId,
@@ -30,26 +30,22 @@ export function AddNewSectionButton({
   const {
     register,
     handleSubmit,
-    setValue,
-    watch,
     formState: { errors },
   } = useForm<{ displayName: string; name: string }>();
   const [isPending, startTransition] = useTransition();
   const [shouldAddSection, setShouldAddSection] = useState(false);
-  const [nameEdited, setNameEdited] = useState(false);
 
   if (!user) {
     return null;
   }
 
-  const onSubmit = async (data: { displayName: string; name: string }) => {
+  const onSubmit = async (data: { name: string }) => {
     const title = "Add Section";
     startTransition(() => {
       (async () => {
         try {
           await insertSection({
             name: data.name,
-            displayName: data.displayName,
             userId: user.id,
             parentId: sectionId,
           });
@@ -64,10 +60,6 @@ export function AddNewSectionButton({
     });
   };
 
-  const validateName = async (name: string) => {
-    const isExists = await getSectionByNameUser(user.id, name);
-    return !isExists.length;
-  };
 
   return (
     <>
@@ -88,36 +80,13 @@ export function AddNewSectionButton({
           </DrawerDialogHeader>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div>
-              <Label htmlFor="displayName">Display Name</Label>
-              <Input
-                id="displayName"
-                {...register("displayName", { required: true })}
-                onChange={(e) => {
-                  !nameEdited && setValue("name", e.target.value);
-                }}
-              />
-              {errors.displayName && <span>This field is required</span>}
-            </div>
-            <div>
               <Label htmlFor="name">Name</Label>
               <Input
-                className="border-primary"
                 id="name"
-                {...register("name", {
-                  required: true,
-                  validate: validateName,
-                  onChange: () => {
-                    setNameEdited(true);
-                  },
-                })}
+                {...register("name", { required: true })}
+          
               />
-              {errors.name && (
-                <div>
-                  {errors.name.type === "validate"
-                    ? "Name already exists"
-                    : "This field is required"}
-                </div>
-              )}
+              {errors.displayName && <span>This field is required</span>}
             </div>
             <DrawerDialogFooter>
               <Button type="submit" disabled={isPending}>
