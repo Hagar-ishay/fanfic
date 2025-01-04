@@ -1,10 +1,11 @@
 import { notFound } from "next/navigation";
 import React from "react";
 import { getFanficById } from "@/db/fanfics";
-import Fanfic from "@/library/sections/[sectionId]/@fanfics/fanfics/[sectionFanficId]/(components)/Fanfic";
+import Fanfic from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/Fanfic";
 import { currentUser } from "@clerk/nextjs/server";
 import { listUserSections } from "@/db/sections";
 import { connection } from "next/server";
+import FanficV2 from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficV2";
 
 export async function generateMetadata({
   params,
@@ -47,7 +48,7 @@ export default async function Page({
 
   return (
     <div className="w-full">
-      <Fanfic fanfic={fanfic} transferableSections={transferableSections} />
+      <FanficV2 fanfic={fanfic} transferableSections={transferableSections} />
     </div>
   );
 }

@@ -1,11 +1,10 @@
 "use server";
-import { NewFanfic, Tags } from "@/db/types";
 import * as cheerio from "cheerio";
-import { convert } from "html-to-text";
 import { DateTime } from "luxon";
 import * as consts from "../consts";
+import { NewFanfic, Tags } from "@/db/types";
 
-export async function htmlParser(html: string, fanficId: string | number) {
+export async function extractFanfic(html: string, fanficId: string | number) {
   const extractor = new Extractor(html, fanficId);
   const parsedFanfic = extractor.getObject();
   return parsedFanfic;
@@ -16,11 +15,7 @@ class Extractor {
   private _fanficId: number;
 
   constructor(html: string, fanficId: string | number) {
-    this.$ = cheerio.load(html, {
-      xml: {
-        decodeEntities: false,
-      },
-    });
+    this.$ = cheerio.load(html);
     this.cleanHtml(html);
     this._fanficId = +fanficId;
   }
@@ -30,28 +25,9 @@ class Extractor {
 
     return text.replace(/\s+/g, " ").trim();
   }
+
   private parseToString(selector: cheerio.BasicAcceptedElems<any>): string {
-    const html = this.$(selector).first().html() || "";
-    return convert(html, {
-      selectors: [
-        { selector: "a", options: { ignoreHref: true } },
-        { selector: "img", format: "skip" },
-        { selector: "em", format: "italics" },
-        {
-          selector: "p",
-          options: { leadingLineBreaks: 1, trailingLineBreaks: 1 },
-        },
-      ],
-      formatters: {
-        italics: function (elem, walk, builder) {
-          builder.addInline("_");
-          walk(elem.children, builder);
-          builder.addInline("_");
-        },
-      },
-      preserveNewlines: true,
-      wordwrap: false,
-    });
+    return this.$(selector).first().text().trim();
   }
 
   private parseToDate(selector: cheerio.BasicAcceptedElems<any>): Date {
@@ -63,8 +39,13 @@ class Extractor {
   }
 
   public get summary(): string {
-    return this.parseToString(
-      "#workskin div.summary.module blockquote.userstuff"
+    return (
+      this.$("#workskin div.summary.module blockquote.userstuff")
+        .first()
+        .html()
+        ?.replace(/<\/p><p>/g, "\n")
+        .replace(/<[^>]+>/g, "\n")
+        .trim() || ""
     );
   }
 

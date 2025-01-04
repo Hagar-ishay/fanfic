@@ -4,7 +4,7 @@ import { Header } from "@/library/(components)/Header";
 import { SectionTransitionProvider } from "@/library/(components)/SectionTransitionContext";
 import { AddFanficButton } from "@/library/sections/[sectionId]/(components)/AddFanficButton";
 import { ShowHideModal } from "@/library/sections/[sectionId]/(components)/ShowHideModal";
-import { FanficTransitionProvider } from "@/library/sections/[sectionId]/@fanfics/fanfics/[sectionFanficId]/(components)/FanficTransitionContext";
+import { FanficTransitionProvider } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficTransitionContext";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { UserFanfic } from "@/db/types";
 import { cn } from "@/lib/utils";
-import { useFanficTransition } from "@/library/sections/[sectionId]/@fanfics/fanfics/[sectionFanficId]/(components)/FanficTransitionContext";
+import { useFanficTransition } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficTransitionContext";
 import { Draggable } from "@hello-pangea/dnd";
 import { BookUp, BookUp2, CircleCheck, Grip, Loader2 } from "lucide-react";
 import Link from "next/link";
