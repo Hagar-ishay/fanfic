@@ -4,10 +4,9 @@ import * as drizzle from "drizzle-orm";
 import { DEFAULT_SECTIONS } from "@/consts";
 import { db } from "@/db/db";
 import { sectionFanfics, sections } from "@/db/schema";
-import { NeonHttpQueryResultHKT } from "drizzle-orm/neon-http";
+import { NeonQueryResultHKT } from "drizzle-orm/neon-serverless";
 import { PgTransaction } from "drizzle-orm/pg-core";
 import { expirePath } from "next/dist/server/web/spec-extension/revalidate";
-import { NeonQueryResultHKT } from "drizzle-orm/neon-serverless";
 
 export const selectOrCreateSections = async (userId: string) => {
   let userSections = await listUserSections(userId);

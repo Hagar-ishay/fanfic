@@ -3,16 +3,12 @@ import { Section } from "@/library/(components)/Section";
 import { currentUser } from "@clerk/nextjs/server";
 import { Metadata } from "next";
 import Link from "next/link";
-import { connection } from "next/server";
-import { FC } from "react";
 
 export const metadata: Metadata = {
   title: "Penio Fanfic - Library",
 };
 
-const Page: FC = async () => {
-  await connection();
-
+export default async function Page() {
   const user = await currentUser();
   if (!user) {
     return null;
@@ -34,6 +30,4 @@ const Page: FC = async () => {
       ))}
     </div>
   );
-};
-
-export default Page;
+}

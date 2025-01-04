@@ -2,9 +2,8 @@
 import * as drizzle from "drizzle-orm";
 
 import { db } from "@/db/db";
-import { fanfics, sectionFanfics } from "@/db/schema";
+import { fanfics, sectionFanfics, sections } from "@/db/schema";
 import { NewFanfic } from "@/db/types";
-import { expirePath } from "next/cache";
 
 export const updateFanfic = async (ficId: number, { ...update }) => {
   return await db
@@ -18,13 +17,10 @@ export const updateSectionFanfic = async (
   sectionFanficId: number,
   { ...update }
 ) => {
-  const sectionFanfic = await db
+  return await db
     .update(sectionFanfics)
     .set(update)
-    .where(drizzle.eq(sectionFanfics.id, sectionFanficId))
-    .returning({ sectionId: sectionFanfics.sectionId });
-  const sectionId = sectionFanfic[0].sectionId;
-  expirePath(`/library/sections/${sectionId}/fanfics/${sectionFanficId}`);
+    .where(drizzle.eq(sectionFanfics.id, sectionFanficId));
 };
 
 export const selectOngoingFanfics = async () => {
@@ -43,15 +39,14 @@ export const selectSectionFanfic = async (sectionIds: number[]) => {
     .orderBy(sectionFanfics.sectionId, sectionFanfics.position);
 };
 
-export const getFanficByExternalId = async (external: number) => {
-  const fanfic = await db
+export const listUserFanfics = async (userId: string) => {
+  return await db
     .select()
     .from(fanfics)
-    .where(drizzle.eq(fanfics.fanficId, external));
-  if (fanfic.length === 0) {
-    return null;
-  }
-  return fanfic[0];
+    .innerJoin(sectionFanfics, drizzle.eq(fanfics.id, sectionFanfics.fanficId))
+    .innerJoin(sections, drizzle.eq(sectionFanfics.sectionId, sections.id))
+    .where(drizzle.eq(sectionFanfics.userId, userId))
+    .orderBy(sectionFanfics.sectionId, sectionFanfics.position);
 };
 
 export const getFanficById = async (sectionFanficId: number) => {
@@ -69,6 +64,13 @@ export const getFanficById = async (sectionFanficId: number) => {
     ...fanfic[0].section_fanfics,
     id: fanfic[0].section_fanfics.id,
   };
+};
+
+export const getFanficByExternalId = async (externalId: number) => {
+  return db
+    .select()
+    .from(fanfics)
+    .where(drizzle.eq(fanfics.fanficId, externalId));
 };
 
 export const insertFanfic = async (fanfic: NewFanfic) => {
@@ -96,17 +98,14 @@ export const insertSectionFanfic = async (
     .insert(sectionFanfics)
     .values({ sectionId, fanficId, position, userId })
     .returning({ fanficId: fanfics.id });
-  expirePath(`/library/sections/${sectionId}`);
   return result[0].fanficId;
 };
 
 export const deleteSectionFanfic = async (userFanficId: number) => {
-  const sectionFanfic = await db
+  return await db
     .delete(sectionFanfics)
     .where(drizzle.eq(sectionFanfics.id, userFanficId))
-    .returning({ fanficId: fanfics.id, sectionId: sectionFanfics.sectionId });
-  const sectionId = sectionFanfic[0].sectionId;
-  expirePath(`/library/sections/${sectionId}/fanfics/${userFanficId}`);
+    .returning({ fanficId: fanfics.id });
 };
 
 export const reorderFanfics = async (
@@ -114,35 +113,23 @@ export const reorderFanfics = async (
   fromIndex: number,
   toIndex: number
 ) => {
-  return await db.transaction(async (tx) => {
-    const fanfics = await tx
-      .select()
-      .from(sectionFanfics)
-      .where(drizzle.eq(sectionFanfics.sectionId, sectionId))
-      .orderBy(sectionFanfics.position);
+  const fanfics = await db
+    .select()
+    .from(sectionFanfics)
+    .where(drizzle.eq(sectionFanfics.sectionId, sectionId))
+    .orderBy(sectionFanfics.position);
 
-    const [movedFanfic] = fanfics.splice(fromIndex, 1);
-    fanfics.splice(toIndex, 0, movedFanfic);
+  const [movedFanfic] = fanfics.splice(fromIndex, 1);
+  fanfics.splice(toIndex, 0, movedFanfic);
 
-    await Promise.all(
-      fanfics.map((fanfic) =>
-        tx
-          .update(sectionFanfics)
-          .set({ position: -(fanfics.indexOf(fanfic) + 1) })
-          .where(drizzle.eq(sectionFanfics.id, fanfic.id))
-      )
-    );
+  await Promise.all(
+    fanfics.map((fanfic, index) =>
+      db
+        .update(sectionFanfics)
+        .set({ position: index })
+        .where(drizzle.eq(sectionFanfics.id, fanfic.id))
+    )
+  );
 
-    await tx
-      .update(sectionFanfics)
-      .set({ position: drizzle.sql`-position - 1` })
-      .where(
-        drizzle.and(
-          drizzle.eq(sectionFanfics.sectionId, sectionId),
-          drizzle.lt(sectionFanfics.position, 0)
-        )
-      );
-
-    return fanfics;
-  });
+  return fanfics;
 };
