@@ -9,9 +9,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Tags } from "@/db/types";
-import { cn } from "@/lib/utils";
-import React from "react";
-import { useMediaQuery } from "@/hooks/use-media-query";
+import { cn, getIsDesktop } from "@/lib/utils";
 
 const MAX_TAGS_ITEM_LENGTH = 50;
 
@@ -26,7 +24,7 @@ type BadgeGroup = {
 };
 
 export default function TagsCarousel({ tags }: { tags: Tags }) {
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isDesktop = getIsDesktop();
 
   const badges: BadgeItem[] = Object.entries(tags).flatMap(
     ([category, values]) =>

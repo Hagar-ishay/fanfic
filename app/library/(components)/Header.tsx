@@ -7,7 +7,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { cn } from "@/lib/utils";
+import { cn, getIsDesktop } from "@/lib/utils";
 import { Fragment } from "react";
 
 export function Header({
@@ -17,7 +17,7 @@ export function Header({
   segments: { label: string; href: string }[];
   children?: React.ReactNode;
 }) {
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isDesktop = getIsDesktop()
   return (
     <div className="flex justify-between items-center sticky top-16 bg-background/80 backdrop-blur-sm z-40 shadow-md py-6">
       <div className="pl-8">

@@ -1,4 +1,5 @@
 "use client";
+import { getIsDesktop } from "@/lib/utils";
 import type React from "react";
 import {
   Tooltip as BaseTooltip,
@@ -6,7 +7,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
-import { useMediaQuery } from "@/hooks/use-media-query";
 
 export function Tooltip({
   description,
@@ -15,7 +15,7 @@ export function Tooltip({
   description: string;
   children: React.ReactNode;
 }) {
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isDesktop = getIsDesktop();
   return (
     <TooltipProvider>
       {/* disable on mobile */}

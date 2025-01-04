@@ -17,7 +17,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useMediaQuery } from "@/hooks/use-media-query";
+import { getIsDesktop } from "@/lib/utils";
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -50,7 +50,7 @@ export function ContextMenu({
     { items: options },
   ]);
   const [activeIndex, setActiveIndex] = useState(0);
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isDesktop = getIsDesktop();
   const router = useRouter();
 
   function handleSelect(option: Option) {

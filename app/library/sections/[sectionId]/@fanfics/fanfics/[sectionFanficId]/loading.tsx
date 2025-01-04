@@ -7,11 +7,11 @@ import {
   DrawerDialogTitle,
 } from "@/components/base/DrawerDialog";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { cn } from "@/lib/utils";
+import { cn, getIsDesktop } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 
 export default function Loading() {
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isDesktop = getIsDesktop()
 
   return (
     <DrawerDialog defaultOpen>

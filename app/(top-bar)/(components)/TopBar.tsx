@@ -1,7 +1,6 @@
-import { UserButton } from "@clerk/nextjs";
-import type React from "react";
-import { SettingsModal } from "@/(top-bar)/(components)/Settings";
 import { SearchInput } from "@/(top-bar)/(components)/SearchInput";
+import { SettingsModal } from "@/(top-bar)/(components)/Settings";
+import { UserButton } from "@clerk/nextjs";
 
 export default async function TopBar() {
   return (
@@ -9,7 +8,7 @@ export default async function TopBar() {
       <div className="flex justify-start">
         <UserButton />
       </div>
-      <div className="flex flex-row items-center gap-4 focus:outline-none focus:ring-2 focus:ring-yellow-400 ">
+      <div className="flex flex-row items-center gap-4 focus:outline-none focus:ring-2 ">
         <SearchInput />
         <div className="flex flex-row gap-2">
           <SettingsModal />

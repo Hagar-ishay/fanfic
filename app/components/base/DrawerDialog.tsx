@@ -22,8 +22,9 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { ComponentProps } from "react";
+import { getIsDesktop } from "@/lib/utils";
 
-const isDesktop = () => useMediaQuery("(min-width: 768px)");
+const isDesktop = () => getIsDesktop()
 
 export function DrawerDialog(
   props: ComponentProps<typeof Dialog> | ComponentProps<typeof Drawer>

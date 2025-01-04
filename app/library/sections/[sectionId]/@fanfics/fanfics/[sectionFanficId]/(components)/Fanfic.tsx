@@ -12,8 +12,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Section, Tags, UserFanfic } from "@/db/types";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import { cn } from "@/lib/utils";
+import { cn, getIsDesktop } from "@/lib/utils";
 import { FanficHeader } from "@/library/sections/[sectionId]/@fanfics/fanfics/[sectionFanficId]/(components)/FanficHeader";
 import EditableLabels from "@/library/sections/[sectionId]/@fanfics/fanfics/[sectionFanficId]/(components)/InputLabels";
 import { SummaryContent } from "@/library/sections/[sectionId]/@fanfics/fanfics/[sectionFanficId]/(components)/Summary";
@@ -31,7 +30,7 @@ export default function Fanfic({
 }) {
   const router = useRouter();
   const [isOpen, setIsOpen] = React.useState(false);
-  const isDesktop = useMediaQuery("(min-width: 768px)");
+  const isDesktop = getIsDesktop();
 
   React.useEffect(() => {
     setIsOpen(true);
