@@ -10,12 +10,12 @@ import { Button } from "@/components/ui/button";
 import { DrawerDescription } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Fanfic, Section, SectionFanfic } from "@/db/types";
-import { CircleCheck, SearchIcon } from "lucide-react";
+import { cn, getIsDesktop } from "@/lib/utils";
+import { SearchIcon } from "lucide-react";
+import { DateTime } from "luxon";
 import { matchSorter } from "match-sorter";
 import Link from "next/link";
 import React from "react";
-import { DateTime } from "luxon";
-import { cn, getIsDesktop } from "@/lib/utils";
 
 export function Search({
   userFanfics,
@@ -36,7 +36,6 @@ export function Search({
       "sections.name",
       "fanfics.tags.*",
       "section_fanfics.editableLabels",
-      "fanfics.summary",
     ],
     threshold: matchSorter.rankings.CONTAINS,
     sorter: (rankedItems) => {
