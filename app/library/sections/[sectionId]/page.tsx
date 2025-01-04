@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props) {
     return notFound();
   }
 
-  const displayName = currentSection.displayName;
+  const displayName = currentSection.name;
 
   return {
     title: `Penio Fanfic - ${displayName}`,
