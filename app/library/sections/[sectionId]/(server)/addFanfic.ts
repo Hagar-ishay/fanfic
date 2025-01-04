@@ -1,7 +1,7 @@
 "use server";
 
 import { AO3_LINK } from "@/consts";
-import { getFanficByExternalId, insertFanfic, insertSectionFanfic } from "@/db/fanfics";
+import { getFanficById, insertFanfic, insertSectionFanfic } from "@/db/fanfics";
 import { getSection } from "@/db/sections";
 import { getAo3Client } from "@/lib/ao3Client";
 import { htmlParser } from "@/lib/htmlParser";
@@ -22,7 +22,7 @@ export async function addFanfic(
     fanficUrl.toString().replace(`${AO3_LINK}/works/`, "").split("/")[0] ?? "";
 
   try {
-    const fanfic = await getFanficByExternalId(+fanficId);
+    const fanfic = await getFanficById(+fanficId);
     let dbFanficId = fanfic?.id;
     if (!dbFanficId) {
       const data = await ao3Client.getFanfic(fanficId);

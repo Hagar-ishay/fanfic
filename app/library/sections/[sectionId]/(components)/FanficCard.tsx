@@ -1,8 +1,9 @@
 "use client";
 
 import { Tooltip } from "@/components/base/Tooltip";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import type { UserFanfic } from "@/db/types";
+import { UserFanfic } from "@/db/types";
 import { cn } from "@/lib/utils";
 import { useFanficTransition } from "@/library/sections/[sectionId]/@fanfics/fanfics/[sectionFanficId]/(components)/FanficTransitionContext";
 import { Draggable } from "@hello-pangea/dnd";
@@ -19,19 +20,18 @@ export default function FanficCard({
   const { isPending } = useFanficTransition();
 
   return (
-    <Draggable draggableId={`fanfic-${fanfic.id.toString()}`} index={index}>
+    <Draggable draggableId={`fanfic-${fanfic.id}`} index={index}>
       {(provided, snapshot) => (
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          style={provided.draggableProps.style}
-          className={cn("relative", snapshot.isDragging && "z-50")}
+          className="relative"
         >
           <Card
             className={cn(
               "pt-3 pb-3 border-none border-0 shadow-none hover:bg-accent/30",
               snapshot.isDragging
-                ? "shadow-lg opacity-90 bg-background"
+                ? "opacity-50"
                 : "transition-all duration-300 ease-in-out"
             )}
           >
@@ -41,9 +41,12 @@ export default function FanficCard({
                   <div className="flex flex-row items-center gap-3">
                     <div
                       {...provided.dragHandleProps}
-                      className="cursor-grab active:cursor-grabbing p-2"
+                      onClick={(e) => e.stopPropagation()}
+                      className="cursor-grab active:cursor-grabbing"
                     >
-                      <Grip className="w-4 h-4" />
+                      <Button size="icon" variant="ghost">
+                        <Grip />
+                      </Button>
                     </div>
                     <Link
                       href={`/library/sections/${fanfic.sectionId}/fanfics/${fanfic.id}`}
