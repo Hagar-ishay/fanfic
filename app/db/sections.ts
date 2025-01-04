@@ -7,6 +7,7 @@ import { sectionFanfics, sections } from "@/db/schema";
 import { NeonHttpQueryResultHKT } from "drizzle-orm/neon-http";
 import { PgTransaction } from "drizzle-orm/pg-core";
 import { expirePath } from "next/dist/server/web/spec-extension/revalidate";
+import { NeonQueryResultHKT } from "drizzle-orm/neon-serverless";
 
 export const selectOrCreateSections = async (userId: string) => {
   let userSections = await listUserSections(userId);
@@ -53,17 +54,17 @@ export const insertSection = async ({
 export const deleteSection = async (
   sectionId: number,
   tx: PgTransaction<
-    NeonHttpQueryResultHKT,
+    NeonQueryResultHKT,
     Record<string, never>,
     drizzle.ExtractTablesWithRelations<Record<string, never>>
   > | null = null
 ) => {
   const isTopLevel = !tx;
-  const currentTx = tx || (await db.transaction(async (trx) => trx));
+  const currentTx = tx;
 
   const deleteFunc = async (
     innerTx: PgTransaction<
-      NeonHttpQueryResultHKT,
+      NeonQueryResultHKT,
       Record<string, never>,
       drizzle.ExtractTablesWithRelations<Record<string, never>>
     >
