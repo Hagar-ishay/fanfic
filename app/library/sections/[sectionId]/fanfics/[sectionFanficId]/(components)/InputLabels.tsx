@@ -4,14 +4,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { updateSectionFanfic } from "@/db/fanfics";
-import { Tag, X } from "lucide-react";
+import { Tag, TagsIcon, X } from "lucide-react";
 import type React from "react";
 import { useOptimistic, useRef, useState, useTransition } from "react";
+import { cn } from "@/lib/utils";
 
 export default function InputLabels({
+  sectionId,
   fanficId,
   labels,
 }: {
+  sectionId: number;
   fanficId: number;
   labels: string[];
 }) {
@@ -46,7 +49,9 @@ export default function InputLabels({
         }
         if (newLabels !== currentLabels) {
           addOptimistic(newLabels);
-          await updateSectionFanfic(fanficId, { editableLabels: newLabels });
+          await updateSectionFanfic(sectionId, fanficId, {
+            editableLabels: newLabels,
+          });
         }
       });
     } else {
@@ -74,7 +79,7 @@ export default function InputLabels({
     <div className="max-w-md px-1 flex flex-row items-center gap-2">
       {newLabel === null && (
         <Button size="sm" variant="ghost" onClick={handleAddLabel}>
-          <Tag />
+          <TagsIcon /> Add Label
         </Button>
       )}
       <div className="flex flex-row w-fit items-center gap-1">
@@ -82,16 +87,18 @@ export default function InputLabels({
           <Badge variant="outline" className="w-fit">
             <Input
               noborder
-              className="text-xs px-1 py-0 placeholder:text-gray-400 placeholder:truncate"
-              size={5}
-              ref={inputRef}
+              autoFocus
+              className={cn(
+                "text-xs text-muted-foreground px-1 py-0 placeholder:text-gray-400 placeholder:truncate transition-all",
+                "w-auto min-w-[60px] max-w-[200px]"
+              )}
               value={newLabel}
               onChange={(e) => setNewLabel(e.target.value)}
               onKeyDown={handleKeyDown}
               onBlur={() =>
                 handleUpdateLabels({ actionType: "add", label: newLabel })
               }
-              placeholder="Add tag"
+              placeholder="Enter label"
             />
           </Badge>
         )}
@@ -105,12 +112,12 @@ export default function InputLabels({
               {label}
               <Button
                 variant="ghost"
-                className="absolute right-1 top-1/2 -translate-y-1/2 p-0 h-4 w-4"
+                className="absolute right-1 top-1/2 -translate-y-1/3 p-0 h-4 w-4"
                 onClick={() =>
                   handleUpdateLabels({ actionType: "delete", label })
                 }
               >
-                <X />
+                ˣ
               </Button>
             </Badge>
           ))}

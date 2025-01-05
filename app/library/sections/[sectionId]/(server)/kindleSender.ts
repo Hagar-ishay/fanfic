@@ -98,7 +98,7 @@ export async function kindleSender({
       downloadPath
     );
     console.log("Sent to Kindle:", title);
-    await updateSectionFanfic(fanfic.id, {
+    await updateSectionFanfic(fanfic.sectionId, fanfic.id, {
       lastSent: new Date(Date.now()),
       latestStartingChapter: latestFinalChapter,
     });

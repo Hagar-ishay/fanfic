@@ -7,7 +7,6 @@ import React from "react";
 import { ContextMenu } from "@/components/base/ContextMenu";
 import { Delete } from "@/components/base/Delete";
 import { deleteSection, transferSection } from "@/db/sections";
-import { useSectionTransition } from "@/library/(components)/SectionTransitionContext";
 
 export function SectionContextMenu({
   section,
@@ -18,15 +17,10 @@ export function SectionContextMenu({
   transferableSections: Section[];
   trigger: React.ReactNode;
 }) {
-  const { isPending, startTransition } = useSectionTransition();
   const [open, setOpen] = React.useState(false);
 
-  const pending = isPending(section.id);
-
   async function onDelete() {
-    startTransition(section.id, async () => {
-      await deleteSection(section.id);
-    });
+    await deleteSection(section.id);
   }
 
   type Option = {
@@ -41,7 +35,6 @@ export function SectionContextMenu({
     {
       icon: <SendHorizontal size={17} />,
       name: "Transfer Section",
-      disabled: pending,
       subItems: [
         ...(section.parentId
           ? [
@@ -60,7 +53,6 @@ export function SectionContextMenu({
     {
       icon: <Trash2 size={17} />,
       name: "Delete Section",
-      disabled: pending,
       action: () => setOpen(true),
     },
   ];

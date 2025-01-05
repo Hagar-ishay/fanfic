@@ -1,12 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import {
-  ClerkProvider,
-  SignInButton,
-  SignedIn,
-  SignedOut,
-} from "@clerk/nextjs";
+import { ClerkProvider, SignedIn, SignedOut } from "@clerk/nextjs";
 import { Toaster } from "@/components/ui/toaster";
 import { Suspense } from "react";
 import { ThemeProvider } from "@/components/base/theme";
