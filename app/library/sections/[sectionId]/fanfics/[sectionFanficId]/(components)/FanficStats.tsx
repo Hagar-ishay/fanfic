@@ -17,10 +17,22 @@ type StatItemProps = {
 };
 
 const StatItem = ({ icon, label, value }: StatItemProps) => {
-  const iconColor = `stat-icon-${label.toLowerCase().replace(" ", "-")}`;
+  const iconColor = {
+    Created: "text-stat-icon-created",
+    Completed: "text-stat-icon-completed",
+    Updated: "text-stat-icon-updated",
+    Chapters: "text-stat-icon-chapters",
+    Words: "text-stat-icon-words",
+    Language: "text-stat-icon-language",
+    "Last Sent": "text-stat-icon-last-sent",
+    "New Chapters": "text-stat-icon-new-chapters",
+  };
+
+  const color = iconColor[label as keyof typeof iconColor];
+
   return (
     <div className="flex items-center gap-3 p-3 sm:p-4 rounded-md hover:bg-accent/50 transition-all duration-300 hover:scale-105 bg-gradient-to-br from-transparent to-accent/5">
-      <div className={cn("p-2 rounded-full", iconColor)}>{icon}</div>
+      <div className={cn("p-2 rounded-full", color)}>{icon}</div>
       <div className="flex flex-col min-w-0">
         <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
           {label}
