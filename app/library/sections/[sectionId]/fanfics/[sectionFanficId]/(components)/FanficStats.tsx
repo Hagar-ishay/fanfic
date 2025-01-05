@@ -8,7 +8,7 @@ import {
   Send,
   CheckCircle2,
 } from "lucide-react";
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 
 type StatItemProps = {
   icon: React.ReactNode;
@@ -17,33 +17,17 @@ type StatItemProps = {
 };
 
 const StatItem = ({ icon, label, value }: StatItemProps) => {
-  const getIconColor = (label: string) => {
-    switch (label.toLowerCase()) {
-      case 'completed':
-        return 'text-green-500 bg-green-500/10';
-      case 'updated':
-        return 'text-blue-500 bg-blue-500/10';
-      case 'chapters':
-        return 'text-purple-500 bg-purple-500/10';
-      case 'words':
-        return 'text-orange-500 bg-orange-500/10';
-      case 'language':
-        return 'text-cyan-500 bg-cyan-500/10';
-      case 'last sent':
-        return 'text-rose-500 bg-rose-500/10';
-      case 'new chapters':
-        return 'text-amber-500 bg-amber-500/10';
-      default:
-        return 'text-accent-foreground bg-accent/10';
-    }
-  };
-
+  const iconColor = `stat-icon-${label.toLowerCase().replace(" ", "-")}`;
   return (
     <div className="flex items-center gap-3 p-3 sm:p-4 rounded-md hover:bg-accent/50 transition-all duration-300 hover:scale-105 bg-gradient-to-br from-transparent to-accent/5">
-      <div className={`p-2 rounded-full ${getIconColor(label)}`}>{icon}</div>
+      <div className={cn("p-2 rounded-full", iconColor)}>{icon}</div>
       <div className="flex flex-col min-w-0">
-        <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{label}</span>
-        <span className="font-semibold text-foreground/90 truncate">{value || "N/A"}</span>
+        <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">
+          {label}
+        </span>
+        <span className="font-semibold text-foreground/90 truncate">
+          {value || "N/A"}
+        </span>
       </div>
     </div>
   );

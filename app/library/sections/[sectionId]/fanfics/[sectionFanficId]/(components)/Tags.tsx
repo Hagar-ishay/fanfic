@@ -17,14 +17,6 @@ export function Tags({ tags }: { tags: TagType }) {
               return valuesB.length - valuesA.length;
             })
             .map(([key, values], idx) => {
-              const getTagColor = (value: string) => {
-                if (value.toLowerCase().includes('angst')) return 'hover:bg-red-500/20 hover:text-red-500';
-                if (value.toLowerCase().includes('fluff')) return 'hover:bg-pink-500/20 hover:text-pink-500';
-                if (value.toLowerCase().includes('romance')) return 'hover:bg-rose-500/20 hover:text-rose-500';
-                if (value.toLowerCase().includes('humor')) return 'hover:bg-yellow-500/20 hover:text-yellow-500';
-                return 'hover:bg-accent hover:text-accent-foreground';
-              };
-
               return (
                 <div
                   key={idx}
@@ -44,7 +36,9 @@ export function Tags({ tags }: { tags: TagType }) {
                       <Badge
                         key={valueIdx}
                         variant="secondary"
-                        className={`px-3 py-1.5 text-xs transition-all duration-200 hover:scale-105 ${getTagColor(value)}`}
+                        className={
+                          "px-3 py-1.5 text-xs transition-all duration-200 hover:scale-105 hover:bg-accent hover:text-accent-foreground"
+                        }
                       >
                         {value}
                       </Badge>

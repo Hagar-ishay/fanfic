@@ -23,20 +23,22 @@ export default function Fanfic({
   const isDesktop = getIsDesktop();
 
   return (
-    <div className="flex flex-col gap-8 p-6 mx-auto">
+    <div className="flex flex-col gap-6 p-3 sm:p-6 mx-auto relative w-full">
+      <div className="absolute inset-0 bg-gradient-to-b from-accent/5 via-transparent to-accent/5 pointer-events-none" />
+      
       {/* Header Section */}
-      <div className="flex justify-between items-start bg-gradient-to-r from-background to-accent/5 p-4 rounded-lg">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+      <div className="relative flex justify-between items-start bg-gradient-to-r from-card via-accent/10 to-card p-4 sm:p-6 rounded-lg border shadow-md">
+        <div className="flex flex-col gap-3 min-w-0 flex-1">
+          <div className="flex items-start gap-3 flex-wrap">
+            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent break-words">
               {fanfic.title}
             </h1>
-            <Link href={fanfic.sourceUrl} target="_blank">
-              <ExternalLink className="h-5 w-5" />
+            <Link href={fanfic.sourceUrl} target="_blank" className="hover:scale-110 transition-transform">
+              <ExternalLink className="h-6 w-6" />
             </Link>
           </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <span>by {fanfic.author}</span>
+          <div className="flex items-center gap-2 text-muted-foreground truncate">
+            <span className="truncate">by {fanfic.author}</span>
             {fanfic.authorUrl && (
               <Link href={fanfic.authorUrl} target="_blank">
                 <ExternalLink className="h-4 w-4" />
@@ -55,16 +57,18 @@ export default function Fanfic({
         />
       </div>
       {fanfic.summary && (
-        <div className="relative max-h-40 overflow-y-auto rounded-lg bg-accent/5 p-4">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/80 pointer-events-none opacity-20" />
-          <BlockQuote>
-            <SummaryContent summary={fanfic.summary} />
-          </BlockQuote>
+        <div className="relative overflow-hidden rounded-lg bg-gradient-to-br from-card via-accent/5 to-card border p-6 shadow-md">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/40" />
+          <div className="relative max-h-40 overflow-y-auto">
+            <BlockQuote>
+              <SummaryContent summary={fanfic.summary} />
+            </BlockQuote>
+          </div>
         </div>
       )}
 
-      <div className="flex flex-col gap-2 bg-accent/5 p-4 rounded-lg">
-        <h3 className="font-semibold text-lg border-b pb-2">Personal Labels</h3>
+      <div className="relative flex flex-col gap-3 bg-gradient-to-br from-card to-accent/10 p-6 rounded-lg border shadow-md">
+        <h3 className="font-semibold text-lg border-b pb-2 text-foreground/90">Personal Labels</h3>
         <InputLabels
           sectionId={fanfic.sectionId}
           fanficId={fanfic.id}
@@ -72,7 +76,7 @@ export default function Fanfic({
         />
       </div>
 
-      <div className="space-y-8">
+      <div className="space-y-8 relative">
         <FanficStats fanfic={fanfic} />
         <Tags tags={fanfic.tags} />
       </div>

@@ -41,6 +41,22 @@ body {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Fanfic semantic colors */
+    --tag-angst: 0 84% 60%; /* red-500 */
+    --tag-fluff: 336 74% 71%; /* pink-500 */
+    --tag-romance: 340 82% 66%; /* rose-500 */
+    --tag-humor: 48 96% 53%; /* yellow-500 */
+
+    /* Stats colors */
+    --stat-created: 215 90% 55%;    /* blue-400 */
+    --stat-completed: 142 71% 45%;   /* green-500 */
+    --stat-updated: 221 83% 53%;     /* blue-500 */
+    --stat-chapters: 270 95% 75%;    /* purple-500 */
+    --stat-words: 24 95% 64%;        /* orange-500 */
+    --stat-language: 184 85% 53%;    /* cyan-500 */
+    --stat-last-sent: 336 74% 71%;   /* rose-500 */
+    --stat-new-chapters: 48 96% 53%; /* amber-500 */
   }
 
   .dark {
@@ -85,5 +101,47 @@ body {
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Color utility classes */
+  .tag-hover-angst {
+    @apply hover:bg-[hsl(var(--tag-angst)/0.2)] hover:text-[hsl(var(--tag-angst))];
+  }
+  .tag-hover-fluff {
+    @apply hover:bg-[hsl(var(--tag-fluff)/0.2)] hover:text-[hsl(var(--tag-fluff))];
+  }
+  .tag-hover-romance {
+    @apply hover:bg-[hsl(var(--tag-romance)/0.2)] hover:text-[hsl(var(--tag-romance))];
+  }
+  .tag-hover-humor {
+    @apply hover:bg-[hsl(var(--tag-humor)/0.2)] hover:text-[hsl(var(--tag-humor))];
+  }
+}
+
+@layer components {
+  /* Base stat icon styles */
+  .stat-icon-created { 
+    @apply text-[hsl(var(--stat-created))] bg-[hsl(var(--stat-created)/0.1)]; 
+  }
+  .stat-icon-completed { 
+    @apply text-[hsl(var(--stat-completed))] bg-[hsl(var(--stat-completed)/0.1)]; 
+  }
+  .stat-icon-updated { 
+    @apply text-[hsl(var(--stat-updated))] bg-[hsl(var(--stat-updated)/0.1)]; 
+  }
+  .stat-icon-chapters { 
+    @apply text-[hsl(var(--stat-chapters))] bg-[hsl(var(--stat-chapters)/0.1)]; 
+  }
+  .stat-icon-words { 
+    @apply text-[hsl(var(--stat-words))] bg-[hsl(var(--stat-words)/0.1)]; 
+  }
+  .stat-icon-language { 
+    @apply text-[hsl(var(--stat-language))] bg-[hsl(var(--stat-language)/0.1)]; 
+  }
+  .stat-icon-last-sent { 
+    @apply text-[hsl(var(--stat-last-sent))] bg-[hsl(var(--stat-last-sent)/0.1)]; 
+  }
+  .stat-icon-new-chapters { 
+    @apply text-[hsl(var(--stat-new-chapters))] bg-[hsl(var(--stat-new-chapters)/0.1)]; 
   }
 }
