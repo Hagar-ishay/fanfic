@@ -6,7 +6,7 @@ export type ShowHideModalProps = {
   children: React.ReactNode;
 };
 
-export function ShowHideModal({ children }: ShowHideModalProps) {
+export function ShowHideLayout({ children }: ShowHideModalProps) {
   const path = usePathname();
-  return <>{path.includes("/fanfics/") && children}</>;
+  return <>{!path.includes("/fanfics/") && children}</>;
 }

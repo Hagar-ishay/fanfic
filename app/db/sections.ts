@@ -132,3 +132,28 @@ export const getSection = async (sectionId: number) => {
     .where(drizzle.eq(sections.id, sectionId));
   return section ? section[0] : null;
 };
+
+export async function getBreadcrumbs(
+  sectionId: number,
+  displayName: string,
+  parentId: number | null
+) {
+  let breadcrumbs = [
+    {
+      label: displayName,
+      href: `/library/sections/${sectionId}`,
+    },
+  ];
+  if (parentId) {
+    const parentSection = await getSection(parentId);
+    if (parentSection) {
+      const parentBreadcrumbs = await getBreadcrumbs(
+        parentSection.id,
+        parentSection.name,
+        parentSection.parentId
+      );
+      breadcrumbs = [...parentBreadcrumbs, ...breadcrumbs];
+    }
+  }
+  return breadcrumbs;
+}

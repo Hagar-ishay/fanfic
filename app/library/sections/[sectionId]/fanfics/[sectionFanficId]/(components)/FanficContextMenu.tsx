@@ -85,7 +85,9 @@ export function FanficContextMenu({
       subItems: sections.map((section) => ({
         name: section.name,
         action: async () => {
-          await updateSectionFanfic(fanfic.id, { sectionId: section.id });
+          await updateSectionFanfic(fanfic.sectionId, fanfic.id, {
+            sectionId: section.id,
+          });
           redirect(`/library/sections/${section.id}`);
         },
       })),
@@ -106,11 +108,7 @@ export function FanficContextMenu({
   return (
     <div>
       <Delete
-        onDelete={() =>
-          startTransition(fanfic.id, async () => {
-            deleteSectionFanfic(fanfic.id);
-          })
-        }
+        onDelete={async () => deleteSectionFanfic(fanfic.id)}
         open={shouldDelete}
         onOpenChange={setShouldDelete}
         header={`Are you sure you want to delete ${fanfic.title}`}

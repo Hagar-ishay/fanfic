@@ -17,11 +17,11 @@ type StatItemProps = {
 };
 
 const StatItem = ({ icon, label, value }: StatItemProps) => (
-  <div className="flex items-center gap-2 p-2 rounded-md hover:bg-accent/50 transition-colors">
-    <div className="text-muted-foreground">{icon}</div>
+  <div className="flex items-center gap-3 p-3 rounded-md hover:bg-accent/50 transition-all duration-200 hover:scale-105">
+    <div className="text-accent-foreground/80">{icon}</div>
     <div className="flex flex-col">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="font-medium">{value || "N/A"}</span>
+      <span className="text-xs text-muted-foreground font-medium">{label}</span>
+      <span className="font-medium text-foreground/90">{value || "N/A"}</span>
     </div>
   </div>
 );
@@ -76,28 +76,18 @@ export const FanficStats = ({ fanfic }: { fanfic: UserFanfic }) => {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-        <div className="p-3">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+      <div className="rounded-lg border bg-gradient-to-br from-card to-accent/5 text-card-foreground shadow-sm">
+        <div className="p-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {stats.map((stat, index) => (
               <StatItem key={index} {...stat} />
             ))}
+            {personalStats.map(
+              (stat, index) => stat && <StatItem key={index} {...stat} />
+            )}
           </div>
         </div>
       </div>
-
-      {personalStats.length > 0 && (
-        <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-          <div className="p-3">
-            <h3 className="font-semibold text-sm mb-2">Reading Progress</h3>
-            <div className="grid grid-cols-2 gap-2">
-              {personalStats.map(
-                (stat, index) => stat && <StatItem key={index} {...stat} />
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

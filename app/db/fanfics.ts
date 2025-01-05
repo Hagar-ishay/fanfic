@@ -4,6 +4,7 @@ import * as drizzle from "drizzle-orm";
 import { db } from "@/db/db";
 import { fanfics, sectionFanfics, sections } from "@/db/schema";
 import { NewFanfic } from "@/db/types";
+import { expirePath } from "next/cache";
 
 export const updateFanfic = async (ficId: number, { ...update }) => {
   return await db
@@ -14,13 +15,15 @@ export const updateFanfic = async (ficId: number, { ...update }) => {
 };
 
 export const updateSectionFanfic = async (
+  sectionId: number,
   sectionFanficId: number,
   { ...update }
 ) => {
-  return await db
+  await db
     .update(sectionFanfics)
     .set(update)
     .where(drizzle.eq(sectionFanfics.id, sectionFanficId));
+  expirePath(`/api/sections/${sectionId}fanfics/${sectionFanficId}`);
 };
 
 export const selectOngoingFanfics = async () => {

@@ -7,8 +7,6 @@ export default async function Layout({
 }: {
   children: React.ReactNode;
 }) {
-  await connection();
-
   return (
     <div className="flex flex-col min-h-screen">
       <Header segments={[{ label: "Library", href: "/library" }]}>

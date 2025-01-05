@@ -1,25 +1,17 @@
 "use client";
 
-import {
-  DrawerDialog,
-  DrawerDialogContent,
-  DrawerDialogFooter,
-  DrawerDialogHeader,
-  DrawerDialogTitle,
-} from "@/components/base/DrawerDialog";
-import TagsCarousel from "@/components/base/Tags";
+import { BlockQuote } from "@/components/base/BlockQuote";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import { Section, Tags, UserFanfic } from "@/db/types";
-import { cn, getIsDesktop } from "@/lib/utils";
-import { FanficHeader } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficHeader";
-import EditableLabels from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/InputLabels";
+import { Section, UserFanfic } from "@/db/types";
+import { getIsDesktop } from "@/lib/utils";
+import { FanficContextMenu } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficContextMenu";
 import { SummaryContent } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/Summary";
-import { Ellipsis, EllipsisVertical } from "lucide-react";
-import { useRouter } from "next/navigation";
-import React from "react";
-import { FanficContextMenu } from "./FanficContextMenu";
+import { Ellipsis, EllipsisVertical, ExternalLink } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import { FanficStats } from "./FanficStats";
+import { Tags } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/Tags";
+import InputLabels from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/InputLabels";
 
 export default function Fanfic({
   fanfic,
@@ -28,74 +20,62 @@ export default function Fanfic({
   fanfic: UserFanfic;
   transferableSections: Section[];
 }) {
-  const router = useRouter();
-  const [isOpen, setIsOpen] = React.useState(false);
   const isDesktop = getIsDesktop();
 
-  React.useEffect(() => {
-    setIsOpen(true);
-  }, [router]);
-
-  const tags: Tags = {
-    WORD_COUNT: [fanfic.wordCount?.toString() ?? ""],
-    CHAPTER_COUNT: [fanfic.chapterCount ?? ""],
-    STATUS: [fanfic.completedAt ? "Complete" : "In Progress"],
-    ...fanfic.tags,
-  };
-
   return (
-    <DrawerDialog
-      open={isOpen}
-      onOpenChange={(open) => {
-        if (!open) {
-          router.back();
-        }
-      }}
-    >
-      <DrawerDialogContent
-        className={cn(
-          "flex flex-col gap-6 p-6",
-          !isDesktop ? "h-full" : "",
-          "max-w-2xl mx-auto"
-        )}
-        optionsMenu={
-          <FanficContextMenu
-            fanfic={fanfic}
-            sections={transferableSections}
-            trigger={
-              <Button size="icon" variant="ghost" className="">
-                {isDesktop ? <Ellipsis /> : <EllipsisVertical />}
-              </Button>
-            }
-          />
-        }
-      >
-        <DrawerDialogHeader className="space-y-2 px-0">
-          <DrawerDialogTitle className="text-2xl font-bold text-center">
-            <FanficHeader fanfic={fanfic} />
-          </DrawerDialogTitle>
-        </DrawerDialogHeader>
-
-        <div className="flex-1">
-          <ScrollArea className="overflow-auto max-h-80 mx-auto py-4 px-6 border border-muted rounded-lg shadow-sm bg-muted/5">
-            <SummaryContent summary={fanfic.summary ?? ""} />
-          </ScrollArea>
+    <div className="flex flex-col gap-8 p-6 mx-auto">
+      {/* Header Section */}
+      <div className="flex justify-between items-start bg-gradient-to-r from-background to-accent/5 p-4 rounded-lg">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+              {fanfic.title}
+            </h1>
+            <Link href={fanfic.sourceUrl} target="_blank">
+              <ExternalLink className="h-5 w-5" />
+            </Link>
+          </div>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <span>by {fanfic.author}</span>
+            {fanfic.authorUrl && (
+              <Link href={fanfic.authorUrl} target="_blank">
+                <ExternalLink className="h-4 w-4" />
+              </Link>
+            )}
+          </div>
         </div>
-
-        <div className="space-y-6">
-          <EditableLabels
-            fanficId={fanfic.sectionId}
-            labels={fanfic.editableLabels}
-          />
-
-          <DrawerDialogFooter className={cn("px-0", !isDesktop ? "mb-10" : "")}>
-            <div className="w-full space-y-4">
-              <Separator className="my-2" />
-              <TagsCarousel tags={tags} />
-            </div>
-          </DrawerDialogFooter>
+        <FanficContextMenu
+          fanfic={fanfic}
+          sections={transferableSections}
+          trigger={
+            <Button size="icon" variant="ghost" className="">
+              {isDesktop ? <Ellipsis /> : <EllipsisVertical />}
+            </Button>
+          }
+        />
+      </div>
+      {fanfic.summary && (
+        <div className="relative max-h-40 overflow-y-auto rounded-lg bg-accent/5 p-4">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background/80 pointer-events-none opacity-20" />
+          <BlockQuote>
+            <SummaryContent summary={fanfic.summary} />
+          </BlockQuote>
         </div>
-      </DrawerDialogContent>
-    </DrawerDialog>
+      )}
+
+      <div className="flex flex-col gap-2 bg-accent/5 p-4 rounded-lg">
+        <h3 className="font-semibold text-lg border-b pb-2">Personal Labels</h3>
+        <InputLabels
+          sectionId={fanfic.sectionId}
+          fanficId={fanfic.id}
+          labels={fanfic.editableLabels}
+        />
+      </div>
+
+      <div className="space-y-8">
+        <FanficStats fanfic={fanfic} />
+        <Tags tags={fanfic.tags} />
+      </div>
+    </div>
   );
 }
