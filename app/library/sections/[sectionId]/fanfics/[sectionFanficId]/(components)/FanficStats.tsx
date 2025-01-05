@@ -16,15 +16,38 @@ type StatItemProps = {
   value: string | number | null | undefined;
 };
 
-const StatItem = ({ icon, label, value }: StatItemProps) => (
-  <div className="flex items-center gap-3 p-3 rounded-md hover:bg-accent/50 transition-all duration-200 hover:scale-105">
-    <div className="text-accent-foreground/80">{icon}</div>
-    <div className="flex flex-col">
-      <span className="text-xs text-muted-foreground font-medium">{label}</span>
-      <span className="font-medium text-foreground/90">{value || "N/A"}</span>
+const StatItem = ({ icon, label, value }: StatItemProps) => {
+  const getIconColor = (label: string) => {
+    switch (label.toLowerCase()) {
+      case 'completed':
+        return 'text-green-500 bg-green-500/10';
+      case 'updated':
+        return 'text-blue-500 bg-blue-500/10';
+      case 'chapters':
+        return 'text-purple-500 bg-purple-500/10';
+      case 'words':
+        return 'text-orange-500 bg-orange-500/10';
+      case 'language':
+        return 'text-cyan-500 bg-cyan-500/10';
+      case 'last sent':
+        return 'text-rose-500 bg-rose-500/10';
+      case 'new chapters':
+        return 'text-amber-500 bg-amber-500/10';
+      default:
+        return 'text-accent-foreground bg-accent/10';
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-3 p-3 sm:p-4 rounded-md hover:bg-accent/50 transition-all duration-300 hover:scale-105 bg-gradient-to-br from-transparent to-accent/5">
+      <div className={`p-2 rounded-full ${getIconColor(label)}`}>{icon}</div>
+      <div className="flex flex-col min-w-0">
+        <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">{label}</span>
+        <span className="font-semibold text-foreground/90 truncate">{value || "N/A"}</span>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export const FanficStats = ({ fanfic }: { fanfic: UserFanfic }) => {
   const stats = [
@@ -76,9 +99,9 @@ export const FanficStats = ({ fanfic }: { fanfic: UserFanfic }) => {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-lg border bg-gradient-to-br from-card to-accent/5 text-card-foreground shadow-sm">
-        <div className="p-4">
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      <div className="rounded-lg border bg-gradient-to-br from-card via-accent/5 to-card text-card-foreground shadow-md overflow-hidden">
+        <div className="p-3 sm:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
             {stats.map((stat, index) => (
               <StatItem key={index} {...stat} />
             ))}
