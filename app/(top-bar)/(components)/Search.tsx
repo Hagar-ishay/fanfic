@@ -27,6 +27,7 @@ export function Search({
   }[];
 }) {
   const [searchInput, setSearchInput] = React.useState("");
+  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
   const isDesktop = getIsDesktop();
 
   const matchedFanfics = matchSorter(userFanfics, searchInput, {
@@ -69,13 +70,13 @@ export function Search({
 
   return (
     <div className="relative max-w-60 min-w-0 w-full">
-      <DrawerDialog>
+      <DrawerDialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <DrawerDialogTrigger asChild>
           <Button
             variant="outline"
             className="pl-8 text-sm text-muted-foreground cursor-text pr-10"
           >
-            Search Library...
+            <h1 className="mt-1">Search Library...</h1>
             <SearchIcon className="pointer-events-none absolute left-2 top-1/2 size-4 -translate-y-1/2 select-none opacity-50 " />
           </Button>
         </DrawerDialogTrigger>
@@ -130,6 +131,7 @@ export function Search({
                   <div className="space-y-1">
                     {fanfics.map((fanfic) => (
                       <Link
+                        onClick={() => setIsDrawerOpen(false)}
                         href={`/library/sections/${fanfic.sections.id}/fanfics/${fanfic.section_fanfics.id}`}
                         key={fanfic.section_fanfics.id}
                         className="block p-3 rounded-lg hover:bg-accent/10 transition-all duration-200 ease-in-out border border-transparent hover:border-border/40"

@@ -37,43 +37,42 @@ export default function FanficCard({
           />
 
           <Card
-            onContextMenu={(e) => {
-              e.preventDefault();
-              console.log({ triggerRef });
-              triggerRef.current?.click();
-            }}
             className={cn(
               "pt-3 pb-3 border-none border-0 shadow-none hover:bg-accent/30",
-              snapshot.isDragging
-                ? "opacity-50"
-                : "transition-all duration-300 ease-in-out"
+              snapshot.isDragging && "opacity-50"
             )}
           >
-            <CardContent className="p-5">
+            <CardContent
+              className="p-5"
+              onContextMenu={(e) => {
+                e.preventDefault();
+                triggerRef.current?.click();
+              }}
+            >
               <div className="flex flex-row items-center justify-between w-full">
-                <div className="flex-grow min-w-0 flex flex-col whitespace-nowrap text-ellipsis overflow-hidden">
-                  <div className="flex flex-row items-center gap-3">
-                    <div
-                      {...provided.dragHandleProps}
-                      onClick={(e) => e.stopPropagation()}
-                      className="cursor-grab active:cursor-grabbing"
-                    >
-                      <Button size="icon" variant="ghost">
-                        <Grip />
-                      </Button>
-                    </div>
-                    <Link
-                      href={`/library/sections/${fanfic.sectionId}/fanfics/${fanfic.id}`}
-                      className="min-w-0 flex-1"
-                    >
-                      <div className="text-md gap-3 font-semibold mt-4 truncate">
-                        {fanfic.title}
-                      </div>
-                      <div className="text-xs text-muted-foreground truncate">
-                        {fanfic.author}
-                      </div>
-                    </Link>
+                <div className="flex-grow min-w-0 flex flex-row items-center gap-3">
+                  <div
+                    {...provided.dragHandleProps}
+                    className="cursor-grab active:cursor-grabbing flex-shrink-0"
+                  >
+                    <Grip className="h-4 w-4" />
                   </div>
+                  <Link
+                    href={`/library/sections/${fanfic.sectionId}/fanfics/${fanfic.id}`}
+                    className="min-w-0 flex-1"
+                    onClick={(e) => {
+                      if (snapshot.isDragging) {
+                        e.preventDefault();
+                      }
+                    }}
+                  >
+                    <div className="text-md font-semibold truncate">
+                      {fanfic.title}
+                    </div>
+                    <div className="text-xs text-muted-foreground truncate">
+                      {fanfic.author}
+                    </div>
+                  </Link>
                 </div>
                 <div className="flex flex-row gap-2 flex-shrink-0 items-center">
                   {fanfic.lastSent && fanfic.updatedAt > fanfic.lastSent && (
