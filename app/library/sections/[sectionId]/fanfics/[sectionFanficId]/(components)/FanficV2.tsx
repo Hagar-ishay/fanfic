@@ -6,23 +6,14 @@ import Tags from "@/components/base/Tags";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import { Section, UserFanfic } from "@/db/types";
-import { getIsDesktop } from "@/lib/utils";
+import { formatDate, getIsDesktop } from "@/lib/utils";
 import { FanficContextMenu } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficContextMenu";
-import {
-  Ellipsis,
-  EllipsisVertical,
-  ExternalLink,
-  MoreVertical,
-} from "lucide-react";
+import { SummaryContent } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/Summary";
+import { Ellipsis, EllipsisVertical, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-
-const formatDate = (date: Date | null) => {
-  if (!date) return "N/A";
-  return new Date(date).toLocaleDateString();
-};
+import { FanficStats } from "./FanficStats";
 
 export default function FanficV2({
   fanfic,
@@ -34,15 +25,6 @@ export default function FanficV2({
   const isDesktop = getIsDesktop();
   const [editingLabels, setEditingLabels] = useState(false);
   const [labels, setLabels] = useState<string[]>(fanfic.editableLabels || []);
-
-  const criticalTags = {
-    Fandom: fanfic.tags.FANDOM || [],
-    Rating: fanfic.tags.RATING || [],
-    Category: fanfic.tags.CATEGORY || [],
-    Relationships: fanfic.tags.RELATIONSHIP || [],
-  };
-
-  console.log({ criticalTags });
 
   return (
     <div className="flex flex-col gap-6 p-4 max-w-screen-2xl mx-auto">
@@ -77,41 +59,13 @@ export default function FanficV2({
       {/* Summary Section */}
       {fanfic.summary && (
         <div className="max-h-40 overflow-y-auto">
-          <BlockQuote>{fanfic.summary}</BlockQuote>
+          <BlockQuote>
+            <SummaryContent summary={fanfic.summary} />
+          </BlockQuote>
         </div>
       )}
-      {/* Critical Tags Section */}
-      <div className="flex flex-wrap gap-2">
-        {Object.entries(criticalTags).map(([category, values]) =>
-          values.map((value, idx) => (
-            <Badge key={`${category}-${idx}`} variant="secondary">
-              {value}
-            </Badge>
-          ))
-        )}
-      </div>
-      {/* Stats Section */}
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div>Created: {formatDate(fanfic.createdAt)}</div>
-        <div>Updated: {formatDate(fanfic.updatedAt)}</div>
-        <div>Completed: {formatDate(fanfic.completedAt)}</div>
-        <div>Words: {fanfic.wordCount?.toLocaleString()}</div>
-        <div>Chapters: {fanfic.chapterCount}</div>
-        <div>Language: {fanfic.language}</div>
-      </div>
-      {/* Personal Stats Section */}
-      <div className="flex flex-col gap-2">
-        <h3 className="font-semibold">Reading Progress</h3>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>Last Sent: {formatDate(fanfic.lastSent)}</div>
-          {fanfic.latestStartingChapter && (
-            <div>New Chapters Available: {fanfic.latestStartingChapter}</div>
-          )}
-        </div>
-      </div>
-      {/* Additional Tags Section */}
-      <Tags tags={fanfic.tags} />
-      {/* Editable Labels Section */}
+
+      {/* Personal Labels Section - Moved up */}
       <div className="flex flex-col gap-2">
         <h3 className="font-semibold">Personal Labels</h3>
         {editingLabels ? (
@@ -161,6 +115,9 @@ export default function FanficV2({
           </div>
         )}
       </div>
+
+      <FanficStats fanfic={fanfic} />
+      <Tags tags={fanfic.tags} />
     </div>
   );
 }

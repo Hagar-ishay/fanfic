@@ -6,12 +6,12 @@ import { DateTime } from "luxon";
 import * as consts from "../consts";
 
 export async function htmlParser(html: string, fanficId: string | number) {
-  const extractor = new Extractor(html, fanficId);
+  const extractor = new HtmlParser(html, fanficId);
   const parsedFanfic = extractor.getObject();
   return parsedFanfic;
 }
 
-class Extractor {
+class HtmlParser {
   private $: cheerio.CheerioAPI;
   private _fanficId: number;
 

@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { UserFanfic } from "@/db/types";
 import { cn } from "@/lib/utils";
-import { useFanficTransition } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficTransitionContext";
 import { Draggable } from "@hello-pangea/dnd";
 import { BookUp, BookUp2, CircleCheck, Grip, Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -17,8 +16,6 @@ export default function FanficCard({
   fanfic: UserFanfic;
   index: number;
 }) {
-  const { isPending } = useFanficTransition();
-
   return (
     <Draggable draggableId={`fanfic-${fanfic.id}`} index={index}>
       {(provided, snapshot) => (
@@ -75,11 +72,6 @@ export default function FanficCard({
                   {fanfic.completedAt && <CircleCheck size="16" />}
                 </div>
               </div>
-              {isPending(fanfic.id) && (
-                <div className="absolute inset-0 bg-background/80 backdrop-blur-[1px] z-50 flex items-center justify-center">
-                  <Loader2 className="w-6 h-6 text-primary animate-spin" />
-                </div>
-              )}
             </CardContent>
           </Card>
         </div>

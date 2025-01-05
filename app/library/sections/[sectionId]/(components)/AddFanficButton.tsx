@@ -42,6 +42,7 @@ export function AddFanficButton({ sectionId }: { sectionId: number }) {
   return (
     <Tooltip description="Add Fanfic from clipboard">
       <Button
+        variant={"default"}
         className="w-10"
         size="icon"
         onClick={handleAddFanficFromClipboard}

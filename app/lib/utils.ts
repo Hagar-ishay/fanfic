@@ -35,3 +35,16 @@ export const errorMessage = (error: unknown) => {
 };
 
 export const getIsDesktop = () => useMediaQuery("(min-width: 768px)");
+
+export function capitalize(word: string) {
+  return word[0].toUpperCase() + word.slice(1).toLowerCase();
+}
+
+export const formatDate = (date: Date | null) => {
+  if (!date) return "N/A";
+  return new Date(date).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};

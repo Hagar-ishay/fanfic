@@ -1,10 +1,8 @@
 import { getSection } from "@/db/sections";
 import { AddNewSectionButton } from "@/library/(components)/AddNewSectionButton";
 import { Header } from "@/library/(components)/Header";
-import { SectionTransitionProvider } from "@/library/(components)/SectionTransitionContext";
 import { AddFanficButton } from "@/library/sections/[sectionId]/(components)/AddFanficButton";
 import { ShowHideModal } from "@/library/sections/[sectionId]/(components)/ShowHideModal";
-import { FanficTransitionProvider } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficTransitionContext";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 
@@ -54,24 +52,22 @@ export default async function Layout({
   }
 
   return (
-    <SectionTransitionProvider>
-      <FanficTransitionProvider>
-        <Header
-          segments={[
-            { label: "Library", href: "/library" },
-            ...(await getBreadcrumbs(
-              sectionId,
-              currentSection.name,
-              currentSection.parentId
-            )),
-          ]}
-        >
-          <AddFanficButton sectionId={sectionId} />
-          <AddNewSectionButton sectionId={sectionId} />
-        </Header>
-        {children}
-        <ShowHideModal>{fanfics}</ShowHideModal>
-      </FanficTransitionProvider>
-    </SectionTransitionProvider>
+    <div>
+      <Header
+        segments={[
+          { label: "Library", href: "/library" },
+          ...(await getBreadcrumbs(
+            sectionId,
+            currentSection.name,
+            currentSection.parentId
+          )),
+        ]}
+      >
+        <AddFanficButton sectionId={sectionId} />
+        <AddNewSectionButton sectionId={sectionId} />
+      </Header>
+      {children}
+      <ShowHideModal>{fanfics}</ShowHideModal>
+    </div>
   );
 }

@@ -7,7 +7,6 @@ import type { Section, UserFanfic } from "@/db/types";
 import { useToast } from "@/hooks/use-toast";
 import { kindleSender } from "@/library/sections/[sectionId]/(server)/kindleSender";
 import { FanficHeader } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficHeader";
-import { useFanficTransition } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficTransitionContext";
 import { useSettingsStore } from "@/store";
 import { CircleChevronRight, SendHorizontal, Trash2 } from "lucide-react";
 import { redirect } from "next/navigation";
@@ -23,7 +22,6 @@ export function FanficContextMenu({
   trigger: React.ReactNode;
 }) {
   const { toast } = useToast();
-  const { isPending, startTransition } = useFanficTransition();
 
   const kindleEmail = useSettingsStore((state) => state.kindleEmail);
   const translationLanguage = useSettingsStore((state) => state.languageCode);
@@ -39,36 +37,32 @@ export function FanficContextMenu({
   };
 
   const isDisabled = Boolean(
-    isPending(fanfic.id) ||
-      isSuccess ||
-      (fanfic.lastSent && fanfic.lastSent > fanfic.updatedAt)
+    isSuccess || (fanfic.lastSent && fanfic.lastSent > fanfic.updatedAt)
   );
 
   const latestFinalChapter = Number(fanfic.chapterCount?.split("/")[0]);
 
-  const handleSend = (sendLatestChapters?: boolean) => {
-    startTransition(fanfic.id, async () => {
-      const result = await kindleSender({
-        fanfic,
-        kindleEmail,
-        translationLanguage,
-        sendLatestChapters: sendLatestChapters || false,
-        latestFinalChapter,
-      });
-      setIsSuccess(result.success);
-      if (result.success) {
-        toast({
-          title: "Send to Kindle",
-          description: `Sent ${fanfic.title} successfully!`,
-        });
-      } else {
-        toast({
-          title: "Send to Kindle",
-          description: `Failed to send ${fanfic.title}: ${result.message}`,
-          variant: "destructive",
-        });
-      }
+  const handleSend = async (sendLatestChapters?: boolean) => {
+    const result = await kindleSender({
+      fanfic,
+      kindleEmail,
+      translationLanguage,
+      sendLatestChapters: sendLatestChapters || false,
+      latestFinalChapter,
     });
+    setIsSuccess(result.success);
+    if (result.success) {
+      toast({
+        title: "Send to Kindle",
+        description: `Sent ${fanfic.title} successfully!`,
+      });
+    } else {
+      toast({
+        title: "Send to Kindle",
+        description: `Failed to send ${fanfic.title}: ${result.message}`,
+        variant: "destructive",
+      });
+    }
   };
 
   const subOptions = [
@@ -90,11 +84,10 @@ export function FanficContextMenu({
       name: "Move section",
       subItems: sections.map((section) => ({
         name: section.name,
-        action: () =>
-          startTransition(fanfic.id, async () => {
-            await updateSectionFanfic(fanfic.id, { sectionId: section.id });
-            redirect(`/library/sections/${section.id}`);
-          }),
+        action: async () => {
+          await updateSectionFanfic(fanfic.id, { sectionId: section.id });
+          redirect(`/library/sections/${section.id}`);
+        },
       })),
     },
     {
