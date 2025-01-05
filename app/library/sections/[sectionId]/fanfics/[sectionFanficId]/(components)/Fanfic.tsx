@@ -8,7 +8,6 @@ import { FanficContextMenu } from "@/library/sections/[sectionId]/fanfics/[secti
 import { SummaryContent } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/Summary";
 import { Ellipsis, EllipsisVertical, ExternalLink } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 import { FanficStats } from "./FanficStats";
 import { Tags } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/Tags";
 import InputLabels from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/InputLabels";
@@ -25,15 +24,18 @@ export default function Fanfic({
   return (
     <div className="flex flex-col gap-6 p-3 sm:p-6 mx-auto relative w-full">
       <div className="absolute inset-0 bg-gradient-to-b from-accent/5 via-transparent to-accent/5 pointer-events-none" />
-      
-      {/* Header Section */}
+
       <div className="relative flex justify-between items-start bg-gradient-to-r from-card via-accent/10 to-card p-4 sm:p-6 rounded-lg border shadow-md">
         <div className="flex flex-col gap-3 min-w-0 flex-1">
           <div className="flex items-start gap-3 flex-wrap">
             <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent break-words">
               {fanfic.title}
             </h1>
-            <Link href={fanfic.sourceUrl} target="_blank" className="hover:scale-110 transition-transform">
+            <Link
+              href={fanfic.sourceUrl}
+              target="_blank"
+              className="hover:scale-110 transition-transform"
+            >
               <ExternalLink className="h-6 w-6" />
             </Link>
           </div>
@@ -68,7 +70,9 @@ export default function Fanfic({
       )}
 
       <div className="relative flex flex-col gap-3 bg-gradient-to-br from-card to-accent/10 p-6 rounded-lg border shadow-md">
-        <h3 className="font-semibold text-lg border-b pb-2 text-foreground/90">Personal Labels</h3>
+        <h3 className="font-semibold text-lg border-b pb-2 text-foreground/90">
+          Personal Labels
+        </h3>
         <InputLabels
           sectionId={fanfic.sectionId}
           fanficId={fanfic.id}
