@@ -3,19 +3,25 @@
 import { Tooltip } from "@/components/base/Tooltip";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { UserFanfic } from "@/db/types";
+import { Section, UserFanfic } from "@/db/types";
 import { cn } from "@/lib/utils";
+import { FanficContextMenu } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficContextMenu";
 import { Draggable } from "@hello-pangea/dnd";
-import { BookUp, BookUp2, CircleCheck, Grip, Loader2 } from "lucide-react";
+import { BookUp, BookUp2, CircleCheck, Grip } from "lucide-react";
 import Link from "next/link";
+import React, { useRef } from "react";
 
 export default function FanficCard({
   fanfic,
   index,
+  transferableSections,
 }: {
   fanfic: UserFanfic;
   index: number;
+  transferableSections: Section[];
 }) {
+  const triggerRef = useRef<HTMLDivElement>(null);
+
   return (
     <Draggable draggableId={`fanfic-${fanfic.id}`} index={index}>
       {(provided, snapshot) => (
@@ -24,7 +30,18 @@ export default function FanficCard({
           {...provided.draggableProps}
           className="relative"
         >
+          <FanficContextMenu
+            sections={transferableSections}
+            fanfic={fanfic}
+            trigger={<div hidden ref={triggerRef} />}
+          />
+
           <Card
+            onContextMenu={(e) => {
+              e.preventDefault();
+              console.log({ triggerRef });
+              triggerRef.current?.click();
+            }}
             className={cn(
               "pt-3 pb-3 border-none border-0 shadow-none hover:bg-accent/30",
               snapshot.isDragging

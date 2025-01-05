@@ -3,13 +3,15 @@
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
 import FanficCard from "./FanficCard";
 import { reorderFanfics } from "@/db/fanfics";
+import { Section } from "@/db/types";
 
 type FanficListProps = {
   fanfics: any[];
   sectionId: number;
+  transferableSections: Section[];
 };
 
-export default function FanficList({ fanfics, sectionId }: FanficListProps) {
+export default function FanficList({ fanfics, sectionId, transferableSections }: FanficListProps) {
   return (
     <DragDropContext
       onDragEnd={async (result) => {
@@ -25,6 +27,7 @@ export default function FanficList({ fanfics, sectionId }: FanficListProps) {
           <div ref={provided.innerRef} {...provided.droppableProps}>
             {fanfics.map((fanfic, index) => (
               <FanficCard
+              transferableSections={transferableSections}
                 key={fanfic.section_fanfics.id}
                 fanfic={{
                   ...fanfic.fanfics,

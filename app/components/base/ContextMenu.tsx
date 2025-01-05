@@ -22,6 +22,7 @@ import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import { set } from "react-hook-form";
 
 export type Option = {
   icon?: React.ReactNode;
@@ -45,6 +46,7 @@ export function ContextMenu({
   trigger: React.ReactNode;
   header?: React.ReactNode;
 }) {
+  const [isOpen, setIsOpen] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [menuSlides, setMenuSlides] = useState<MenuSlide[]>([
     { items: options },
@@ -108,7 +110,7 @@ export function ContextMenu({
   };
 
   return isDesktop ? (
-    <DropdownMenu>
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
       <DropdownMenuContent>
         {renderDropdownMenuItems(options)}

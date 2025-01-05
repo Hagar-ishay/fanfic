@@ -61,7 +61,7 @@ export default async function Page({ params }: Props) {
           />
         </Link>
       ))}
-      <FanficList fanfics={fanfics} sectionId={sectionId} />
+      <FanficList fanfics={fanfics} sectionId={sectionId} transferableSections={transferableSections} />
     </div>
   );
 }

@@ -19,7 +19,7 @@ export function FanficContextMenu({
 }: {
   fanfic: UserFanfic;
   sections: Section[];
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
 }) {
   const { toast } = useToast();
 
