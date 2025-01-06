@@ -47,6 +47,4 @@ export async function addFanfic(
     }
     return { success: false, message: err };
   }
-
-  return { success: false, message: "Failed to create Fic" };
 }
