@@ -8,7 +8,6 @@ import { useOptimistic, useTransition } from "react";
 
 type FanficListProps = {
   fanfics: {
-    sections: Section;
     fanfics: Fanfic;
     section_fanfics: SectionFanfic;
   }[];
