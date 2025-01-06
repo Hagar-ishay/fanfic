@@ -70,7 +70,7 @@ class HtmlParser {
 
   public get downloadLink(): string {
     return (
-      this.$("#workskin div.summary.module blockquote.userstuff")
+      this.$("li.download ul.expandable.secondary > li > a")
         .filter((_, el) => this.$(el).text().trim().toUpperCase() === "EPUB")
         .map((_, el) => `${consts.AO3_LINK}${this.$(el).attr("href") ?? ""}`)
         .get(0) || ""

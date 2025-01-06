@@ -9,7 +9,7 @@ import { kindleSender } from "@/library/sections/[sectionId]/(server)/kindleSend
 import { FanficHeader } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficHeader";
 import { useSettingsStore } from "@/store";
 import { CircleChevronRight, SendHorizontal, Trash2 } from "lucide-react";
-import { redirect } from "next/navigation";
+import { redirect, usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 export function FanficContextMenu({
@@ -22,6 +22,8 @@ export function FanficContextMenu({
   trigger?: React.ReactNode;
 }) {
   const { toast } = useToast();
+  const router = useRouter();
+  const path = usePathname()
 
   const kindleEmail = useSettingsStore((state) => state.kindleEmail);
   const translationLanguage = useSettingsStore((state) => state.languageCode);
@@ -108,7 +110,12 @@ export function FanficContextMenu({
   return (
     <div>
       <Delete
-        onDelete={async () => deleteSectionFanfic(fanfic.id)}
+        onDelete={async () => {
+          await deleteSectionFanfic(fanfic.id)
+          if (path.includes("/fanfics/")) {
+            router.back()
+          }
+        }}
         open={shouldDelete}
         onOpenChange={setShouldDelete}
         header={`Are you sure you want to delete ${fanfic.title}`}

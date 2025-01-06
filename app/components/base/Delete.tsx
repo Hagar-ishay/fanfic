@@ -8,7 +8,6 @@ import {
   DrawerDialogTitle,
 } from "@/components/base/DrawerDialog";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import React from "react";
 
 export function Delete({
@@ -22,7 +21,6 @@ export function Delete({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-
   async function handleDelete() {
     await onDelete();
   }

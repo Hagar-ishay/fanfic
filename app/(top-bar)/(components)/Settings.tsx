@@ -101,6 +101,7 @@ export function SettingsModal() {
                 </p>
               </div>
               <Switch
+                color="primary"
                 id="enableTranslation"
                 name="enableTranslation"
                 defaultChecked={shouldTranslate}
