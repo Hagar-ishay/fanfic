@@ -1,1 +1,0 @@
-ALTER TABLE "fanfiction"."fanfics" ADD COLUMN "sort_priority" integer;
