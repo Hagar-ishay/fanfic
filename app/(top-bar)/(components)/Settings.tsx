@@ -35,8 +35,8 @@ export function SettingsModal() {
   return (
     <DrawerDialog>
       <DrawerDialogTrigger asChild>
-        <Button size="icon" className="w-10">
-          <SettingsIcon />
+        <Button variant="ghost" size="icon" className="h-9 w-9">
+          <SettingsIcon size={25} />
         </Button>
       </DrawerDialogTrigger>
       <DrawerDialogContent className="space-y-6 px-6 pb-10">
@@ -84,7 +84,7 @@ export function SettingsModal() {
                 name="email"
                 defaultValue={kindleEmail}
                 placeholder="kindle@amazon.com"
-                className="w-[180px]"
+                className="w-[180px] text-sm"
               />
             </div>
           </div>

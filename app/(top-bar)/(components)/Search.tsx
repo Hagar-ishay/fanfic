@@ -30,6 +30,24 @@ export function Search({
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
   const isDesktop = getIsDesktop();
 
+  React.useEffect(() => {
+    if (!isDesktop) {
+      const handlePopState = (event: PopStateEvent) => {
+        if (isDrawerOpen) {
+          event.preventDefault();
+          setIsDrawerOpen(false);
+        }
+      };
+
+      if (isDrawerOpen) {
+        window.history.pushState(null, "", window.location.href);
+      }
+
+      window.addEventListener("popstate", handlePopState);
+      return () => window.removeEventListener("popstate", handlePopState);
+    }
+  }, [isDrawerOpen, isDesktop]);
+
   const matchedFanfics = matchSorter(userFanfics, searchInput, {
     keys: [
       "fanfics.title",
@@ -69,15 +87,17 @@ export function Search({
   }
 
   return (
-    <div className="relative max-w-60 min-w-0 w-full">
+    <div className="w-full">
       <DrawerDialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <DrawerDialogTrigger asChild>
           <Button
             variant="outline"
-            className="pl-8 text-sm text-muted-foreground cursor-text pr-10"
+            className="w-full h-9 relative flex items-center justify-start gap-2 px-3"
           >
-            <h1 className="mt-1">Search Library...</h1>
-            <SearchIcon className="pointer-events-none absolute left-2 top-1/2 size-4 -translate-y-1/2 select-none opacity-50 " />
+            <SearchIcon className="h-4 w-4 flex-shrink-0 opacity-50" />
+            <h2 className="text-sm text-muted-foreground truncate mt-1 ml-0.5">
+              Search Library...
+            </h2>
           </Button>
         </DrawerDialogTrigger>
         <DrawerDialogContent className={cn("p-4", isDesktop ? "" : "h-full")}>
