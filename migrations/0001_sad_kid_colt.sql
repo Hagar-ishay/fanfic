@@ -1,2 +1,0 @@
-CREATE UNIQUE INDEX IF NOT EXISTS "fanfics_fanfic_id_unique" ON "fanfiction"."fanfics" USING btree ("fanficId");--> statement-breakpoint
-CREATE UNIQUE INDEX IF NOT EXISTS "sections_name_unique" ON "fanfiction"."sections" USING btree ("name");
