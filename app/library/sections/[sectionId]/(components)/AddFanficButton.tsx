@@ -3,6 +3,7 @@ import LoadableIcon from "@/components/base/LoadableIcon";
 import { Tooltip } from "@/components/base/Tooltip";
 import { Button } from "@/components/ui/button";
 import { AO3_LINK } from "@/consts";
+import { getFanficByExternalId } from "@/db/fanfics";
 import { useToast } from "@/hooks/use-toast";
 import { addFanfic } from "@/library/sections/[sectionId]/(server)/addFanfic";
 import { useUser } from "@clerk/nextjs";

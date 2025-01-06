@@ -70,10 +70,14 @@ export const getFanficById = async (sectionFanficId: number) => {
 };
 
 export const getFanficByExternalId = async (externalId: number) => {
-  return db
+  const result = await db
     .select()
     .from(fanfics)
     .where(drizzle.eq(fanfics.fanficId, externalId));
+  if (result.length > 0) {
+    return result[0];
+  }
+  return null;
 };
 
 export const insertFanfic = async (fanfic: NewFanfic) => {
@@ -105,10 +109,16 @@ export const insertSectionFanfic = async (
 };
 
 export const deleteSectionFanfic = async (userFanficId: number) => {
-  return await db
+  const result = await db
     .delete(sectionFanfics)
     .where(drizzle.eq(sectionFanfics.id, userFanficId))
-    .returning({ fanficId: fanfics.id });
+    .returning({
+      fanficId: sectionFanfics.id,
+      sectionId: sectionFanfics.sectionId,
+    });
+  if (result.length === 1) {
+    expirePath(`/library/sections/${result[0].sectionId}`);
+  }
 };
 
 export const reorderFanfics = async (
