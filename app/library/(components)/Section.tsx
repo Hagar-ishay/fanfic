@@ -5,6 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { Section as DbSection } from "@/db/types";
 import { SectionContextMenu } from "@/library/(components)/SectionContextMenu";
 import { ChevronRight, EllipsisVertical, Loader2 } from "lucide-react";
+import { useRef } from "react";
 
 export function Section({
   section,
@@ -13,20 +14,24 @@ export function Section({
   section: DbSection;
   transferableSections: DbSection[];
 }) {
+  const triggerRef = useRef<HTMLDivElement>(null);
+
   return (
     <>
       <Card className="cursor-pointer p-4 border-none border-0 shadow-none hover:bg-accent/50 transition-colors relative">
-        <CardContent className="flex items-center py-4 pt-5 px-3 justify-between">
+        <CardContent
+          className="flex items-center py-4 pt-5 px-3 justify-between"
+          onContextMenu={(e) => {
+            e.preventDefault();
+            triggerRef.current?.click();
+          }}
+        >
           <div className="flex items-center">
             <div onClick={(e) => e.preventDefault()}>
               <SectionContextMenu
                 section={section}
                 transferableSections={transferableSections}
-                trigger={
-                  <Button size="icon" variant="extraGhost">
-                    <EllipsisVertical className="-ml-5" />
-                  </Button>
-                }
+                trigger={<div hidden ref={triggerRef} />}
               />
             </div>
             <span className="pl-2 text-lg font-semibold text-foreground/90">

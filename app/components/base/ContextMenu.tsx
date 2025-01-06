@@ -47,7 +47,6 @@ export function ContextMenu({
   header?: React.ReactNode;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const [menuSlides, setMenuSlides] = useState<MenuSlide[]>([
     { items: options },
   ]);
@@ -76,7 +75,7 @@ export function ContextMenu({
       setActiveIndex((prev) => prev + 1);
     } else if (option.action) {
       option.action();
-      setIsDrawerOpen(false);
+      setIsOpen(false);
     }
   }
 
@@ -117,7 +116,7 @@ export function ContextMenu({
       </DropdownMenuContent>
     </DropdownMenu>
   ) : (
-    <DrawerDialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+    <DrawerDialog open={isOpen} onOpenChange={setIsOpen}>
       <DrawerDialogTrigger asChild>{trigger}</DrawerDialogTrigger>
       <DrawerDialogContent>
         <DrawerDialogHeader>
