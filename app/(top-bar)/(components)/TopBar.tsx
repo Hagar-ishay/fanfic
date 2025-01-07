@@ -2,7 +2,6 @@ import { Search } from "@/(top-bar)/(components)/Search";
 import { SettingsModal } from "@/(top-bar)/(components)/Settings";
 import { Button } from "@/components/ui/button";
 import { listUserFanfics } from "@/db/fanfics";
-import { UserButton } from "@clerk/nextjs";
 import { currentUser } from "@clerk/nextjs/server";
 import { HomeIcon } from "lucide-react";
 import Link from "next/link";
@@ -14,7 +13,7 @@ export default async function TopBar() {
   return (
     <div className="flex flex-row items-center justify-between w-full gap-4">
       <Link href="/" passHref>
-        <Button variant="ghost" className="flex items-center gap-2">
+        <Button variant="ghost" size="icon">
           <HomeIcon size={25} />
         </Button>
       </Link>

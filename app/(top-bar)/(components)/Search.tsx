@@ -92,7 +92,7 @@ export function Search({
         <DrawerDialogTrigger asChild>
           <Button
             variant="outline"
-            className="w-full h-9 relative flex items-center justify-start gap-2 px-3"
+            className="w-full h-9 relative flex items-center justify-start gap-2 px-3 transition-colors"
           >
             <SearchIcon className="h-4 w-4 flex-shrink-0 opacity-50" />
             <h2 className="text-sm text-muted-foreground truncate mt-1 ml-0.5">

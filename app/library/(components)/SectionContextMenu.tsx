@@ -2,10 +2,10 @@
 
 import { Section } from "@/db/types";
 import { SendHorizontal, Trash2 } from "lucide-react";
-import React from "react";
+import React, { MutableRefObject, useRef } from "react";
 
 import { ContextMenu } from "@/components/base/ContextMenu";
-import { Delete } from "@/components/base/Delete";
+import { ConfirmationModal } from "@/components/base/ConfirmationModal";
 import { deleteSection, transferSection } from "@/db/sections";
 
 export function SectionContextMenu({
@@ -17,7 +17,7 @@ export function SectionContextMenu({
   transferableSections: Section[];
   trigger: React.ReactNode;
 }) {
-  const [open, setOpen] = React.useState(false);
+  const triggerRef = useRef<HTMLDivElement>(null);
 
   async function onDelete() {
     await deleteSection(section.id);
@@ -53,14 +53,16 @@ export function SectionContextMenu({
     {
       icon: <Trash2 size={17} />,
       name: "Delete Section",
-      action: () => setOpen(true),
+      action: () => {
+        triggerRef.current?.click();
+      },
     },
   ];
 
   return (
     <>
       <ContextMenu header={section.name} options={options} trigger={trigger} />
-      <Delete
+      <ConfirmationModal
         header={
           <div>
             Are you sure you want to delete section ${section.name}?
@@ -70,9 +72,8 @@ export function SectionContextMenu({
             </div>
           </div>
         }
-        onDelete={onDelete}
-        open={open}
-        onOpenChange={setOpen}
+        onSubmit={onDelete}
+        ref={triggerRef}
       />
     </>
   );

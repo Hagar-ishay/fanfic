@@ -18,16 +18,20 @@ export function Section({
 
   return (
     <>
-      <Card className="cursor-pointer p-4 border-none border-0 shadow-none hover:bg-accent/50 transition-colors relative">
-        <CardContent
-          className="flex items-center py-4 pt-5 px-3 justify-between"
-          onContextMenu={(e) => {
-            e.preventDefault();
-            triggerRef.current?.click();
-          }}
-        >
+      <Card
+        className="cursor-pointer p-4 border-none border-0 shadow-none hover:bg-accent/50 transition-colors relative"
+        onContextMenu={(e) => {
+          e.preventDefault();
+          triggerRef.current?.click();
+        }}
+      >
+        <CardContent className="flex items-center py-4 pt-5 px-3 justify-between">
           <div className="flex items-center">
-            <div onClick={(e) => e.preventDefault()}>
+            <div
+              onClick={(e) => {
+                e.preventDefault();
+              }}
+            >
               <SectionContextMenu
                 section={section}
                 transferableSections={transferableSections}

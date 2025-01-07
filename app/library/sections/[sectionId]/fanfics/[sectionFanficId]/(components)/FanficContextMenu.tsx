@@ -1,7 +1,7 @@
 "use client";
 
 import { ContextMenu } from "@/components/base/ContextMenu";
-import { Delete } from "@/components/base/Delete";
+import { ConfirmationModal } from "@/components/base/ConfirmationModal";
 import { deleteSectionFanfic, updateSectionFanfic } from "@/db/fanfics";
 import type { Section, UserFanfic } from "@/db/types";
 import { useToast } from "@/hooks/use-toast";
@@ -23,7 +23,7 @@ export function FanficContextMenu({
 }) {
   const { toast } = useToast();
   const router = useRouter();
-  const path = usePathname()
+  const path = usePathname();
 
   const kindleEmail = useSettingsStore((state) => state.kindleEmail);
   const translationLanguage = useSettingsStore((state) => state.languageCode);
@@ -109,11 +109,12 @@ export function FanficContextMenu({
 
   return (
     <div>
-      <Delete
-        onDelete={async () => {
-          await deleteSectionFanfic(fanfic.id)
+      <ConfirmationModal
+        onSubmit={async () => {
+          console.log("eoifjeojifio")
+          await deleteSectionFanfic(fanfic.id);
           if (path.includes("/fanfics/")) {
-            router.back()
+            router.back();
           }
         }}
         open={shouldDelete}

@@ -64,9 +64,8 @@ export function AddNewSectionButton({
     <>
       <Tooltip description="Add new Section">
         <Button
-          className="w-8 h-8"
           size="icon"
-          variant={"outline"}
+          variant={"default"}
           onClick={() => setShouldAddSection(true)}
           disabled={isPending}
         >
@@ -79,9 +78,13 @@ export function AddNewSectionButton({
             <DrawerDialogTitle>Add New Section</DrawerDialogTitle>
           </DrawerDialogHeader>
           <form onSubmit={handleSubmit(onSubmit)}>
-            <div>
+            <div className="p-6 flex flex-col gap-3">
               <Label htmlFor="name">Name</Label>
-              <Input id="name" {...register("name", { required: true })} />
+              <Input
+                placeholder="Enter new name..."
+                id="name"
+                {...register("name", { required: true })}
+              />
               {errors.displayName && <span>This field is required</span>}
             </div>
             <DrawerDialogFooter>
