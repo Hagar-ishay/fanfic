@@ -10,7 +10,7 @@ import { FanficHeader } from "@/library/sections/[sectionId]/fanfics/[sectionFan
 import { useSettingsStore } from "@/store";
 import { CircleChevronRight, SendHorizontal, Trash2 } from "lucide-react";
 import { redirect, usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export function FanficContextMenu({
   fanfic,
@@ -27,8 +27,7 @@ export function FanficContextMenu({
 
   const kindleEmail = useSettingsStore((state) => state.kindleEmail);
   const translationLanguage = useSettingsStore((state) => state.languageCode);
-  const [isSuccess, setIsSuccess] = useState<undefined | boolean>(undefined);
-  const [shouldDelete, setShouldDelete] = useState<boolean>(false);
+  const triggerRef = useRef<HTMLDivElement>(null);
 
   type Option = {
     icon?: React.ReactNode;
@@ -37,10 +36,6 @@ export function FanficContextMenu({
     disabled?: boolean;
     subItems?: Option[];
   };
-
-  const isDisabled = Boolean(
-    isSuccess || (fanfic.lastSent && fanfic.lastSent > fanfic.updatedAt)
-  );
 
   const latestFinalChapter = Number(fanfic.chapterCount?.split("/")[0]);
 
@@ -52,7 +47,6 @@ export function FanficContextMenu({
       sendLatestChapters: sendLatestChapters || false,
       latestFinalChapter,
     });
-    setIsSuccess(result.success);
     if (result.success) {
       toast({
         title: "Send to Kindle",
@@ -97,13 +91,14 @@ export function FanficContextMenu({
     {
       icon: <SendHorizontal size={17} />,
       name: "Send to Kindle",
-      disabled: isDisabled,
       subItems: subOptions,
     },
     {
       icon: <Trash2 size={17} />,
       name: "Delete Fanfic",
-      action: () => setShouldDelete(true),
+      action: () => {
+        triggerRef.current?.click();
+      },
     },
   ];
 
@@ -111,14 +106,13 @@ export function FanficContextMenu({
     <div>
       <ConfirmationModal
         onSubmit={async () => {
-          console.log("eoifjeojifio")
+          console.log("eoifjeojifio");
           await deleteSectionFanfic(fanfic.id);
           if (path.includes("/fanfics/")) {
             router.back();
           }
         }}
-        open={shouldDelete}
-        onOpenChange={setShouldDelete}
+        ref={triggerRef}
         header={`Are you sure you want to delete ${fanfic.title}`}
       />
       <ContextMenu

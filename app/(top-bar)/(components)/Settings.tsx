@@ -32,6 +32,62 @@ export function SettingsModal() {
 
   const shouldTranslate = Boolean(languageCode);
 
+  const content = [
+    {
+      label: "Appearance",
+      description: "Change the appearance of the app",
+      fields: [
+        {
+          label: "Theme",
+          description: "Switch between light and dark mode",
+          component: (
+            <Button
+              onClick={() => setTheme(isCurrentThemeLight ? "dark" : "light")}
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+            >
+              {isCurrentThemeLight ? <Sun /> : <Moon />}
+            </Button>
+          ),
+        },
+      ],
+    },
+    {
+      label: "Epub Settings",
+      description: "Send content to your device",
+      fields: [
+        {
+          label: "Email",
+          description: "Send content to your device",
+          component: (
+            <Input
+              onBlur={(e) => setKindleEmail(e.target.value)}
+              id="email"
+              name="email"
+              defaultValue={kindleEmail}
+              placeholder="enter your email"
+              className="w-[180px] text-sm"
+            />
+          ),
+        },
+        {
+          label: "English Translation",
+          description: "Automatically translate content to English",
+          component: (
+            <Switch
+              color="primary"
+              id="enableTranslation"
+              name="enableTranslation"
+              defaultChecked={shouldTranslate}
+              onClick={() => setLanguageCode(shouldTranslate ? "en" : null)}
+            />
+          ),
+        },
+      ],
+    },
+  ];
+
   return (
     <DrawerDialog>
       <DrawerDialogTrigger asChild>
@@ -47,68 +103,25 @@ export function SettingsModal() {
         </DrawerDialogHeader>
 
         <div className="space-y-6">
-          <div className="space-y-3">
-            <h3 className="font-medium">Appearance</h3>
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label>Theme</Label>
-                <p className="text-sm text-muted-foreground">
-                  Switch between light and dark mode
-                </p>
+          {content.map((section, index) => (
+            <div className="space-y-3 ">
+              <h3 className="font-medium">{section.label}</h3>
+              <div className="flex flex-col gap-6">
+                {section.fields.map((field, index) => (
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="email">{field.label}</Label>
+                      <p className="text-sm text-muted-foreground">
+                        {field.description}
+                      </p>
+                    </div>
+                    {field.component}
+                  </div>
+                ))}
+                {index !== content.length - 1 && <Separator />}
               </div>
-              <Button
-                onClick={() => setTheme(isCurrentThemeLight ? "dark" : "light")}
-                variant="outline"
-                size="icon"
-                className="h-8 w-8"
-              >
-                {isCurrentThemeLight ? <Sun /> : <Moon />}
-              </Button>
             </div>
-          </div>
-
-          <Separator className="my-4" />
-
-          <div className="space-y-3">
-            <h3 className="font-medium">Kindle Settings</h3>
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="email">Kindle Email</Label>
-                <p className="text-sm text-muted-foreground">
-                  Send content to your device
-                </p>
-              </div>
-              <Input
-                onBlur={(e) => setKindleEmail(e.target.value)}
-                id="email"
-                name="email"
-                defaultValue={kindleEmail}
-                placeholder="kindle@amazon.com"
-                className="w-[180px] text-sm"
-              />
-            </div>
-          </div>
-
-          <Separator className="my-4" />
-
-          <div className="space-y-3">
-            <h3 className="font-medium">Translation</h3>
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <Label htmlFor="enableTranslation">English Translation</Label>
-                <p className="text-sm text-muted-foreground">
-                  Automatically translate content to English
-                </p>
-              </div>
-              <Switch
-                color="primary"
-                id="enableTranslation"
-                name="enableTranslation"
-                defaultChecked={shouldTranslate}
-                onClick={() => setLanguageCode(shouldTranslate ? "en" : null)}
-              />
-            </div>
-          </div>
+          ))}
         </div>
       </DrawerDialogContent>
     </DrawerDialog>
