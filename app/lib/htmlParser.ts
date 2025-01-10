@@ -153,6 +153,7 @@ class HtmlParser {
         createdAt: this.createdAt,
         author: this.author,
         sourceUrl: this.sourceUrl,
+        language: this.language,
       };
     } catch (error) {
       console.error("Error fetching or parsing AO3 metadata:", error);

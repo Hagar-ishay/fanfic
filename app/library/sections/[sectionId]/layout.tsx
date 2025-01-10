@@ -1,8 +1,8 @@
 import { getBreadcrumbs, getSection } from "@/db/sections";
-import { AddNewSectionButton } from "@/library/(components)/AddNewSectionButton";
 import { Header } from "@/library/(components)/Header";
-import { AddFanficButton } from "@/library/sections/[sectionId]/(components)/AddFanficButton";
+import { Options } from "@/library/sections/[sectionId]/(components)/Options";
 import { ShowHideLayout } from "@/library/sections/[sectionId]/(components)/ShowHideLayout";
+
 import { notFound } from "next/navigation";
 
 type Props = { params: Promise<{ sectionId: string }> };
@@ -34,8 +34,7 @@ export default async function Layout({
         ]}
       >
         <ShowHideLayout>
-          <AddFanficButton sectionId={sectionId} />
-          <AddNewSectionButton sectionId={sectionId} />
+          <Options sectionId={sectionId} />
         </ShowHideLayout>
       </Header>
       {children}

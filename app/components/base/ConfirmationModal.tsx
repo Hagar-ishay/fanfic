@@ -2,6 +2,7 @@
 
 import {
   DrawerDialog,
+  DrawerDialogClose,
   DrawerDialogContent,
   DrawerDialogDescription,
   DrawerDialogFooter,
@@ -16,19 +17,21 @@ export function ConfirmationModal({
   header,
   onSubmit,
   ref,
+  destructive,
 }: {
   header?: React.ReactNode;
   onSubmit: Function;
   ref?: React.RefObject<HTMLDivElement>;
+  destructive?: boolean;
 }) {
-  async function handleDelete() {
+  async function handleSubmit() {
     await onSubmit();
   }
 
   return (
     <div>
       <DrawerDialog>
-        <DrawerDialogTrigger>
+        <DrawerDialogTrigger asChild>
           <div hidden ref={ref} />
         </DrawerDialogTrigger>
         <DrawerDialogContent className="pb-5">
@@ -36,19 +39,18 @@ export function ConfirmationModal({
             <DrawerDialogTitle>{header}</DrawerDialogTitle>
           </DrawerDialogHeader>
           <DrawerDialogDescription hidden />
-          <DrawerDialogFooter>
-            <div className="flex flex-row justify-end pr-3 gap-2">
-              <Button type="submit" variant="secondary" onSubmit={() => {}}>
-                Cancel
-              </Button>
+          <DrawerDialogFooter className="flex flex-row justify-end pr-3 gap-2">
+            <DrawerDialogClose>
+              <Button variant="secondary">Cancel</Button>
+            </DrawerDialogClose>
+            <DrawerDialogClose>
               <Button
-                onSubmit={handleDelete}
-                type="submit"
-                variant="destructive"
+                onClick={handleSubmit}
+                variant={destructive ? "destructive" : "default"}
               >
-                Delete
+                {destructive ? "Delete" : "Submit"}
               </Button>
-            </div>
+            </DrawerDialogClose>
           </DrawerDialogFooter>
         </DrawerDialogContent>
       </DrawerDialog>

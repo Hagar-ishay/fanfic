@@ -14,6 +14,19 @@ export const updateFanfic = async (ficId: number, { ...update }) => {
     .returning({ fanficId: fanfics.id });
 };
 
+export const tranferSectionFanfic = async (
+  sectionFanficId: number,
+  newSectionId: number
+) => {
+  const position = await getNextPosition(newSectionId);
+  const updateParams = { position, sectionId: newSectionId };
+  await db
+    .update(sectionFanfics)
+    .set(updateParams)
+    .where(drizzle.eq(sectionFanfics.id, sectionFanficId));
+  expirePath(`/api/sections/${newSectionId}`);
+};
+
 export const updateSectionFanfic = async (
   sectionId: number,
   sectionFanficId: number,
@@ -23,7 +36,7 @@ export const updateSectionFanfic = async (
     .update(sectionFanfics)
     .set(update)
     .where(drizzle.eq(sectionFanfics.id, sectionFanficId));
-  expirePath(`/api/sections/${sectionId}fanfics/${sectionFanficId}`);
+  expirePath(`/api/sections/${sectionId}/fanfics/${sectionFanficId}`);
 };
 
 export const selectOngoingFanfics = async () => {
@@ -93,20 +106,24 @@ export const insertSectionFanfic = async (
   userId: string,
   fanficId: number
 ) => {
-  const highestPosition = await db
-    .select({ maxPosition: drizzle.max(sectionFanfics.position) })
-    .from(sectionFanfics)
-    .where(drizzle.eq(sectionFanfics.sectionId, sectionId));
-  const position =
-    highestPosition.length > 0 && highestPosition[0].maxPosition !== null
-      ? highestPosition[0].maxPosition + 1
-      : 0;
+  const position = await getNextPosition(sectionId);
   const result = await db
     .insert(sectionFanfics)
     .values({ sectionId, fanficId, position, userId })
     .returning({ fanficId: fanfics.id });
   expirePath(`/library/sections/${sectionId}`);
   return result[0].fanficId;
+};
+
+export const getNextPosition = async (sectionId: number) => {
+  const highestPosition = await db
+    .select({ maxPosition: drizzle.max(sectionFanfics.position) })
+    .from(sectionFanfics)
+    .where(drizzle.eq(sectionFanfics.sectionId, sectionId));
+  if (highestPosition.length === 0 || highestPosition[0].maxPosition === null) {
+    return 0;
+  }
+  return highestPosition[0].maxPosition + 1;
 };
 
 export const deleteSectionFanfic = async (userFanficId: number) => {
@@ -153,7 +170,7 @@ export const reorderFanfics = async (
 
     return fanfics;
   });
-  
+
   expirePath(`/library/sections/${sectionId}`);
   return result;
 };

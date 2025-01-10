@@ -98,18 +98,4 @@
   body {
     @apply bg-background text-foreground;
   }
-
-  /* Color utility classes */
-  .tag-hover-angst {
-    @apply hover:bg-[hsl(var(--tag-angst)/0.2)] hover:text-[hsl(var(--tag-angst))];
-  }
-  .tag-hover-fluff {
-    @apply hover:bg-[hsl(var(--tag-fluff)/0.2)] hover:text-[hsl(var(--tag-fluff))];
-  }
-  .tag-hover-romance {
-    @apply hover:bg-[hsl(var(--tag-romance)/0.2)] hover:text-[hsl(var(--tag-romance))];
-  }
-  .tag-hover-humor {
-    @apply hover:bg-[hsl(var(--tag-humor)/0.2)] hover:text-[hsl(var(--tag-humor))];
-  }
 }

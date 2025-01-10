@@ -2,6 +2,7 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { DateTime } from "luxon";
 
 const algorithm = "aes-256-cbc";
 const key = Buffer.from("1209r2$9ubb398F1!0@G9fCw9#r6$ur2", "utf8");
@@ -42,9 +43,5 @@ export function capitalize(word: string) {
 
 export const formatDate = (date: Date | null) => {
   if (!date) return "N/A";
-  return new Date(date).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  return DateTime.fromJSDate(date).toRelative();
 };

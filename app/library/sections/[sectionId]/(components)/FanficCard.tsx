@@ -81,11 +81,15 @@ export default function FanficCard({
                     </Tooltip>
                   )}
                   {!fanfic.lastSent && (
-                    <Tooltip description="Upload whole fic">
+                    <Tooltip description="Not uploaded yet">
                       <BookUp2 size="18" />
                     </Tooltip>
                   )}
-                  {fanfic.completedAt && <CircleCheck size="16" />}
+                  {fanfic.completedAt && (
+                    <Tooltip description="Completed">
+                      <CircleCheck size="16" />
+                    </Tooltip>
+                  )}
                 </div>
               </div>
             </CardContent>

@@ -1,5 +1,4 @@
 "use client";
-import { getIsDesktop } from "@/lib/utils";
 import type React from "react";
 import {
   Tooltip as BaseTooltip,
@@ -7,21 +6,23 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Tooltip({
   description,
   children,
+  className,
 }: {
   description: string;
   children: React.ReactNode;
+  className?: string;
 }) {
-  const isDesktop = getIsDesktop();
+  const isMobile = useIsMobile();
   return (
     <TooltipProvider>
-      {/* disable on mobile */}
-      <BaseTooltip open={!isDesktop ? false : undefined}>
+      <BaseTooltip open={isMobile ? false : undefined}>
         <TooltipTrigger asChild>{children}</TooltipTrigger>
-        <TooltipContent>{description}</TooltipContent>
+        <TooltipContent className={className}>{description}</TooltipContent>
       </BaseTooltip>
     </TooltipProvider>
   );

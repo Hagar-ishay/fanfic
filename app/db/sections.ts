@@ -46,7 +46,9 @@ export const insertSection = async ({
     .insert(sections)
     .values({ name, userId, parentId })
     .returning({ id: sections.id });
-  expirePath(`/library/sections/${parentId}`);
+  parentId
+    ? expirePath(`/library/sections/${parentId}`)
+    : expirePath("/library");
   return result[0].id;
 };
 

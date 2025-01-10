@@ -9,14 +9,17 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { cn, formatDate } from "@/lib/utils";
+import { DateTime } from "luxon";
+import { Tooltip } from "@/components/base/Tooltip";
 
 type StatItemProps = {
   icon: React.ReactNode;
   label: string;
   value: string | number | null | undefined;
+  tooltip?: string;
 };
 
-const StatItem = ({ icon, label, value }: StatItemProps) => {
+const StatItem = ({ icon, label, value, tooltip }: StatItemProps) => {
   const iconColor = {
     Created: "text-stat-icon-created",
     Completed: "text-stat-icon-completed",
@@ -29,7 +32,7 @@ const StatItem = ({ icon, label, value }: StatItemProps) => {
   };
 
   const color = iconColor[label as keyof typeof iconColor];
-
+  const statValue = value || "N/A";
   return (
     <div className="flex items-center gap-3 p-3 sm:p-4 rounded-md hover:bg-accent/50 transition-all duration-300 hover:scale-105 bg-gradient-to-br from-transparent to-accent/5">
       <div className={cn("p-2 rounded-full", color)}>{icon}</div>
@@ -38,7 +41,13 @@ const StatItem = ({ icon, label, value }: StatItemProps) => {
           {label}
         </span>
         <span className="font-semibold text-foreground/90 truncate">
-          {value || "N/A"}
+          {tooltip ? (
+            <Tooltip description={tooltip}>
+              <span>{statValue}</span>
+            </Tooltip>
+          ) : (
+            statValue
+          )}
         </span>
       </div>
     </div>
@@ -51,17 +60,20 @@ export const FanficStats = ({ fanfic }: { fanfic: UserFanfic }) => {
       icon: <Calendar className="h-4 w-4" />,
       label: "Created",
       value: formatDate(fanfic.createdAt),
+      tooltip: DateTime.fromJSDate(fanfic.createdAt).toLocaleString(),
     },
     fanfic.completedAt
       ? {
           icon: <CheckCircle2 className="h-4 w-4" />,
           label: "Completed",
-          value: formatDate(fanfic.updatedAt),
+          value: formatDate(fanfic.completedAt),
+          tooltip: DateTime.fromJSDate(fanfic.completedAt).toLocaleString(),
         }
       : {
           icon: <Clock className="h-4 w-4" />,
           label: "Updated",
           value: formatDate(fanfic.updatedAt),
+          tooltip: DateTime.fromJSDate(fanfic.updatedAt).toLocaleString(),
         },
     {
       icon: <BookOpen className="h-4 w-4" />,
@@ -85,6 +97,9 @@ export const FanficStats = ({ fanfic }: { fanfic: UserFanfic }) => {
       icon: <Send className="h-4 w-4" />,
       label: "Last Sent",
       value: formatDate(fanfic.lastSent),
+      tooltip: fanfic.lastSent
+        ? DateTime.fromJSDate(fanfic.lastSent).toLocaleString()
+        : undefined,
     },
     fanfic.latestStartingChapter && {
       icon: <BookOpen className="h-4 w-4" />,

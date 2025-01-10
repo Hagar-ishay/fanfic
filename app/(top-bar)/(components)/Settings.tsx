@@ -104,11 +104,14 @@ export function SettingsModal() {
 
         <div className="space-y-6">
           {content.map((section, index) => (
-            <div className="space-y-3 ">
+            <div key={index} className="space-y-3 ">
               <h3 className="font-medium">{section.label}</h3>
               <div className="flex flex-col gap-6">
                 {section.fields.map((field, index) => (
-                  <div className="flex items-center justify-between">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between"
+                  >
                     <div className="space-y-0.5">
                       <Label htmlFor="email">{field.label}</Label>
                       <p className="text-sm text-muted-foreground">

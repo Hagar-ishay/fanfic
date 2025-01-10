@@ -2,7 +2,11 @@
 
 import { ContextMenu } from "@/components/base/ContextMenu";
 import { ConfirmationModal } from "@/components/base/ConfirmationModal";
-import { deleteSectionFanfic, updateSectionFanfic } from "@/db/fanfics";
+import {
+  deleteSectionFanfic,
+  tranferSectionFanfic,
+  updateSectionFanfic,
+} from "@/db/fanfics";
 import type { Section, UserFanfic } from "@/db/types";
 import { useToast } from "@/hooks/use-toast";
 import { kindleSender } from "@/library/sections/[sectionId]/(server)/kindleSender";
@@ -10,7 +14,7 @@ import { FanficHeader } from "@/library/sections/[sectionId]/fanfics/[sectionFan
 import { useSettingsStore } from "@/store";
 import { CircleChevronRight, SendHorizontal, Trash2 } from "lucide-react";
 import { redirect, usePathname, useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 
 export function FanficContextMenu({
   fanfic,
@@ -81,9 +85,7 @@ export function FanficContextMenu({
       subItems: sections.map((section) => ({
         name: section.name,
         action: async () => {
-          await updateSectionFanfic(fanfic.sectionId, fanfic.id, {
-            sectionId: section.id,
-          });
+          await tranferSectionFanfic(fanfic.id, section.id);
           redirect(`/library/sections/${section.id}`);
         },
       })),
@@ -114,6 +116,7 @@ export function FanficContextMenu({
         }}
         ref={triggerRef}
         header={`Are you sure you want to delete ${fanfic.title}`}
+        destructive
       />
       <ContextMenu
         options={options}

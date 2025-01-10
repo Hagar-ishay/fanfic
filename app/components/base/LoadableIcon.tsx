@@ -3,11 +3,11 @@ import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function LoadableIcon({
-  DefaultIcon,
+  defaultIcon,
   isPending,
   successState,
 }: {
-  DefaultIcon: React.ComponentType;
+  defaultIcon: React.ReactNode;
   isPending: boolean;
   successState?: boolean;
 }) {
@@ -20,5 +20,5 @@ export default function LoadableIcon({
   if (successState) {
     return <CheckCircle />;
   }
-  return <DefaultIcon />;
+  return defaultIcon;
 }

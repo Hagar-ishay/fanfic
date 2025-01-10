@@ -20,6 +20,7 @@ export function SectionContextMenu({
   const triggerRef = useRef<HTMLDivElement>(null);
 
   async function onDelete() {
+    console.log("here??");
     await deleteSection(section.id);
   }
 
@@ -64,8 +65,8 @@ export function SectionContextMenu({
       <ContextMenu header={section.name} options={options} trigger={trigger} />
       <ConfirmationModal
         header={
-          <div>
-            Are you sure you want to delete section ${section.name}?
+          <div className="flex flex-col gap-2">
+            Are you sure you want to delete section {section.name} ?
             <div className="text-sm">
               Fics and Child sections belonging to this section will be removed
               from your library
@@ -74,6 +75,7 @@ export function SectionContextMenu({
         }
         onSubmit={onDelete}
         ref={triggerRef}
+        destructive
       />
     </>
   );
