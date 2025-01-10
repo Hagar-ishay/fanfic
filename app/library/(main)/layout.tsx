@@ -1,6 +1,6 @@
-import { AddNewSectionButton } from "@/library/(components)/AddNewSectionButton";
 import { Header } from "@/library/(components)/Header";
-import { connection } from "next/server";
+import { Options } from "@/library/sections/[sectionId]/(components)/Options";
+import { ShowHideLayout } from "@/library/sections/[sectionId]/(components)/ShowHideLayout";
 
 export default async function Layout({
   children,
@@ -10,7 +10,9 @@ export default async function Layout({
   return (
     <div className="flex flex-col min-h-screen">
       <Header segments={[{ label: "Library", href: "/library" }]}>
-        <AddNewSectionButton sectionId={null} />
+        <ShowHideLayout>
+          <Options sectionId={null} />
+        </ShowHideLayout>
       </Header>
       <div className="flex-grow">{children}</div>
     </div>

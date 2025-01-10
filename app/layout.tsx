@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/base/theme";
 import TopBar from "./(top-bar)/(components)/TopBar";
 import { SignIn } from "@/components/SignIn";
 import { FontProvider } from "@/components/base/FontProvider";
+import { Footer } from "@/(top-bar)/(components)/Footer";
 
 export const metadata: Metadata = {
   title: "Fanfic Penio",
@@ -43,6 +44,7 @@ export default function RootLayout({
               <SignedIn>
                 <main>{children}</main>
                 <Toaster />
+                <Footer />
               </SignedIn>
             </Suspense>
           </ThemeProvider>

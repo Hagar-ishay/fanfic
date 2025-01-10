@@ -11,14 +11,14 @@ export default async function TopBar() {
   const userFanfics = await listUserFanfics(user!.id);
 
   return (
-    <div className="flex flex-row items-center justify-between w-full gap-4 h-14">
-      <Link href="/" passHref className="min-w-14 min-h-10">
+    <div className="flex flex-row items-center justify-between w-full gap-4 h-14 ">
+      <Link href="/home" passHref className="min-w-14 min-h-10">
         <Image
           src="/icon.png"
           alt="Home"
-          width={80}
-          height={80}
-          className="mix-blend-multiply absolute top-1 left-2"
+          width={70}
+          height={70}
+          className="dark:mix-blend-exclusion dark:bg-white dark:rounded-full absolute top-2 left-3 "
         />
       </Link>
       <div className="max-w-xl w-full">

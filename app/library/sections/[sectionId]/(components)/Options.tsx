@@ -12,23 +12,19 @@ import { useUser } from "@clerk/nextjs";
 import { ClipboardPlus, EllipsisVertical, ListPlus } from "lucide-react";
 import { useRef, useTransition } from "react";
 
-export function Options({ sectionId }: { sectionId: number }) {
+export function Options({ sectionId }: { sectionId: number | null }) {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
   const { user } = useUser();
   const triggerSectionRef = useRef<HTMLDivElement>(null);
 
-  if (!user) {
-    return null;
-  }
-
   const handleAddFanficFromClipboard = async () => {
     const title = "Add Fanfic";
     const clipboardText = await navigator.clipboard.readText();
     if (clipboardText.startsWith(`${AO3_LINK}/works/`)) {
       startTransition(async () => {
-        const result = await addFanfic(sectionId, user.id, clipboardText);
+        const result = await addFanfic(sectionId!, user!.id, clipboardText);
         if (result.success) {
           toast({ title, description: "Added Successfully!" });
         } else {
@@ -45,11 +41,15 @@ export function Options({ sectionId }: { sectionId: number }) {
   };
 
   const options = [
-    {
-      icon: <ClipboardPlus />,
-      name: "Add Fanfic from Clipboard",
-      action: handleAddFanficFromClipboard,
-    },
+    ...(sectionId
+      ? [
+          {
+            icon: <ClipboardPlus />,
+            name: "Add Fanfic from Clipboard",
+            action: handleAddFanficFromClipboard,
+          },
+        ]
+      : []),
     {
       icon: <ListPlus />,
       name: "Add New Section",
@@ -77,7 +77,7 @@ export function Options({ sectionId }: { sectionId: number }) {
             <Tooltip description={option.name} key={option.name}>
               <Button
                 size="icon"
-                variant="ghost"
+                variant="default"
                 onClick={option.action}
                 disabled={isPending}
               >

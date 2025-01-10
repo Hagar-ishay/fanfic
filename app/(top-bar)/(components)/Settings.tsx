@@ -5,7 +5,7 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 
 import { useSettingsStore } from "../../store";
-import { Moon, SettingsIcon, Sun } from "lucide-react";
+import { Moon, Settings2Icon, SettingsIcon, Sun } from "lucide-react";
 import React from "react";
 
 import { Switch } from "../../components/ui/switch";
@@ -91,9 +91,7 @@ export function SettingsModal() {
   return (
     <DrawerDialog>
       <DrawerDialogTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <SettingsIcon size={25} />
-        </Button>
+        <Settings2Icon size={24} className="cursor-pointer mr-2" />
       </DrawerDialogTrigger>
       <DrawerDialogContent className="space-y-6 px-6 pb-10">
         <DrawerDialogHeader>
