@@ -2,24 +2,32 @@
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import { Kalam } from "next/font/google";
 import localFont from "next/font/local";
+import { LXGW_WenKai_Mono_TC } from "next/font/google";
 
-const kalam = Kalam({
-  weight: "300",
+const wenKai = LXGW_WenKai_Mono_TC({
+  variable: "--font-wenkai",
   style: "normal",
-  variable: "--font-kalam",
+  weight: "700",
+  subsets: [
+    "cyrillic",
+    "cyrillic-ext",
+    "greek",
+    "greek-ext",
+    "lisu",
+    "vietnamese",
+  ],
 });
 
 const blokletters = localFont({
   src: "../../fonts/Blokletters-Balpen.ttf",
   variable: "--font-blokletters",
+  fallback: ["wenkai"],
 });
 
 const bloklettersLight = localFont({
   src: "../../fonts/Blokletters-Potlood.ttf",
   variable: "--font-blokletters-light",
-  weight: "100 300",
 });
 
 export function FontProvider({ children }: { children: React.ReactNode }) {
@@ -29,7 +37,7 @@ export function FontProvider({ children }: { children: React.ReactNode }) {
       className={cn(
         blokletters.variable,
         bloklettersLight.variable,
-        kalam.variable,
+        wenKai.variable,
         blokletters.className,
         isMobile ? "text-sm" : "text-base"
       )}

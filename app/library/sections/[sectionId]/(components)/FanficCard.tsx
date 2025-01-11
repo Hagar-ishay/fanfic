@@ -4,7 +4,7 @@ import { Tooltip } from "@/components/base/Tooltip";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Section, UserFanfic } from "@/db/types";
-import { cn } from "@/lib/utils";
+import { cn, getFont } from "@/lib/utils";
 import { FanficContextMenu } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficContextMenu";
 import { Draggable } from "@hello-pangea/dnd";
 import { BookUp, BookUp2, CircleCheck, Grip } from "lucide-react";
@@ -66,11 +66,22 @@ export default function FanficCard({
                       }
                     }}
                   >
-                    <div className="text-md font-semibold truncate">
-                      {fanfic.title}
-                    </div>
-                    <div className="text-xs text-muted-foreground truncate">
-                      {fanfic.author}
+                    <div className="min-w-0 flex-1">
+                      <div
+                        className={cn(
+                          "text-md font-semibold truncate",
+                          getFont(fanfic.language)
+                        )}
+                      >
+                        {fanfic.title}
+                      </div>
+                      <div
+                        className={
+                          "text-xs text-muted-foreground truncate font-blokletters-light"
+                        }
+                      >
+                        {fanfic.author}
+                      </div>
                     </div>
                   </Link>
                 </div>

@@ -28,7 +28,10 @@ export function Breadcrumbs({
 
   const GetBreadcrumb = (segment: { label: string; href: string }) => {
     return (
-      <BreadcrumbItem className="font-semibold" key={segment.href}>
+      <BreadcrumbItem
+        className="font-semibold text-accent-foreground/80"
+        key={segment.href}
+      >
         <BreadcrumbLink href={segment.href}>{segment.label}</BreadcrumbLink>
       </BreadcrumbItem>
     );

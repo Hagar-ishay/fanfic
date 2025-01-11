@@ -18,7 +18,7 @@ export default {
       fontFamily: {
         "blokletters-light": ["var(--font-blokletters-light)"],
         blokletters: ["var(--font-blokletters)"],
-        kalam: ["var(--font-kalam)"],
+        wenkai: ["var(--font-wenkai)"],
       },
       colors: {
         background: "hsl(var(--background))",

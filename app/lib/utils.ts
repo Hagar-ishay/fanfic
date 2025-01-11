@@ -45,3 +45,8 @@ export const formatDate = (date: Date | null) => {
   if (!date) return "N/A";
   return DateTime.fromJSDate(date).toRelative();
 };
+
+export const getFont = (langCode: string | null) =>
+  ["ru", "ja", "zh", "ko"].includes(langCode || "en")
+    ? "font-wenkai text-xl"
+    : "font-blokletters";

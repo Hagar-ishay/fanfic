@@ -28,7 +28,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <header className="flex flex-row items-center justify-between sticky top-0 z-50 p-4 shadow-md bg-muted gap-2">
+            <header className="flex flex-row items-center justify-between sticky top-0 z-50 p-4 shadow-md gap-2 bg-background">
               <Suspense>
                 <SignedIn>
                   <TopBar />

@@ -92,10 +92,13 @@ export function Search({
         <DrawerDialogTrigger asChild>
           <Button
             variant="outline"
-            className="w-full h-9 relative flex items-center justify-start gap-2 px-3 transition-colors"
+            className={cn(
+              "h-9 relative flex items-center justify-start gap-1 sm:gap-2 px-2 sm:px-3 transition-colors",
+              isDesktop ? "w-full" : "max-w-32"
+            )}
           >
             <SearchIcon className="h-4 w-4 flex-shrink-0 opacity-50" />
-            <h2 className="text-sm text-muted-foreground truncate mt-1 ml-0.5">
+            <h2 className="text-sm text-muted-foreground truncate mt-1 sm:block">
               Search Library...
             </h2>
           </Button>

@@ -10,15 +10,12 @@ import {
 } from "@/components/base/DrawerDialog";
 import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getIsDesktop } from "@/lib/utils";
-import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import { ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
