@@ -93,12 +93,11 @@ export function Search({
           <Button
             variant="outline"
             className={cn(
-              "h-9 relative flex items-center justify-start gap-1 sm:gap-2 px-2 sm:px-3 transition-colors",
-              isDesktop ? "w-full" : "max-w-32"
+              "h-9 relative flex items-center justify-start gap-1 sm:gap-2 px-2 sm:px-3 transition-colors w-full"
             )}
           >
             <SearchIcon className="h-4 w-4 flex-shrink-0 opacity-50" />
-            <h2 className="text-sm text-muted-foreground truncate mt-1 sm:block">
+            <h2 className="text-sm text-muted-foreground truncate mt-1 ">
               Search Library...
             </h2>
           </Button>

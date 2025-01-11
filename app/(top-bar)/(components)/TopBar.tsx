@@ -14,9 +14,7 @@ export default async function TopBar() {
   return (
     <div className="flex flex-row items-center justify-between w-full gap-4 h-14">
       <HomeIcon />
-      <div className="max-w-xl w-full">
-        <Search userFanfics={userFanfics} />
-      </div>
+      <Search userFanfics={userFanfics} />
       <SettingsModal />
     </div>
   );
