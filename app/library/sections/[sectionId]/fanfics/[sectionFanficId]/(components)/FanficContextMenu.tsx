@@ -13,7 +13,7 @@ import { kindleSender } from "@/library/sections/[sectionId]/(server)/kindleSend
 import { FanficHeader } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficHeader";
 import { useSettingsStore } from "@/store";
 import { CircleChevronRight, SendHorizontal, Trash2 } from "lucide-react";
-import { redirect, usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useRef } from "react";
 
 export function FanficContextMenu({
@@ -47,7 +47,7 @@ export function FanficContextMenu({
     const result = await kindleSender({
       fanfic,
       kindleEmail,
-      translationLanguage,
+      translationLanguage: null,
       sendLatestChapters: sendLatestChapters || false,
       latestFinalChapter,
     });
@@ -85,8 +85,7 @@ export function FanficContextMenu({
       subItems: sections.map((section) => ({
         name: section.name,
         action: async () => {
-          await tranferSectionFanfic(fanfic.id, section.id);
-          redirect(`/library/sections/${section.id}`);
+          await tranferSectionFanfic(fanfic.id, section.id, fanfic.sectionId);
         },
       })),
     },

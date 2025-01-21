@@ -20,11 +20,18 @@ export async function getAo3Client() {
   return ao3Client;
 }
 
+export type AutoCompleteType =
+  | "fandom"
+  | "freeform"
+  | "relationship"
+  | "character";
+
 class AO3Client {
   private cookieJar: CookieJar;
   private axiosInstance: AxiosInstance;
   private defaultHeaders: object = {
     "Content-Type": "application/x-www-form-urlencoded",
+    Accept: "application/json,application/x-www-form-urlencoded",
   };
   constructor() {
     this.cookieJar = new CookieJar();
@@ -159,6 +166,15 @@ class AO3Client {
       throw new Error("Failed to authenticate to AO3");
     }
     return response;
+  }
+
+  public async autocomplete(
+    type: string,
+    query: string
+  ): Promise<{ id: string; name: string }[]> {
+    const url = `${AO3_LINK}/autocomplete/${type}?term=${query}`;
+    console.log({ url });
+    return this.request({ method: "GET", url });
   }
 
   public async downloadFanfic(

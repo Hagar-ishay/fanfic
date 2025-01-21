@@ -16,7 +16,8 @@ export const updateFanfic = async (ficId: number, { ...update }) => {
 
 export const tranferSectionFanfic = async (
   sectionFanficId: number,
-  newSectionId: number
+  newSectionId: number,
+  oldSectionId: number
 ) => {
   const position = await getNextPosition(newSectionId);
   const updateParams = { position, sectionId: newSectionId };
@@ -24,7 +25,7 @@ export const tranferSectionFanfic = async (
     .update(sectionFanfics)
     .set(updateParams)
     .where(drizzle.eq(sectionFanfics.id, sectionFanficId));
-  expirePath(`/api/sections/${newSectionId}`);
+  expirePath(`/api/sections/${oldSectionId}`);
 };
 
 export const updateSectionFanfic = async (

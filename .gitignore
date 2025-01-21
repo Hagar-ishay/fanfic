@@ -37,7 +37,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-
+*.code-workspace
 .vscode
 /.cache
 .secrets/

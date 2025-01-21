@@ -46,9 +46,7 @@ export async function kindleSender({
       fanfic.language !== translationLanguage
   );
 
-  let downloadPath = path.resolve(
-    `/tmp/${fanfic.title.replace(" ", " ")}.epub`
-  );
+  let downloadPath = path.resolve(`/tmp/${fanfic.title}.epub`);
   let title = fanfic.title;
   let author = fanfic.author;
 

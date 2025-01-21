@@ -10,7 +10,11 @@ export function HomeIcon() {
   const width = isMobile ? 50 : 70;
 
   return (
-    <Link href="/home" passHref className="min-w-6 min-h-10">
+    <Link
+      href="/home"
+      passHref
+      className={cn("min-h-10", isMobile ? "min-w-6" : "min-w-14")}
+    >
       <Image
         src="/icon.png"
         alt="Home"

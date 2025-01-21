@@ -50,3 +50,14 @@ export const getFont = (langCode: string | null) =>
   ["ru", "ja", "zh", "ko"].includes(langCode || "en")
     ? "font-wenkai text-xl"
     : "font-blokletters";
+
+export const debounce = <T extends (...args: any[]) => any>(
+  fn: T,
+  ms = 300
+) => {
+  let timeoutId: ReturnType<typeof setTimeout>;
+  return function (this: any, ...args: Parameters<T>) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn.apply(this, args), ms);
+  };
+};

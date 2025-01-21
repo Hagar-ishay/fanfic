@@ -3,7 +3,7 @@
 import { BlockQuote } from "@/components/base/BlockQuote";
 import { Button } from "@/components/ui/button";
 import { Section, UserFanfic } from "@/db/types";
-import { cn, getFont, getIsDesktop } from "@/lib/utils";
+import { cn, getFont } from "@/lib/utils";
 import { FanficContextMenu } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficContextMenu";
 import { SummaryContent } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/Summary";
 import { Ellipsis, EllipsisVertical, ExternalLink } from "lucide-react";
