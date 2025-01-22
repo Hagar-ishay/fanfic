@@ -21,7 +21,7 @@ interface MultiSelectProps {
   searchPlaceholder?: string;
   emptyMessage?: string;
   className?: string;
-  allowExclude: boolean;
+  allowExclude?: boolean;
   multiple?: boolean;
   getOptions: (
     value: string,
