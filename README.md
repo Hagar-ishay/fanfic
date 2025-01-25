@@ -13,12 +13,14 @@ A modern web application that enhances your fanfiction reading experience by pro
 
 ## Tech Stack
 
-- Next.js 15
 - TypeScript
-- Tailwind CSS
-- Clerk for authentication (Google provider)
-- Drizzle for database management
-- Vercel for Continuous Deployment
+- Tailwind CSS + Radix/Shadcn 
+- Framework: React + Next.js 15 App Router
+- State management: Zustand
+- Auth: Clerk
+- ORM: Drizzle
+- DB Provider: Neon Serverless
+- Hosting: Vercel
 
 
 ## Project Structure
