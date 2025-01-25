@@ -11,6 +11,31 @@ A modern web application that enhances your fanfiction reading experience by pro
 - Google authentication via Clerk
 - Responsive design for both desktop and mobile
 
+## Tech Stack
+
+- Next.js 15
+- TypeScript
+- Tailwind CSS
+- Clerk for authentication (Google provider)
+- Drizzle for database management
+- Vercel for Continuous Deployment
+
+
+## Project Structure
+
+```
+├── migrations/       # Drizzle-based DB migration files
+├── app/              # Next.js app router pages
+├── app/components/   # Reusable UI components
+├── app/lib/          # Utility functions and helpers
+├── app/db/           # Database schema and migrations
+├── app/library/      # Personal library management
+├── app/home/         # Landing page
+├── app/explore/      # Story discovery and search interface for AO3 content
+└── public/           # Static assets
+
+```
+
 ## Getting Started
 
 1. Clone the repository
@@ -28,33 +53,6 @@ pnpm run dev
 
 4. Open [http://localhost:3000](http://localhost:3000) to view the application
 
-## Tech Stack
-
-- Next.js 15
-- TypeScript
-- Tailwind CSS
-- Clerk for authentication (Google provider)
-- Drizzle for database management
-- Vercel for Continuous Deployment
-
-## Project Structure
-
-```
-├── migrations/       # Drizzle-based DB migration files
-├── app/              # Next.js app router pages
-├── app/components/   # Reusable UI components
-├── app/lib/          # Utility functions and helpers
-├── app/db/           # Database schema and migrations
-├── app/library/      # Personal library management
-├── app/home/         # Landing page
-├── app/explore/      # Story discovery and search interface for AO3 content
-└── public/           # Static assets
-
-```
-
-## Deployment
-
-This project is continuously deployed using Vercel's CD pipeline. Any changes merged to the main branch will automatically trigger a new deployment.
 
 ## TODO
 
