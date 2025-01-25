@@ -109,3 +109,21 @@ export const credentials = schema.table(
     sessionTypeUnique: uniqueIndex("sessions_type_unique").on(table.type),
   })
 );
+
+export const savedSearches = schema.table(
+  "saved_searches",
+  {
+    id: serial().primaryKey(),
+    name: varchar().notNull(),
+    search: jsonb().$type<{ [name: string]: string }>().notNull(),
+    userId: varchar("user_id").notNull(),
+    creationTime: timestamp("creation_time").notNull().defaultNow(),
+    updateTime: timestamp("update_time").$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    savedSearchesUnique: uniqueIndex("user_saved_searches_unique").on(
+      table.userId,
+      table.name
+    ),
+  })
+);

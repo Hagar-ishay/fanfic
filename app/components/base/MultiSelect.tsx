@@ -67,7 +67,11 @@ export function MultiSelect({
 
   return (
     <div className="relative">
-      <input type="hidden" name={name} value={JSON.stringify(selectedValues)} />
+      <input
+        type="hidden"
+        name={name}
+        value={JSON.stringify(selectedValues.map((item) => item.id))}
+      />
       {label || name}
       <Command>
         <div className="flex flex-col gap-4 text-xs">
@@ -86,8 +90,7 @@ export function MultiSelect({
                 {value.excluded ? "-" : ""}
                 {value.name}
                 <X
-                  size={14}
-                  className="cursor-pointer hover:text-destructive"
+                  className="cursor-pointer hover:text-destructive h-4 w-4 "
                   onClick={() =>
                     setValues(selectedValues.filter((_, i) => i !== index))
                   }
@@ -111,22 +114,17 @@ export function MultiSelect({
             >
               <span className="truncate">{option.name}</span>
               {allowExclude && (
-                <button className="flex-shrink-0 cursor-pointer text-muted-foreground hover:text-destructive">
-                  <MinusCircle
-                    size={16}
-                    onSelect={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      if (
-                        !selectedValues.find((value) => value.id === option.id)
-                      ) {
-                        setValues([
-                          ...selectedValues,
-                          { ...option, excluded: true },
-                        ]);
-                      }
-                    }}
-                  />
+                <button
+                  className="flex-shrink-0 cursor-pointer text-muted-foreground hover:text-destructive"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (!selectedValues.find((value) => value.id === option.id)) {
+                      setValues([...selectedValues, { ...option, excluded: true }]);
+                    }
+                  }}
+                >
+                  <MinusCircle size={16} />
                 </button>
               )}
             </CommandItem>

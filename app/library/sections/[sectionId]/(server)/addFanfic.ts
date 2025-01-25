@@ -3,7 +3,6 @@
 import { AO3_LINK } from "@/consts";
 import {
   getFanficByExternalId,
-  getFanficById,
   insertFanfic,
   insertSectionFanfic,
 } from "@/db/fanfics";

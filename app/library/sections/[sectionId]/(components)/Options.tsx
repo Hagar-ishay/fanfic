@@ -47,6 +47,7 @@ export function Options({ sectionId }: { sectionId: number | null }) {
             icon: <ClipboardPlus />,
             name: "Add Fanfic from Clipboard",
             action: handleAddFanficFromClipboard,
+            isPending: isPending,
           },
         ]
       : []),
@@ -79,9 +80,16 @@ export function Options({ sectionId }: { sectionId: number | null }) {
                 size="icon"
                 variant="default"
                 onClick={option.action}
-                disabled={isPending}
+                disabled={option.isPending}
               >
-                <LoadableIcon defaultIcon={option.icon} isPending={isPending} />
+                {option.isPending ? (
+                  <LoadableIcon
+                    defaultIcon={option.icon}
+                    isPending={option.isPending}
+                  />
+                ) : (
+                  option.icon
+                )}
               </Button>
             </Tooltip>
           ))}

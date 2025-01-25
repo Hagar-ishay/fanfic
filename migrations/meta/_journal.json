@@ -8,6 +8,13 @@
       "when": 1736179900375,
       "tag": "0000_bent_mongoose",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1737736660601,
+      "tag": "0001_cultured_psynapse",
+      "breakpoints": true
     }
   ]
 }

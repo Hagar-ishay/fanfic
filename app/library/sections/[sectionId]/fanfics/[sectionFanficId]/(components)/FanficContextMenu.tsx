@@ -47,7 +47,7 @@ export function FanficContextMenu({
     const result = await kindleSender({
       fanfic,
       kindleEmail,
-      translationLanguage: null,
+      translationLanguage: translationLanguage,
       sendLatestChapters: sendLatestChapters || false,
       latestFinalChapter,
     });

@@ -31,7 +31,8 @@ class AO3Client {
   private axiosInstance: AxiosInstance;
   private defaultHeaders: object = {
     "Content-Type": "application/x-www-form-urlencoded",
-    Accept: "application/json,application/x-www-form-urlencoded",
+    Accept:
+      "application/json,application/x-www-form-urlencoded,text/html,application/xhtml+xml,application/xml",
   };
   constructor() {
     this.cookieJar = new CookieJar();
@@ -93,6 +94,7 @@ class AO3Client {
         .map((cookie) => cookie.cookieString())
         .join("; ");
     }
+
     const response = await this.axiosInstance.request<T>(config);
     if (config.responseType === "stream") {
       return response as T;
@@ -173,7 +175,6 @@ class AO3Client {
     query: string
   ): Promise<{ id: string; name: string }[]> {
     const url = `${AO3_LINK}/autocomplete/${type}?term=${query}`;
-    console.log({ url });
     return this.request({ method: "GET", url });
   }
 

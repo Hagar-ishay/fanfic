@@ -18,10 +18,12 @@ export function ConfirmationModal({
   onSubmit,
   ref,
   destructive,
+  trigger,
 }: {
   header?: React.ReactNode;
   onSubmit: Function;
   ref?: React.RefObject<HTMLDivElement>;
+  trigger?: React.ReactNode;
   destructive?: boolean;
 }) {
   async function handleSubmit() {
@@ -32,7 +34,7 @@ export function ConfirmationModal({
     <div>
       <DrawerDialog>
         <DrawerDialogTrigger asChild>
-          <div hidden ref={ref} />
+          {trigger ? <div>{trigger}</div> : <div hidden ref={ref} />}
         </DrawerDialogTrigger>
         <DrawerDialogContent className="pb-5">
           <DrawerDialogHeader>
