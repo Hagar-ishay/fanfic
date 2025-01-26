@@ -18,6 +18,7 @@ import {
   DrawerDialogTrigger,
 } from "@/components/base/DrawerDialog";
 import { Separator } from "@/components/ui/separator";
+import { Tooltip } from "@/components/base/Tooltip";
 
 export function SettingsModal() {
   const { theme, systemTheme, setTheme } = useTheme();
@@ -75,13 +76,16 @@ export function SettingsModal() {
           label: "English Translation",
           description: "Automatically translate content to English",
           component: (
-            <Switch
-              color="primary"
-              id="enableTranslation"
-              name="enableTranslation"
-              defaultChecked={shouldTranslate}
-              onClick={() => setLanguageCode(shouldTranslate ? "en" : null)}
-            />
+            <Tooltip description="Coming soon">
+              <Switch
+                className="bg-primary"
+                id="enableTranslation"
+                name="enableTranslation"
+                disabled
+                defaultChecked={shouldTranslate}
+                onClick={() => setLanguageCode(shouldTranslate ? "en" : null)}
+              />
+            </Tooltip>
           ),
         },
       ],

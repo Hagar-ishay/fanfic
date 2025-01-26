@@ -14,14 +14,7 @@ export const selectOrCreateSections = async (userId: string) => {
     userSections = await db
       .insert(sections)
       .values(DEFAULT_SECTIONS.map((name) => ({ name, userId })))
-      .returning({
-        id: sections.id,
-        name: sections.name,
-        userId: sections.userId,
-        parentId: sections.parentId,
-        updateTime: sections.updateTime,
-        creationTime: sections.creationTime,
-      });
+      .returning();
   }
   return userSections;
 };
