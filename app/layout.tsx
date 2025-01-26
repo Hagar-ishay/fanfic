@@ -24,7 +24,7 @@ export default function RootLayout({
         <FontProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="dark"
+            defaultTheme="system"
             enableSystem
             disableTransitionOnChange
           >
