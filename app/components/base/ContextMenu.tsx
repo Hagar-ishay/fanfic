@@ -1,5 +1,6 @@
 "use client";
 
+import { ConfirmationModal } from "@/components/base/ConfirmationModal";
 import {
   DrawerDialog,
   DrawerDialogContent,
@@ -15,7 +16,6 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
-import { getIsDesktop } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -26,6 +26,8 @@ export type Option = {
   action?: () => void;
   disabled?: boolean;
   subItems?: Option[];
+  destructive?: boolean;
+  confirmationHeader?: React.ReactNode;
 };
 
 type MenuSlide = {
@@ -47,7 +49,6 @@ export function ContextMenu({
     { items: options },
   ]);
   const [activeIndex, setActiveIndex] = useState(0);
-  const isDesktop = getIsDesktop();
   const router = useRouter();
 
   function handleSelect(option: Option) {
@@ -135,23 +136,42 @@ export function ContextMenu({
                     </Button>
                   )}
 
-                  {slide.items.map((option, index) => (
-                    <Button
-                      key={index}
-                      variant="ghost"
-                      onClick={() => handleSubItemClick(option)}
-                      disabled={option.disabled}
-                      className="justify-between text-sm"
-                    >
-                      <div className="gap-3 flex flex-row items-center">
-                        {option.icon}
-                        {option.name}
-                      </div>
-                      {option.subItems && option.subItems.length > 0 && (
-                        <ChevronRight className="h-4 w-4" />
-                      )}
-                    </Button>
-                  ))}
+                  {slide.items.map((option, index) =>
+                    option.destructive ? (
+                      <ConfirmationModal
+                        key={index}
+                        onSubmit={() => handleSubItemClick(option)}
+                        header={option.confirmationHeader}
+                        trigger={
+                          <Button
+                            variant="destructive"
+                            className="justify-between text-sm"
+                          >
+                            <div className="gap-3 flex flex-row items-center">
+                              {option.icon}
+                              {option.name}
+                            </div>
+                          </Button>
+                        }
+                      ></ConfirmationModal>
+                    ) : (
+                      <Button
+                        key={index}
+                        variant="ghost"
+                        onClick={() => handleSubItemClick(option)}
+                        disabled={option.disabled}
+                        className="justify-between text-sm"
+                      >
+                        <div className="gap-3 flex flex-row items-center">
+                          {option.icon}
+                          {option.name}
+                        </div>
+                        {option.subItems && option.subItems.length > 0 && (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )
+                  )}
                 </div>
               ))}
             </div>

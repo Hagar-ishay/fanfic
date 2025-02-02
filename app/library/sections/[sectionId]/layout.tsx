@@ -1,6 +1,6 @@
+import { Header } from "@/components/base/Header";
 import { getBreadcrumbs, getSection } from "@/db/sections";
-import { Header } from "@/library/(components)/Header";
-import { Options } from "@/library/sections/[sectionId]/(components)/Options";
+import { Options } from "@/library/(components)/Options";
 import { ShowHideLayout } from "@/library/sections/[sectionId]/(components)/ShowHideLayout";
 
 import { notFound } from "next/navigation";

@@ -13,18 +13,25 @@ import {
 import { MultiSelect } from "@/components/base/MultiSelect";
 import { Select } from "@/components/base/Select";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { saveSearch } from "@/db/savedSearches";
+import { SavedSearch } from "@/db/types";
 import { autocomplete } from "@/explore/(server)/autocomplete";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AutoCompleteType } from "@/lib/ao3Client";
 import { cn } from "@/lib/utils";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { PlusIcon } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { useUser } from "@clerk/nextjs";
-import { saveSearch } from "@/db/savedSearches";
-import { Separator } from "@/components/ui/separator";
+import React from "react";
 
-export function SearchBuilder() {
+export function SearchBuilder({
+  trigger,
+  savedSearch,
+}: {
+  trigger: React.ReactNode;
+  savedSearch?: SavedSearch;
+}) {
   const isMobile = useIsMobile();
   const { user } = useUser();
 
@@ -36,41 +43,49 @@ export function SearchBuilder() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const { SearchName, ...filters } = Object.fromEntries(
-      formData.entries()
-    ) as Record<string, string>;
+    const entries = Object.fromEntries(formData.entries()) as Record<
+      string,
+      string
+    >;
+    const { SearchName, ...filters } = entries;
 
     const formattedSearch = Object.entries(filters).reduce(
       (acc, [key, value]) => {
-        let parsedKey = `work_search[${key}]`;
         const parsedValue = JSON.parse(value);
-        const id = parsedValue.id;
-        if (parsedValue.excluded) {
-          parsedKey = `exclude_work_search[!${id}]`;
+        if (
+          parsedValue &&
+          (!Array.isArray(parsedValue) || parsedValue.length > 0)
+        ) {
+          return { ...acc, [key]: parsedValue };
         }
-
-        if (Array.isArray(value)) {
-          return { ...acc, [parsedKey]: value.join(",") };
-        }
-        return { ...acc, [parsedKey]: value };
+        return acc;
       },
       {}
     );
 
     await saveSearch({
+      ...(savedSearch?.id ? { id: savedSearch.id } : {}),
       name: SearchName as string,
       search: formattedSearch,
       userId: user!.id,
     });
   };
 
+  const getDefaultValue = (fieldName: string) => {
+    if (!savedSearch?.search) return undefined;
+    const value = savedSearch.search[fieldName];
+    return value ? JSON.stringify(value) : undefined;
+  };
+
+  const getArrayValue = (fieldName: string) => {
+    if (!savedSearch?.search) return undefined;
+    const value = savedSearch.search[fieldName];
+    return Array.isArray(value) ? value : value ? [value] : undefined;
+  };
+
   return (
     <DrawerDialog>
-      <DrawerDialogTrigger asChild>
-        <Button>
-          <PlusIcon /> Search Builder
-        </Button>
-      </DrawerDialogTrigger>
+      <DrawerDialogTrigger asChild>{trigger}</DrawerDialogTrigger>
       <DrawerDialogContent
         className={cn(
           "flex flex-col",
@@ -87,6 +102,7 @@ export function SearchBuilder() {
                   name="SearchName"
                   placeholder="Name your Search"
                   required
+                  defaultValue={savedSearch?.name}
                 />
               </div>
             </DrawerDialogTitle>
@@ -97,6 +113,7 @@ export function SearchBuilder() {
               <Select
                 label="Rating"
                 name={"rating_ids"}
+                defaultValue={getDefaultValue("rating_ids")}
                 options={[
                   { id: "10", name: "General Audiences" },
                   { id: "11", name: "Teen And Up Audiences" },
@@ -107,6 +124,7 @@ export function SearchBuilder() {
               <Select
                 label="Category"
                 name={"category_ids"}
+                defaultValue={getDefaultValue("category_ids")}
                 options={[
                   { id: "21", name: "Gen" },
                   { id: "22", name: "F/M" },
@@ -118,6 +136,7 @@ export function SearchBuilder() {
               <Select
                 name={"complete"}
                 label={"Status"}
+                defaultValue={getDefaultValue("complete")}
                 options={[
                   { id: "true", name: "Complete" },
                   { id: "false", name: "Incomplete" },
@@ -128,29 +147,34 @@ export function SearchBuilder() {
                 name={"fandom" as AutoCompleteType}
                 label={"Fandoms"}
                 multiple
+                defaultValue={getArrayValue("fandom")}
                 getOptions={getAutoCompleteTags}
               />
               <MultiSelect
                 name={"character" as AutoCompleteType}
                 label={"Characters"}
                 multiple
+                defaultValue={getArrayValue("character")}
                 getOptions={getAutoCompleteTags}
               />
               <MultiSelect
                 name={"relationship" as AutoCompleteType}
                 label={"Relationships"}
+                defaultValue={getArrayValue("relationship")}
                 getOptions={getAutoCompleteTags}
               />
               <MultiSelect
                 name={"tag" as AutoCompleteType}
                 label={"Additional Tags"}
                 multiple
+                defaultValue={getArrayValue("tag")}
                 getOptions={getAutoCompleteTags}
               />
               <Select
                 name={"sort_column"}
                 label={"Order By"}
                 placeholder="Select an option..."
+                defaultValue={getDefaultValue("sort_column")}
                 options={[
                   { id: "revised_at", name: "Date Updated" },
                   { id: "title_to_sort_on", name: "Title" },
@@ -176,7 +200,7 @@ export function SearchBuilder() {
                   }
                 }}
               >
-                Create
+                {savedSearch ? "Update" : "Create"}
               </Button>
             </DrawerDialogClose>
           </DrawerDialogFooter>

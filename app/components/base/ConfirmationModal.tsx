@@ -34,7 +34,7 @@ export function ConfirmationModal({
     <div>
       <DrawerDialog>
         <DrawerDialogTrigger asChild>
-          {trigger ? <div>{trigger}</div> : <div hidden ref={ref} />}
+          {trigger ? trigger : <div hidden ref={ref} />}
         </DrawerDialogTrigger>
         <DrawerDialogContent className="pb-5">
           <DrawerDialogHeader>
@@ -45,7 +45,7 @@ export function ConfirmationModal({
             <DrawerDialogClose>
               <Button variant="secondary">Cancel</Button>
             </DrawerDialogClose>
-            <DrawerDialogClose>
+            <DrawerDialogClose asChild>
               <Button
                 onClick={handleSubmit}
                 variant={destructive ? "destructive" : "default"}

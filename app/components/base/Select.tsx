@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import {
   Select as BaseSelect,
   SelectContent,
@@ -14,13 +13,15 @@ export function Select({
   placeholder = "Select an option...",
   name,
   label,
+  defaultValue,
 }: {
   options: { id: string; name: string }[];
   placeholder?: string;
   name?: string;
   label?: string;
+  defaultValue?: string;
 }) {
-  const [value, setValue] = React.useState<string>("");
+  const [value, setValue] = React.useState<string>(defaultValue || "");
 
   return (
     <div className="flex flex-col gap-2">

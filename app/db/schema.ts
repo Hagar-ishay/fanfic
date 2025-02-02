@@ -1,4 +1,5 @@
 import {
+  boolean,
   integer,
   jsonb,
   pgSchema,
@@ -45,7 +46,7 @@ export const fanfics = schema.table(
     updatedAt: timestamp("updated_at").notNull(),
     completedAt: timestamp("completed_at"),
     tags: jsonb()
-      .$type<{ [category: string]: string[] }>()
+      .$type<{ [category: string]: string[] | string | object }>()
       .notNull()
       .default({}),
     wordCount: integer("word_count"),
@@ -115,7 +116,13 @@ export const savedSearches = schema.table(
   {
     id: serial().primaryKey(),
     name: varchar().notNull(),
-    search: jsonb().$type<{ [name: string]: string }>().notNull(),
+    search: jsonb()
+      .$type<{
+        [name: string]:
+          | { id: string; name: string; excluded?: boolean }
+          | { id: string; name: string; excluded?: boolean }[];
+      }>()
+      .notNull(),
     userId: varchar("user_id").notNull(),
     creationTime: timestamp("creation_time").notNull().defaultNow(),
     updateTime: timestamp("update_time").$onUpdate(() => new Date()),
@@ -127,3 +134,13 @@ export const savedSearches = schema.table(
     ),
   })
 );
+
+export const settings = schema.table("settings", {
+  id: serial().primaryKey(),
+  userId: varchar("user_id").notNull(),
+  kindleEmail: varchar("kindle_email"),
+  languageCode: varchar("language_code").notNull().default("en"),
+  enableTranslation: boolean("enable_translation").notNull().default(false),
+  creationTime: timestamp("creation_time").notNull().defaultNow(),
+  updateTime: timestamp("update_time").$onUpdate(() => new Date()),
+});

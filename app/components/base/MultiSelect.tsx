@@ -1,11 +1,10 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Command, CommandInput, CommandItem } from "@/components/ui/command";
 import { debounce } from "@/lib/utils";
 import { CommandList, CommandSeparator } from "cmdk";
-import { X, MinusCircle, XCircle } from "lucide-react";
+import { MinusCircle, X } from "lucide-react";
 import * as React from "react";
 
 interface SelectedValue {
@@ -17,12 +16,10 @@ interface SelectedValue {
 interface MultiSelectProps {
   name: string;
   label?: string;
-  placeholder?: string;
   searchPlaceholder?: string;
-  emptyMessage?: string;
-  className?: string;
   allowExclude?: boolean;
   multiple?: boolean;
+  defaultValue?: SelectedValue[];
   getOptions: (
     value: string,
     name: string
@@ -36,9 +33,10 @@ export function MultiSelect({
   multiple = true,
   allowExclude = true,
   searchPlaceholder = "type to search...",
+  defaultValue,
 }: MultiSelectProps) {
   const [selectedValues, setSelectedValues] = React.useState<SelectedValue[]>(
-    []
+    defaultValue || []
   );
   const [options, setOptions] = React.useState<{ id: string; name: string }[]>(
     []
@@ -67,11 +65,7 @@ export function MultiSelect({
 
   return (
     <div className="relative">
-      <input
-        type="hidden"
-        name={name}
-        value={JSON.stringify(selectedValues.map((item) => item.id))}
-      />
+      <input type="hidden" name={name} value={JSON.stringify(selectedValues)} />
       {label || name}
       <Command>
         <div className="flex flex-col gap-4 text-xs">
@@ -90,7 +84,8 @@ export function MultiSelect({
                 {value.excluded ? "-" : ""}
                 {value.name}
                 <X
-                  className="cursor-pointer hover:text-destructive h-4 w-4 "
+                  size={14}
+                  className="cursor-pointer hover:text-destructive"
                   onClick={() =>
                     setValues(selectedValues.filter((_, i) => i !== index))
                   }
@@ -114,17 +109,22 @@ export function MultiSelect({
             >
               <span className="truncate">{option.name}</span>
               {allowExclude && (
-                <button
-                  className="flex-shrink-0 cursor-pointer text-muted-foreground hover:text-destructive"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (!selectedValues.find((value) => value.id === option.id)) {
-                      setValues([...selectedValues, { ...option, excluded: true }]);
-                    }
-                  }}
-                >
-                  <MinusCircle size={16} />
+                <button className="flex-shrink-0 cursor-pointer text-muted-foreground hover:text-destructive">
+                  <MinusCircle
+                    size={16}
+                    onSelect={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (
+                        !selectedValues.find((value) => value.id === option.id)
+                      ) {
+                        setValues([
+                          ...selectedValues,
+                          { ...option, excluded: true },
+                        ]);
+                      }
+                    }}
+                  />
                 </button>
               )}
             </CommandItem>

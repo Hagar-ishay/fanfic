@@ -1,4 +1,10 @@
-import { credentials, fanfics, savedSearches, sectionFanfics, sections } from "@/db/schema";
+import {
+  credentials,
+  fanfics,
+  savedSearches,
+  sectionFanfics,
+  sections,
+} from "@/db/schema";
 
 export type NewFanfic = typeof fanfics.$inferInsert;
 export type Fanfic = typeof fanfics.$inferSelect;
@@ -17,5 +23,6 @@ const enumValues = {
 } as const;
 export type SessionType = (typeof enumValues)[keyof typeof enumValues];
 
-
 export type SavedSearch = typeof savedSearches.$inferSelect;
+
+export type SavedSearchSearch = (typeof savedSearches.$inferSelect)["search"];
