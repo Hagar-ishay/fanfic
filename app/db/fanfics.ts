@@ -25,7 +25,7 @@ export const tranferSectionFanfic = async (
     .update(sectionFanfics)
     .set(updateParams)
     .where(drizzle.eq(sectionFanfics.id, sectionFanficId));
-  expirePath(`/api/sections/${oldSectionId}`);
+  expirePath(`/library/sections/${oldSectionId}`);
 };
 
 export const updateSectionFanfic = async (
@@ -37,7 +37,7 @@ export const updateSectionFanfic = async (
     .update(sectionFanfics)
     .set(update)
     .where(drizzle.eq(sectionFanfics.id, sectionFanficId));
-  expirePath(`/api/sections/${sectionId}/fanfics/${sectionFanficId}`);
+  expirePath(`/library/sections/${sectionId}/fanfics/${sectionFanficId}`);
 };
 
 export const selectOngoingFanfics = async () => {
