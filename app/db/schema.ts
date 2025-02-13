@@ -46,7 +46,7 @@ export const fanfics = schema.table(
     updatedAt: timestamp("updated_at").notNull(),
     completedAt: timestamp("completed_at"),
     tags: jsonb()
-      .$type<{ [category: string]: string[] | string | object }>()
+      .$type<{ [category: string]: string[] }>()
       .notNull()
       .default({}),
     wordCount: integer("word_count"),
