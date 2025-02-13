@@ -20,7 +20,6 @@ export function SectionContextMenu({
   const triggerRef = useRef<HTMLDivElement>(null);
 
   async function onDelete() {
-    console.log("here??");
     await deleteSection(section.id);
   }
 

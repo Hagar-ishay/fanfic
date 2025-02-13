@@ -107,7 +107,6 @@ export function FanficContextMenu({
     <div>
       <ConfirmationModal
         onSubmit={async () => {
-          console.log("eoifjeojifio");
           await deleteSectionFanfic(fanfic.id);
           if (path.includes("/fanfics/")) {
             router.back();

@@ -27,11 +27,14 @@ class HtmlParser {
 
   private cleanHtml(text: string): string {
     this.$("#admin-banner").remove();
-
-    return text.replace(/\s+/g, " ").trim();
+    return text;
   }
+
   private parseToString(selector: cheerio.BasicAcceptedElems<any>): string {
-    const html = this.$(selector).first().html() || "";
+    const element = this.$(selector).first();
+    if (!element.length) return "";
+
+    const html = element.html() || "";
     return convert(html, {
       selectors: [
         { selector: "a", options: { ignoreHref: true } },
@@ -43,7 +46,7 @@ class HtmlParser {
         },
       ],
       formatters: {
-        italics: function (elem, walk, builder) {
+        italics: (elem, walk, builder) => {
           builder.addInline("_");
           walk(elem.children, builder);
           builder.addInline("_");
