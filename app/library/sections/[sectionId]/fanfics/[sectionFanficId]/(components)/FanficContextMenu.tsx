@@ -1,12 +1,7 @@
 "use client";
 
 import { ContextMenu } from "@/components/base/ContextMenu";
-import { ConfirmationModal } from "@/components/base/ConfirmationModal";
-import {
-  deleteSectionFanfic,
-  tranferSectionFanfic,
-  updateSectionFanfic,
-} from "@/db/fanfics";
+import { deleteSectionFanfic, tranferSectionFanfic } from "@/db/fanfics";
 import type { Section, UserFanfic } from "@/db/types";
 import { useToast } from "@/hooks/use-toast";
 import { kindleSender } from "@/library/sections/[sectionId]/(server)/kindleSender";
@@ -14,7 +9,6 @@ import { FanficHeader } from "@/library/sections/[sectionId]/fanfics/[sectionFan
 import { useSettingsStore } from "@/store";
 import { CircleChevronRight, SendHorizontal, Trash2 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
-import { useRef } from "react";
 
 export function FanficContextMenu({
   fanfic,
@@ -31,15 +25,6 @@ export function FanficContextMenu({
 
   const kindleEmail = useSettingsStore((state) => state.kindleEmail);
   const translationLanguage = useSettingsStore((state) => state.languageCode);
-  const triggerRef = useRef<HTMLDivElement>(null);
-
-  type Option = {
-    icon?: React.ReactNode;
-    name: string;
-    action?: () => void;
-    disabled?: boolean;
-    subItems?: Option[];
-  };
 
   const latestFinalChapter = Number(fanfic.chapterCount?.split("/")[0]);
 
@@ -78,7 +63,7 @@ export function FanficContextMenu({
     });
   }
 
-  const options: Option[] = [
+  const options = [
     {
       icon: <CircleChevronRight size={17} />,
       name: "Move section",
@@ -97,25 +82,19 @@ export function FanficContextMenu({
     {
       icon: <Trash2 size={17} />,
       name: "Delete Fanfic",
-      action: () => {
-        triggerRef.current?.click();
+      destructive: true,
+      confirmationHeader: `Are you sure you want to delete ${fanfic.title}`,
+      action: async () => {
+        await deleteSectionFanfic(fanfic.id);
+        if (path.includes("/fanfics/")) {
+          router.back();
+        }
       },
     },
   ];
 
   return (
     <div>
-      <ConfirmationModal
-        onSubmit={async () => {
-          await deleteSectionFanfic(fanfic.id);
-          if (path.includes("/fanfics/")) {
-            router.back();
-          }
-        }}
-        ref={triggerRef}
-        header={`Are you sure you want to delete ${fanfic.title}`}
-        destructive
-      />
       <ContextMenu
         options={options}
         trigger={trigger}

@@ -15,6 +15,13 @@
       "when": 1737736660601,
       "tag": "0001_cultured_psynapse",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1738341751876,
+      "tag": "0002_tidy_sabretooth",
+      "breakpoints": true
     }
   ]
 }

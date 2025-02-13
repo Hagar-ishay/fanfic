@@ -45,9 +45,8 @@ export async function kindleSender({
       translationLanguage &&
       fanfic.language !== translationLanguage
   );
-
-  let downloadPath = path.resolve(`/tmp/${fanfic.title}.epub`);
-  let title = fanfic.title;
+  let title = fanfic.title.trim();
+  let downloadPath = path.resolve(`/tmp/${title}.epub`);
   let author = fanfic.author;
 
   try {
@@ -55,7 +54,7 @@ export async function kindleSender({
     await ao3Client.downloadFanfic(fanfic.downloadLink, downloadPath);
     if (shouldTranslate) {
       const { translatedTitle, translatedAuthor } = await translateMetadata({
-        title: fanfic.title,
+        title: title,
         author: fanfic.author,
       });
 
@@ -78,7 +77,7 @@ export async function kindleSender({
       };
       await unlinkAsync(downloadPath);
       downloadPath = path.resolve(
-        `/tmp/${fanfic.title.replace(" ", " ")} - Chapters ${fanfic.latestStartingChapter} - ${latestFinalChapter}.epub`
+        `/tmp/${title} - Chapters ${fanfic.latestStartingChapter} - ${latestFinalChapter}.epub`
       );
       await buildNewEpub(data, downloadPath);
     }
@@ -92,7 +91,7 @@ export async function kindleSender({
     await sendToKindle(
       kindleEmail,
       title,
-      downloadPath.replace("/tmp/", ""),
+      downloadPath.replace("/tmp/", "").trim(),
       downloadPath
     );
     console.log("Sent to Kindle:", title);

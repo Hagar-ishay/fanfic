@@ -1,25 +1,40 @@
 "use server";
 import { db } from "@/db/db";
 import { savedSearches } from "@/db/schema";
+import { SavedSearchSearch } from "@/db/types";
 import * as drizzle from "drizzle-orm";
+import { expirePath } from "next/cache";
 
 export async function saveSearch({
+  id,
   name,
   search,
   userId,
 }: {
+  id?: number;
   name: string;
-  search: { [key: string]: string };
+  search: SavedSearchSearch;
   userId: string;
 }) {
-  return await db
-    .insert(savedSearches)
-    .values({
-      name,
-      search,
-      userId,
-    })
-    .returning({ id: savedSearches.id });
+  if (id) {
+    return await db
+      .update(savedSearches)
+      .set({
+        name,
+        search,
+        userId,
+      })
+      .returning({ id: savedSearches.id });
+  } else {
+    return await db
+      .insert(savedSearches)
+      .values({
+        name,
+        search,
+        userId,
+      })
+      .returning({ id: savedSearches.id });
+  }
 }
 
 export async function getSavedSearches(userId: string) {
@@ -30,5 +45,6 @@ export async function getSavedSearches(userId: string) {
 }
 
 export async function deleteSavedSearch(id: number) {
-  return await db.delete(savedSearches).where(drizzle.eq(savedSearches.id, id));
+  await db.delete(savedSearches).where(drizzle.eq(savedSearches.id, id));
+  expirePath(`/explore`);
 }

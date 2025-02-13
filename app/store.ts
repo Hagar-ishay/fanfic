@@ -4,9 +4,11 @@ import { persist } from "zustand/middleware";
 
 type SettingsState = {
   kindleEmail: string;
-  setEmail: (email: string) => void;
+  setKindleEmail: (email: string) => void;
   languageCode: string | null;
   setLanguageCode: (languageCode: string | null) => void;
+  enableTranslation: boolean;
+  setEnableTranslation: (enabled: boolean) => void;
 };
 
 type SearchState = {
@@ -19,8 +21,9 @@ export const useSettingsStore = create(
     (set) => ({
       kindleEmail: "",
       languageCode: null,
+      enableTranslation: false,
 
-      setEmail: (email: string) =>
+      setKindleEmail: (email: string) =>
         set((state) => ({
           ...state,
           kindleEmail: email,
@@ -29,6 +32,11 @@ export const useSettingsStore = create(
         set((state) => ({
           ...state,
           languageCode: languageCode,
+        })),
+      setEnableTranslation: (enabled: boolean) =>
+        set((state) => ({
+          ...state,
+          enableTranslation: enabled,
         })),
     }),
     {

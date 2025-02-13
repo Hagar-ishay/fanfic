@@ -1,41 +1,90 @@
-import { currentUser } from "@clerk/nextjs/server";
-import { LibraryIcon, SearchIcon } from "lucide-react";
-import { Metadata } from "next";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { BookOpen, Download, Globe, Library } from "lucide-react";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Penio Fanfic - Library",
-};
-
-export default async function Page() {
-  const user = await currentUser();
-  if (!user) {
-    return null;
-  }
+export default function HomePage() {
+  const features = [
+    {
+      title: "Library Management",
+      description: "Organize your fanfics into custom sections and collections",
+      icon: <Library className="h-6 w-6" />,
+    },
+    {
+      title: "Kindle Integration",
+      description: "Send fanfics directly to your Kindle device",
+      icon: <Download className="h-6 w-6" />,
+    },
+    {
+      title: "Translation Support",
+      description:
+        "Read fanfics in your preferred language with automatic translation",
+      icon: <Globe className="h-6 w-6" />,
+    },
+    {
+      title: "Advanced Search",
+      description:
+        "Find exactly what you want to read with powerful search filters",
+      icon: <BookOpen className="h-6 w-6" />,
+    },
+  ];
 
   return (
-    <div className="min-h-[calc(100vh-170px)] flex flex-col bg-gradient-to-b from-background to-primary/5">
-      <div className="flex flex-col items-center justify-center px-4 py-8 flex-1">
-        <div className="text-center mb-8 md:mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold mb-4">Welcome to Penio Fanfic</h1>
+    <div className=" mx-auto px-4 py-16 w-fit">
+      <div className="flex flex-col justify-center relative items-center text-center">
+        <div className="mb-3">
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <h1 className="text-4xl font-bold tracking-tight">
+              Welcome to Pendio Fanfic
+            </h1>
+          </div>
+          <h3 className="text-xl text-muted-foreground font-semibold max-w-2xl mx-auto">
+            Your personal fanfiction library manager.
+          </h3>
         </div>
+        <p className="text-lg text-muted-foreground mx-auto max-w-2xl">
+          Save your frequent searches, organize your library, and send your
+          favorite stories to your devices with ease.
+        </p>
+        <div className="mt-8 flex justify-center gap-4">
+          <Button asChild size="lg">
+            <Link href="/explore">Start Exploring</Link>
+          </Button>
+          <Button asChild variant="outline" size="lg">
+            <Link href="/library">My Library</Link>
+          </Button>
+        </div>
+      </div>
 
-        <div className="flex flex-col md:flex-row gap-4 md:gap-10">
-          <Link
-            href="/explore"
-            className="bg-primary/90 hover:bg-primary transition-all hover:scale-105 text-primary-foreground rounded-xl items-center justify-center flex flex-col gap-3 p-6 w-full md:w-48 h-32 md:h-40 font-bold text-xl shadow-lg"
-          >
-            <SearchIcon size={32} />
-            Explore
-          </Link>
-          <Link
-            href="/library"
-            className="bg-primary/90 hover:bg-primary transition-all hover:scale-105 text-primary-foreground rounded-xl items-center justify-center flex flex-col gap-3 p-6 w-full md:w-48 h-32 md:h-40 font-bold text-xl shadow-lg"
-          >
-            <LibraryIcon size={32} />
-            Library
-          </Link>
+      <Separator className="my-8" />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-9">
+        {features.map((feature, index) => (
+          <Card key={index}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                {feature.icon}
+                {feature.title}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-muted-foreground">{feature.description}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <div className="text-center">
+        <h2 className="text-xl font-semibold mb-2">Supported Sites</h2>
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-muted">
+          <span className="text-sm font-medium">Archive of Our Own (AO3)</span>
+          <span className="px-2 py-0.5 text-xs rounded-full bg-primary/10 text-primary">
+            Active
+          </span>
         </div>
+        <p className="text-sm text-muted-foreground mt-2">
+          More sites coming soon!
+        </p>
       </div>
     </div>
   );

@@ -1,30 +1,41 @@
 "use client";
 
-import Link from "next/link";
+import { useSidebar } from "@/components/ui/sidebar";
 import Image from "next/image";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import React from "react";
 
-export function HomeIcon() {
+export function HomeIcon({ renderMobile = false }: { renderMobile?: boolean }) {
   const isMobile = useIsMobile();
+  const { toggleSidebar } = useSidebar();
   const width = isMobile ? 50 : 70;
 
+  if (renderMobile && !isMobile) {
+    return;
+  }
+
   return (
-    <Link
-      href="/home"
-      passHref
-      className={cn("min-h-10", isMobile ? "min-w-6" : "min-w-14")}
-    >
+    <div className="flex flex-row items-center gap-2">
       <Image
+        onClick={toggleSidebar}
         src="/icon.png"
-        alt="Home"
+        alt="Penio Fanfic"
         width={width}
         height={width}
         className={cn(
-          "dark:mix-blend-exclusion dark:bg-white dark:rounded-full absolute ",
-          isMobile ? "top-5 left-1" : "top-2 left-3"
+          "dark:mix-blend-exclusion dark:bg-secondary-foreground dark:rounded-full mb-1 hover:cursor-pointer"
         )}
       />
-    </Link>
+      <div
+        className={cn(
+          "flex flex-col items-center justify-center cursor-default font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-primary to-orange-600",
+          isMobile ? "text-lg" : "text-2xl"
+        )}
+      >
+        <p>Penio</p>
+        <p>Fanfic</p>
+      </div>
+    </div>
   );
 }
