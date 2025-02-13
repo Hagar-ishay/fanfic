@@ -7,6 +7,8 @@ import { connection } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import FanficList from "@/library/sections/[sectionId]/(components)/FanficList";
 
+export const maxDuration = 15;
+
 type Props = {
   params: Promise<{ sectionId: string }>;
 };
@@ -61,7 +63,11 @@ export default async function Page({ params }: Props) {
           />
         </Link>
       ))}
-      <FanficList fanfics={fanfics} sectionId={sectionId} transferableSections={transferableSections} />
+      <FanficList
+        fanfics={fanfics}
+        sectionId={sectionId}
+        transferableSections={transferableSections}
+      />
     </div>
   );
 }

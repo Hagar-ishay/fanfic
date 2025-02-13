@@ -8,15 +8,14 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { AddNewSectionButton } from "@/library/(components)/AddNewSectionButton";
 import { addFanfic } from "@/library/sections/[sectionId]/(server)/addFanfic";
-import { useUser } from "@clerk/nextjs";
 import { ClipboardPlus, EllipsisVertical, ListPlus } from "lucide-react";
 import { useRef, useTransition } from "react";
 
-export function Options({ sectionId }: { sectionId: number | null }) {
+export function Options({ sectionId, userId }: { sectionId: number | null, userId: string }) {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
-  const { user } = useUser();
+
   const triggerSectionRef = useRef<HTMLDivElement>(null);
 
   const handleAddFanficFromClipboard = async () => {
@@ -24,7 +23,7 @@ export function Options({ sectionId }: { sectionId: number | null }) {
     const clipboardText = await navigator.clipboard.readText();
     if (clipboardText.startsWith(`${AO3_LINK}/works/`)) {
       startTransition(async () => {
-        const result = await addFanfic(sectionId!, user!.id, clipboardText);
+        const result = await addFanfic(sectionId!, userId, clipboardText);
         if (result.success) {
           toast({ title, description: "Added Successfully!" });
         } else {

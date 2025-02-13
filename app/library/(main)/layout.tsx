@@ -6,6 +6,7 @@ import { Options } from "@/library/(components)/Options";
 import { Search } from "@/library/(components)/Search";
 import { ShowHideLayout } from "@/library/sections/[sectionId]/(components)/ShowHideLayout";
 import { currentUser } from "@clerk/nextjs/server";
+import { notFound } from "next/navigation";
 
 export default async function Layout({
   children,
@@ -13,6 +14,10 @@ export default async function Layout({
   children: React.ReactNode;
 }) {
   const user = await currentUser();
+  if (!user) {
+    return notFound();
+  }
+
   const userFanfics = await listUserFanfics(user!.id);
 
   return (
@@ -25,7 +30,7 @@ export default async function Layout({
       </TopBar>
       <Header segments={[{ label: "Library", href: "/library" }]}>
         <ShowHideLayout>
-          <Options sectionId={null} />
+          <Options sectionId={null} userId={user.id} />
         </ShowHideLayout>
       </Header>
       <div className="flex-grow">{children}</div>

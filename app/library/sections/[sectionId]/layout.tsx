@@ -2,6 +2,7 @@ import { Header } from "@/components/base/Header";
 import { getBreadcrumbs, getSection } from "@/db/sections";
 import { Options } from "@/library/(components)/Options";
 import { ShowHideLayout } from "@/library/sections/[sectionId]/(components)/ShowHideLayout";
+import { currentUser } from "@clerk/nextjs/server";
 
 import { notFound } from "next/navigation";
 
@@ -21,6 +22,11 @@ export default async function Layout({
     return notFound();
   }
 
+  const user = await currentUser();
+  if (!user) {
+    return notFound();
+  }
+
   return (
     <div>
       <Header
@@ -34,7 +40,7 @@ export default async function Layout({
         ]}
       >
         <ShowHideLayout>
-          <Options sectionId={sectionId} />
+          <Options sectionId={sectionId} userId={user.id} />
         </ShowHideLayout>
       </Header>
       {children}
