@@ -88,34 +88,50 @@ class AO3Client {
     },
     useCookies = true
   ): Promise<T> {
+    console.time(`AO3 ${config.method} request to ${config.url}`);
     config.headers = { ...this.defaultHeaders, ...config.headers };
     if (useCookies) {
-      config.headers.Cookie = (await this.cookieJar.store.getAllCookies())
+      const cookies = await this.cookieJar.store.getAllCookies();
+      console.log(
+        "Using cookies:",
+        cookies.map((c) => c.key)
+      );
+      config.headers.Cookie = cookies
         .map((cookie) => cookie.cookieString())
         .join("; ");
     }
 
-    const response = await this.axiosInstance.request<T>(config);
-    if (config.responseType === "stream") {
-      return response as T;
+    try {
+      const response = await this.axiosInstance.request<T>(config);
+      console.timeEnd(`AO3 ${config.method} request to ${config.url}`);
+      if (config.responseType === "stream") {
+        return response as T;
+      }
+      return response.data;
+    } catch (error) {
+      console.timeEnd(`AO3 ${config.method} request to ${config.url}`);
+      console.error("Request failed:", error);
+      throw error;
     }
-    return response.data;
   }
 
   public async login(credentials: Credentials): Promise<void> {
-    if (
+    // Check if ALL cookies are valid, not just if they exist
+    const hasValidSession =
       credentials.session &&
-      credentials.session?.length > 0 &&
-      credentials.session.map(
-        (cookie) =>
-          !cookie.expires ||
-          cookie.expires == "Infinity" ||
-          new Date(cookie.expires).getTime() > Date.now()
-      )
-    ) {
-      await this.setSessionCookies(credentials.session);
+      credentials.session.length > 0 &&
+      credentials.session.every((cookie) => {
+        if (!cookie.expires || cookie.expires === "Infinity") return true;
+        return new Date(cookie.expires).getTime() > Date.now();
+      });
+
+    if (hasValidSession) {
+      console.log("Using existing session");
+      await this.setSessionCookies(credentials.session!);
       return;
     }
+
+    console.log("Session expired or invalid, logging in again");
     const tokenUrl = `${AO3_LINK}/token_dispenser.json`;
     const loginUrl = `${AO3_LINK}/users/login`;
     try {
@@ -159,6 +175,7 @@ class AO3Client {
   public async getFanfic(fanficId: string): Promise<string> {
     console.time("AO3 request total");
     try {
+      console.log("Starting fanfic request for ID:", fanficId);
       const url = `${AO3_LINK}/works/${fanficId}?view_full_work=true&view_adult=true`;
       const response = await this.request<string>({
         method: "GET",
@@ -171,6 +188,7 @@ class AO3Client {
           "This work is only available to registered users of the Archive"
         )
       ) {
+        console.error("Authentication failed despite having valid cookies");
         throw new Error("Failed to authenticate to AO3");
       }
       console.timeEnd("AO3 response processing");
