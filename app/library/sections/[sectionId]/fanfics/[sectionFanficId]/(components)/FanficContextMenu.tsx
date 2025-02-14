@@ -23,16 +23,11 @@ export function FanficContextMenu({
   const router = useRouter();
   const path = usePathname();
 
-  const kindleEmail = useSettingsStore((state) => state.kindleEmail);
-  const translationLanguage = useSettingsStore((state) => state.languageCode);
-
   const latestFinalChapter = Number(fanfic.chapterCount?.split("/")[0]);
 
   const handleSend = async (sendLatestChapters?: boolean) => {
     const result = await kindleSender({
       fanfic,
-      kindleEmail,
-      translationLanguage: translationLanguage,
       sendLatestChapters: sendLatestChapters || false,
       latestFinalChapter,
     });
