@@ -32,7 +32,17 @@ class AO3Client {
   private defaultHeaders: object = {
     "Content-Type": "application/x-www-form-urlencoded",
     Accept:
-      "application/json,application/x-www-form-urlencoded,text/html,application/xhtml+xml,application/xml",
+      "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Cache-Control": "no-cache",
+    Pragma: "no-cache",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
+    "Upgrade-Insecure-Requests": "1",
+    "User-Agent":
+      "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Mobile Safari/537.36",
   };
   constructor() {
     this.cookieJar = new CookieJar();
@@ -97,7 +107,12 @@ class AO3Client {
 
     try {
       console.time(`AO3 ${config.method} request to ${config.url}`);
-      const response = await this.axiosInstance.request<T>(config);
+      const response = await this.axiosInstance.request<T>({
+        ...config,
+        maxRedirects: 5,
+        timeout: 10000, // 10 second timeout
+        decompress: true, // Handle gzip/deflate automatically
+      });
       console.timeEnd(`AO3 ${config.method} request to ${config.url}`);
       if (config.responseType === "stream") {
         return response as T;
@@ -162,7 +177,7 @@ class AO3Client {
     console.log("Getting fanfic", fanficId);
     try {
       console.log("Starting fanfic request for ID:", fanficId);
-      const url = `${AO3_LINK}/works/${fanficId}?view_full_work=true&view_adult=true`;
+      const url = `${AO3_LINK}/works/${fanficId}?view_adult=true`;
       const response = await this.request<string>({
         method: "GET",
         url,
