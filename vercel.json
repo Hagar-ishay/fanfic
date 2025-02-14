@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/check-for-updates",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/ao3-login",
+      "schedule": "0 0 * * *"
     }
   ],
   "functions": {

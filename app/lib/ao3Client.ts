@@ -115,23 +115,8 @@ class AO3Client {
     }
   }
 
-  public async login(credentials: Credentials): Promise<void> {
-    // Check if ALL cookies are valid, not just if they exist
-    const hasValidSession =
-      credentials.session &&
-      credentials.session.length > 0 &&
-      credentials.session.every((cookie) => {
-        if (!cookie.expires || cookie.expires === "Infinity") return true;
-        return new Date(cookie.expires).getTime() > Date.now();
-      });
-
-    if (hasValidSession) {
-      console.log("Using existing session");
-      await this.setSessionCookies(credentials.session!);
-      return;
-    }
-
-    console.log("Session expired or invalid, logging in again");
+  public async refreshLogin(): Promise<void> {
+    console.log("Refreshing AO3 login");
     const tokenUrl = `${AO3_LINK}/token_dispenser.json`;
     const loginUrl = `${AO3_LINK}/users/login`;
     try {
@@ -170,6 +155,25 @@ class AO3Client {
       console.log(error);
       throw new Error(`Failed to login: ${error}`);
     }
+  }
+
+  public async login(credentials: Credentials): Promise<void> {
+    const hasValidSession =
+      credentials.session &&
+      credentials.session.length > 0 &&
+      credentials.session.every((cookie) => {
+        if (!cookie.expires || cookie.expires === "Infinity") return true;
+        return new Date(cookie.expires).getTime() > Date.now();
+      });
+
+    if (hasValidSession) {
+      console.log("Using existing session");
+      await this.setSessionCookies(credentials.session!);
+      return;
+    }
+
+    console.log("Session expired or invalid, logging in again");
+    await this.refreshLogin();
   }
 
   public async getFanfic(fanficId: string): Promise<string> {
