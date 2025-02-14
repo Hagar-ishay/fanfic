@@ -111,9 +111,6 @@ class AO3Client {
       console.time(`AO3 ${config.method} request to ${config.url}`);
       const response = await this.axiosInstance.request<T>({
         ...config,
-        maxRedirects: 5,
-        timeout: 10000, // 10 second timeout
-        decompress: true, // Handle gzip/deflate automatically
       });
       console.timeEnd(`AO3 ${config.method} request to ${config.url}`);
       if (config.responseType === "stream") {
