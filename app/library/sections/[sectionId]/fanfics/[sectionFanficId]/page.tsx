@@ -3,7 +3,6 @@ import React from "react";
 import { getFanficById } from "@/db/fanfics";
 import { currentUser } from "@clerk/nextjs/server";
 import { listUserSections } from "@/db/sections";
-import { connection } from "next/server";
 import Fanfic from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/Fanfic";
 
 export async function generateMetadata({
@@ -11,7 +10,6 @@ export async function generateMetadata({
 }: {
   params: Promise<{ sectionId: string; sectionFanficId: string }>;
 }) {
-  await connection();
   const requestParams = await params;
   const sectionId = parseInt(requestParams.sectionId);
   const fanficId = parseInt(requestParams.sectionFanficId);
@@ -30,7 +28,6 @@ export default async function Page({
 }: {
   params: Promise<{ sectionId: string; sectionFanficId: string }>;
 }) {
-  await connection();
   const requestParams = await params;
   const user = await currentUser();
   const sectionId = parseInt(requestParams.sectionId);

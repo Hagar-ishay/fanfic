@@ -11,7 +11,13 @@ import { addFanfic } from "@/library/sections/[sectionId]/(server)/addFanfic";
 import { ClipboardPlus, EllipsisVertical, ListPlus } from "lucide-react";
 import { useRef, useTransition } from "react";
 
-export function Options({ sectionId, userId }: { sectionId: number | null, userId: string }) {
+export function Options({
+  sectionId,
+  userId,
+}: {
+  sectionId: number | null;
+  userId: string;
+}) {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
@@ -20,20 +26,50 @@ export function Options({ sectionId, userId }: { sectionId: number | null, userI
 
   const handleAddFanficFromClipboard = async () => {
     const title = "Add Fanfic";
-    const clipboardText = await navigator.clipboard.readText();
-    if (clipboardText.startsWith(`${AO3_LINK}/works/`)) {
+    try {
+      const clipboardText = await navigator.clipboard.readText();
+      if (!clipboardText.startsWith(`${AO3_LINK}/works/`)) {
+        toast({
+          title,
+          description: "Invalid URL. Please copy a valid AO3 fanfic link",
+          variant: "destructive",
+        });
+        return;
+      }
+
       startTransition(async () => {
-        const result = await addFanfic(sectionId!, userId, clipboardText);
-        if (result.success) {
-          toast({ title, description: "Added Successfully!" });
-        } else {
-          toast({ title, description: result.message, variant: "destructive" });
+        console.time("Total add fanfic operation");
+        try {
+          const result = await addFanfic(sectionId!, userId, clipboardText);
+          console.timeEnd("Total add fanfic operation");
+
+          if (result.success) {
+            toast({ title, description: "Added Successfully!" });
+          } else {
+            toast({
+              title,
+              description: result.message || "Failed to add fanfic",
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
+          console.timeEnd("Total add fanfic operation");
+          console.error("Error adding fanfic:", error);
+          toast({
+            title,
+            description:
+              error instanceof Error
+                ? error.message
+                : "Request timed out or failed",
+            variant: "destructive",
+          });
         }
       });
-    } else {
+    } catch (error) {
+      console.error("Clipboard error:", error);
       toast({
         title,
-        description: "Invalid URL. Please copy a valid AO3 fanfic link",
+        description: "Failed to read clipboard",
         variant: "destructive",
       });
     }
