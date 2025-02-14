@@ -157,17 +157,30 @@ class AO3Client {
   }
 
   public async getFanfic(fanficId: string): Promise<string> {
-    const url = `${AO3_LINK}/works/${fanficId}?view_full_work=true&view_adult=true`;
-    const response = await this.request<string>({ method: "GET", url });
+    console.time("AO3 request total");
+    try {
+      const url = `${AO3_LINK}/works/${fanficId}?view_full_work=true&view_adult=true`;
+      const response = await this.request<string>({
+        method: "GET",
+        url,
+      });
 
-    if (
-      response.includes(
-        "This work is only available to registered users of the Archive"
-      )
-    ) {
-      throw new Error("Failed to authenticate to AO3");
+      console.time("AO3 response processing");
+      if (
+        response.includes(
+          "This work is only available to registered users of the Archive"
+        )
+      ) {
+        throw new Error("Failed to authenticate to AO3");
+      }
+      console.timeEnd("AO3 response processing");
+
+      console.timeEnd("AO3 request total");
+      return response;
+    } catch (error) {
+      console.timeEnd("AO3 request total");
+      throw error;
     }
-    return response;
   }
 
   public async autocomplete(
