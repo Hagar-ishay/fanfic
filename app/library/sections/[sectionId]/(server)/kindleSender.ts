@@ -15,6 +15,7 @@ import path from "node:path";
 import { promisify } from "node:util";
 import nodemailer from "nodemailer";
 import { ENV } from "../../../../config";
+import { getSettings } from "@/db/settings";
 
 const unlinkAsync = promisify(fs.unlink);
 const statAsync = promisify(fs.stat);
@@ -26,17 +27,19 @@ interface Chapter {
 
 export async function kindleSender({
   fanfic,
-  kindleEmail,
-  translationLanguage,
   sendLatestChapters,
   latestFinalChapter,
 }: {
   fanfic: UserFanfic;
-  kindleEmail: string;
-  translationLanguage: string | null;
   sendLatestChapters: boolean;
   latestFinalChapter: number;
 }) {
+  const settings = await getSettings(fanfic.userId);
+  const translationLanguage = settings.languageCode;
+  const kindleEmail = settings.kindleEmail;
+  if (!kindleEmail) {
+    throw new Error("Kindle email not found");
+  }
   const startingChapter = fanfic.latestStartingChapter
     ? fanfic.latestStartingChapter + 1
     : null;

@@ -31,19 +31,19 @@ class AO3Client {
   private axiosInstance: AxiosInstance;
   private defaultHeaders: object = {
     "Content-Type": "application/x-www-form-urlencoded",
-    Accept:
-      "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+    Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
-    "Cache-Control": "no-cache",
-    Pragma: "no-cache",
-    "Sec-Fetch-Dest": "document",
-    "Sec-Fetch-Mode": "navigate",
-    "Sec-Fetch-Site": "none",
-    "Sec-Fetch-User": "?1",
-    "Upgrade-Insecure-Requests": "1",
     "User-Agent":
-      "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Mobile Safari/537.36",
+      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
   };
+
+  private essentialCookies = [
+    "_otwarchive_session",
+    "remember_user_token",
+    "user_credentials",
+    "view_adult",
+  ];
+
   constructor() {
     this.cookieJar = new CookieJar();
     this.axiosInstance = wrapper(
@@ -77,13 +77,15 @@ class AO3Client {
   private async setSessionCookies(
     cookies: { key: string; value: string; expires: Date | null | "Infinity" }[]
   ) {
-    const session = cookies.map((cookie) => {
-      return {
+    // Only store essential cookies
+    const session = cookies
+      .filter((cookie) => this.essentialCookies.includes(cookie.key))
+      .map((cookie) => ({
         key: cookie.key,
         value: cookie.value,
         expires: cookie.expires,
-      };
-    });
+      }));
+
     await refreshSession("AO3", session);
     this.setCookies(session);
   }
@@ -176,25 +178,18 @@ class AO3Client {
     console.time("AO3 request total");
     console.log("Getting fanfic", fanficId);
     try {
-      console.log("Starting fanfic request for ID:", fanficId);
       const url = `${AO3_LINK}/works/${fanficId}?view_adult=true`;
       const response = await this.request<string>({
         method: "GET",
         url,
       });
 
-      console.time("AO3 response processing");
       if (
-        response.includes(
-          "This work is only available to registered users of the Archive"
-        )
+        response.includes("This work is only available to registered users")
       ) {
-        console.error("Authentication failed despite having valid cookies");
         throw new Error("Failed to authenticate to AO3");
       }
-      console.timeEnd("AO3 response processing");
 
-      console.timeEnd("AO3 request total");
       return response;
     } catch (error) {
       console.timeEnd("AO3 request total");
