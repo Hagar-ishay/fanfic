@@ -78,30 +78,25 @@ class AO3Client {
     this.setCookies(session);
   }
 
-  private async request<T>(
-    config: {
-      method: string;
-      url: string;
-      data?: any;
-      headers?: any;
-      responseType?: "stream";
-    },
-    useCookies = true
-  ): Promise<T> {
-    console.time(`AO3 ${config.method} request to ${config.url}`);
+  private async request<T>(config: {
+    method: string;
+    url: string;
+    data?: any;
+    headers?: any;
+    responseType?: "stream";
+  }): Promise<T> {
     config.headers = { ...this.defaultHeaders, ...config.headers };
-    if (useCookies) {
-      const cookies = await this.cookieJar.store.getAllCookies();
-      console.log(
-        "Using cookies:",
-        cookies.map((c) => c.key)
-      );
-      config.headers.Cookie = cookies
-        .map((cookie) => cookie.cookieString())
-        .join("; ");
-    }
+    const cookies = await this.cookieJar.store.getAllCookies();
+    console.log(
+      "Using cookies:",
+      cookies.map((c) => c.key)
+    );
+    config.headers.Cookie = cookies
+      .map((cookie) => cookie.cookieString())
+      .join("; ");
 
     try {
+      console.time(`AO3 ${config.method} request to ${config.url}`);
       const response = await this.axiosInstance.request<T>(config);
       console.timeEnd(`AO3 ${config.method} request to ${config.url}`);
       if (config.responseType === "stream") {
@@ -130,17 +125,14 @@ class AO3Client {
       };
       const encodedData = querystring.stringify(data);
 
-      await this.request(
-        {
-          method: "POST",
-          url: loginUrl,
-          data: encodedData,
-          headers: {
-            Referer: `${AO3_LINK}/users/login`,
-          },
+      await this.request({
+        method: "POST",
+        url: loginUrl,
+        data: encodedData,
+        headers: {
+          Referer: `${AO3_LINK}/users/login`,
         },
-        false
-      );
+      });
 
       const cookies = (await this.cookieJar.store.getAllCookies()).map(
         (cookie) => ({
@@ -167,6 +159,7 @@ class AO3Client {
 
   public async getFanfic(fanficId: string): Promise<string> {
     console.time("AO3 request total");
+    console.log("Getting fanfic", fanficId);
     try {
       console.log("Starting fanfic request for ID:", fanficId);
       const url = `${AO3_LINK}/works/${fanficId}?view_full_work=true&view_adult=true`;

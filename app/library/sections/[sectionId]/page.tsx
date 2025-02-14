@@ -7,7 +7,7 @@ import { connection } from "next/server";
 import { currentUser } from "@clerk/nextjs/server";
 import FanficList from "@/library/sections/[sectionId]/(components)/FanficList";
 
-export const maxDuration = 15;
+export const maxDuration = 59;
 
 type Props = {
   params: Promise<{ sectionId: string }>;
