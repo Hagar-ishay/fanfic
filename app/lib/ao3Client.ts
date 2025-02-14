@@ -158,22 +158,11 @@ class AO3Client {
   }
 
   public async login(credentials: Credentials): Promise<void> {
-    const hasValidSession =
-      credentials.session &&
-      credentials.session.length > 0 &&
-      credentials.session.every((cookie) => {
-        if (!cookie.expires || cookie.expires === "Infinity") return true;
-        return new Date(cookie.expires).getTime() > Date.now();
-      });
-
-    if (hasValidSession) {
-      console.log("Using existing session");
-      await this.setSessionCookies(credentials.session!);
-      return;
+    if (credentials.session) {
+      await this.setSessionCookies(credentials.session);
+    } else {
+      await this.refreshLogin();
     }
-
-    console.log("Session expired or invalid, logging in again");
-    await this.refreshLogin();
   }
 
   public async getFanfic(fanficId: string): Promise<string> {
