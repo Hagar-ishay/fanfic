@@ -6,8 +6,10 @@ import { DateTime } from "luxon";
 import * as consts from "../consts";
 
 export async function htmlParser(html: string, fanficId: string | number) {
+  console.time("Total HTML parsing");
   const extractor = new HtmlParser(html, fanficId);
   const parsedFanfic = extractor.getObject();
+  console.timeEnd("Total HTML parsing");
   return parsedFanfic;
 }
 
@@ -16,11 +18,14 @@ class HtmlParser {
   private _fanficId: number;
 
   constructor(html: string, fanficId: string | number) {
+    console.time("Cheerio initialization");
     this.$ = cheerio.load(html, {
       xml: {
         decodeEntities: false,
       },
     });
+    console.timeEnd("Cheerio initialization");
+
     this.cleanHtml(html);
     this._fanficId = +fanficId;
   }
@@ -31,11 +36,15 @@ class HtmlParser {
   }
 
   private parseToString(selector: cheerio.BasicAcceptedElems<any>): string {
+    console.time("String conversion");
     const element = this.$(selector).first();
-    if (!element.length) return "";
+    if (!element.length) {
+      console.timeEnd("String conversion");
+      return "";
+    }
 
     const html = element.html() || "";
-    return convert(html, {
+    const result = convert(html, {
       selectors: [
         { selector: "a", options: { ignoreHref: true } },
         { selector: "img", format: "skip" },
@@ -55,6 +64,8 @@ class HtmlParser {
       preserveNewlines: true,
       wordwrap: false,
     });
+    console.timeEnd("String conversion");
+    return result;
   }
 
   private parseToDate(selector: cheerio.BasicAcceptedElems<any>): Date {
@@ -85,6 +96,7 @@ class HtmlParser {
   }
 
   public get tags(): Tags {
+    console.time("Tags parsing");
     const tags: Tags = {};
     this.$("dl.work.meta.group > dt").each((_, el) => {
       const category = this.parseToString(el)
@@ -98,6 +110,7 @@ class HtmlParser {
 
       tags[category] = tagList;
     });
+    console.timeEnd("Tags parsing");
     return tags;
   }
 
@@ -142,7 +155,8 @@ class HtmlParser {
 
   public getObject(): NewFanfic | null {
     try {
-      return {
+      console.time("Metadata extraction");
+      const metadata = {
         fanficId: this.fanficId,
         summary: this.summary,
         downloadLink: this.downloadLink,
@@ -158,7 +172,10 @@ class HtmlParser {
         sourceUrl: this.sourceUrl,
         language: this.language,
       };
+      console.timeEnd("Metadata extraction");
+      return metadata;
     } catch (error) {
+      console.timeEnd("Metadata extraction");
       console.error("Error fetching or parsing AO3 metadata:", error);
       return null;
     }

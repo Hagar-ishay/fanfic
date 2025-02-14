@@ -16,15 +16,17 @@ export async function addFanfic(
   userId: string,
   fanficUrl: string
 ) {
+  console.time("Total addFanfic execution");
   const fanficId =
     fanficUrl.toString().replace(`${AO3_LINK}/works/`, "").split("/")[0] ?? "";
 
   try {
-    // Run section check and fanfic lookup in parallel
+    console.time("Initial parallel operations");
     const [section, existingFanfic] = await Promise.all([
       getSection(sectionId),
       getFanficByExternalId(+fanficId),
     ]);
+    console.timeEnd("Initial parallel operations");
 
     if (section?.userId !== userId) {
       return { success: false, message: "Invalid section request" };
@@ -33,19 +35,35 @@ export async function addFanfic(
     let dbFanficId = existingFanfic?.id;
 
     if (!dbFanficId) {
+      console.time("AO3 client initialization");
       const ao3Client = await getAo3Client();
+      console.timeEnd("AO3 client initialization");
+
+      console.time("Fetching fanfic data");
       const data = await ao3Client.getFanfic(fanficId);
+      console.timeEnd("Fetching fanfic data");
+
+      console.time("Parsing HTML");
       const metadata = await htmlParser(data, fanficId);
+      console.timeEnd("Parsing HTML");
 
       if (!metadata) {
         return { success: false, message: "Failed to parse Fic" };
       }
+
+      console.time("Inserting fanfic to DB");
       dbFanficId = await insertFanfic({ ...metadata });
+      console.timeEnd("Inserting fanfic to DB");
     }
 
+    console.time("Inserting section fanfic");
     await insertSectionFanfic(sectionId, userId, dbFanficId);
+    console.timeEnd("Inserting section fanfic");
+
+    console.timeEnd("Total addFanfic execution");
     return { success: true, message: "" };
   } catch (error) {
+    console.timeEnd("Total addFanfic execution");
     console.log({ error });
     let err = errorMessage(error);
     if (err.includes("duplicate key value violates unique constraint")) {
