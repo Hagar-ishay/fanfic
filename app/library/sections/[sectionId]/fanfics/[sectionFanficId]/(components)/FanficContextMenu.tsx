@@ -6,9 +6,14 @@ import type { Section, UserFanfic } from "@/db/types";
 import { useToast } from "@/hooks/use-toast";
 import { kindleSender } from "@/library/sections/[sectionId]/(server)/kindleSender";
 import { FanficHeader } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficHeader";
-import { useSettingsStore } from "@/store";
-import { CircleChevronRight, SendHorizontal, Trash2 } from "lucide-react";
+import {
+  CircleChevronRight,
+  SendHorizontal,
+  Trash2,
+  RefreshCw,
+} from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import { checkAndUpdateFanfic } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(server)/updateFanfic";
 
 export function FanficContextMenu({
   fanfic,
@@ -45,6 +50,22 @@ export function FanficContextMenu({
     }
   };
 
+  const handleUpdate = async () => {
+    const result = await checkAndUpdateFanfic({
+      id: fanfic.id,
+      fanficId: fanfic.fanficId,
+      title: fanfic.title,
+      updatedAt: fanfic.updatedAt,
+      sectionId: fanfic.sectionId,
+    });
+
+    toast({
+      title: "Update Fanfic",
+      description: result.message,
+      variant: result.success ? "default" : "destructive",
+    });
+  };
+
   const subOptions = [
     {
       name: "Send entire work",
@@ -59,6 +80,11 @@ export function FanficContextMenu({
   }
 
   const options = [
+    {
+      icon: <RefreshCw size={17} />,
+      name: "Check for updates",
+      action: handleUpdate,
+    },
     {
       icon: <CircleChevronRight size={17} />,
       name: "Move section",
