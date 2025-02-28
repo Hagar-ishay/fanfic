@@ -1,13 +1,4 @@
-import {
-  boolean,
-  integer,
-  jsonb,
-  pgSchema,
-  serial,
-  timestamp,
-  uniqueIndex,
-  varchar,
-} from "drizzle-orm/pg-core";
+import { boolean, integer, jsonb, pgSchema, serial, timestamp, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 
 export const schema = pgSchema("fanfiction");
 
@@ -24,10 +15,7 @@ export const sections = schema.table(
     userId: varchar("user_id").notNull(),
   },
   (table) => ({
-    sectionFanficsUnique: uniqueIndex("sections_id_name_unique").on(
-      table.userId,
-      table.name
-    ),
+    sectionFanficsUnique: uniqueIndex("sections_id_name_unique").on(table.userId, table.name),
   })
 );
 
@@ -35,7 +23,7 @@ export const fanfics = schema.table(
   "fanfics",
   {
     id: serial().primaryKey(),
-    fanficId: integer().notNull(),
+    externalId: integer("external_id").notNull().unique(),
     title: varchar().notNull(),
     summary: varchar(),
     author: varchar().notNull(),
@@ -45,10 +33,7 @@ export const fanfics = schema.table(
     createdAt: timestamp("created_at").notNull(),
     updatedAt: timestamp("updated_at").notNull(),
     completedAt: timestamp("completed_at"),
-    tags: jsonb()
-      .$type<{ [category: string]: string[] }>()
-      .notNull()
-      .default({}),
+    tags: jsonb().$type<{ [category: string]: string[] }>().notNull().default({}),
     wordCount: integer("word_count"),
     chapterCount: varchar("chapter_count"),
     language: varchar(),
@@ -56,9 +41,7 @@ export const fanfics = schema.table(
     updateTime: timestamp("update_time").$onUpdate(() => new Date()),
   },
   (table) => ({
-    fanficsfanficIdUnique: uniqueIndex("fanfics_fanfic_id_unique").on(
-      table.fanficId
-    ),
+    fanficsExternalIdUnique: uniqueIndex("fanfics_external_id_unique").on(table.externalId),
   })
 );
 
@@ -78,19 +61,11 @@ export const sectionFanfics = schema.table(
     updateTime: timestamp("update_time").$onUpdate(() => new Date()),
     lastSent: timestamp("last_sent"),
     latestStartingChapter: integer("latest_starting_chapter"),
-    editableLabels: jsonb("edditable_labels")
-      .$type<string[]>()
-      .default([])
-      .notNull(),
+    editableLabels: jsonb("edditable_labels").$type<string[]>().default([]).notNull(),
   },
   (table) => ({
-    sectionFanficsUniquePosition: uniqueIndex(
-      "section_fanfics_position_unique"
-    ).on(table.sectionId, table.position),
-    sectionFanficsUnique: uniqueIndex("user_fanfics_unique").on(
-      table.userId,
-      table.fanficId
-    ),
+    sectionFanficsUniquePosition: uniqueIndex("section_fanfics_position_unique").on(table.sectionId, table.position),
+    sectionFanficsUnique: uniqueIndex("user_fanfics_unique").on(table.userId, table.fanficId),
   })
 );
 
@@ -99,10 +74,7 @@ export const credentials = schema.table(
   {
     id: serial().primaryKey(),
     type: credentialsType().notNull(),
-    session:
-      jsonb().$type<
-        { key: string; value: string; expires: Date | null | "Infinity" }[]
-      >(),
+    session: jsonb().$type<{ key: string; value: string; expires: Date | null | "Infinity" }[]>(),
     creationTime: timestamp("creation_time").notNull().defaultNow(),
     updateTime: timestamp("update_time").$onUpdate(() => new Date()),
   },
@@ -128,10 +100,7 @@ export const savedSearches = schema.table(
     updateTime: timestamp("update_time").$onUpdate(() => new Date()),
   },
   (table) => ({
-    savedSearchesUnique: uniqueIndex("user_saved_searches_unique").on(
-      table.userId,
-      table.name
-    ),
+    savedSearchesUnique: uniqueIndex("user_saved_searches_unique").on(table.userId, table.name),
   })
 );
 

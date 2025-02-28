@@ -17,26 +17,20 @@ export async function GET(request: Request) {
   try {
     await Promise.all(
       fanfics.map(async (fanfic) => {
-        const fanficId = fanfic.fanficId.toString();
-        const updatedFic = await ao3Client.getFanfic(fanficId);
-        const parsedFanfic = await htmlParser(updatedFic, fanficId);
+        const externalId = fanfic.externalId.toString();
+        const updatedFic = await ao3Client.getFanfic(externalId);
+        const parsedFanfic = await htmlParser(updatedFic, externalId);
 
-        if (
-          parsedFanfic?.updatedAt &&
-          parsedFanfic?.updatedAt > fanfic.updatedAt
-        ) {
+        if (parsedFanfic?.updatedAt && parsedFanfic?.updatedAt > fanfic.updatedAt) {
           await updateFanfic(fanfic.id, parsedFanfic);
-          console.log(`updated fanfic ${fanfic.title}: ID ${fanficId}`);
+          console.log(`updated fanfic ${fanfic.title}: ID ${externalId}`);
         }
       })
     );
   } catch (error) {
     console.error(errorMessage(error));
     // Return error status for monitoring purposes
-    return NextResponse.json(
-      { ok: false, error: errorMessage(error) },
-      { status: 500 }
-    );
+    return NextResponse.json({ ok: false, error: errorMessage(error) }, { status: 500 });
   }
   return NextResponse.json({ ok: true });
 }

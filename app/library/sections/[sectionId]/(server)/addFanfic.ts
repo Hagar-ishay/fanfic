@@ -1,30 +1,18 @@
 "use server";
 
 import { AO3_LINK } from "@/consts";
-import {
-  getFanficByExternalId,
-  insertFanfic,
-  insertSectionFanfic,
-} from "@/db/fanfics";
+import { getFanficByExternalId, insertFanfic, insertSectionFanfic } from "@/db/fanfics";
 import { getSection } from "@/db/sections";
 import { getAo3Client } from "@/lib/ao3Client";
 import { htmlParser } from "@/lib/htmlParser";
 import { errorMessage } from "@/lib/utils";
 
-export async function addFanfic(
-  sectionId: number,
-  userId: string,
-  fanficUrl: string
-) {
-  const fanficId =
-    fanficUrl.toString().replace(`${AO3_LINK}/works/`, "").split("/")[0] ?? "";
+export async function addFanfic(sectionId: number, userId: string, fanficUrl: string) {
+  const externalId = fanficUrl.toString().replace(`${AO3_LINK}/works/`, "").split("/")[0] ?? "";
 
   try {
     // Run section check and fanfic lookup in parallel
-    const [section, existingFanfic] = await Promise.all([
-      getSection(sectionId),
-      getFanficByExternalId(+fanficId),
-    ]);
+    const [section, existingFanfic] = await Promise.all([getSection(sectionId), getFanficByExternalId(+externalId)]);
 
     if (section?.userId !== userId) {
       return { success: false, message: "Invalid section request" };
@@ -34,8 +22,8 @@ export async function addFanfic(
 
     if (!dbFanficId) {
       const ao3Client = await getAo3Client();
-      const data = await ao3Client.getFanfic(fanficId);
-      const metadata = await htmlParser(data, fanficId);
+      const data = await ao3Client.getFanfic(externalId);
+      const metadata = await htmlParser(data, externalId);
 
       if (!metadata) {
         return { success: false, message: "Failed to parse Fic" };

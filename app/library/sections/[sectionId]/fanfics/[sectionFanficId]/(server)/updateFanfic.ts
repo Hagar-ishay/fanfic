@@ -7,28 +7,24 @@ import { errorMessage } from "@/lib/utils";
 import { expirePath } from "next/cache";
 
 export async function checkAndUpdateFanfic({
-  id,
   fanficId,
+  externalId,
   title,
   updatedAt,
   sectionId,
 }: {
-  id: number;
   fanficId: number;
+  externalId: number;
   title: string;
   updatedAt: Date;
   sectionId: number;
 }) {
   try {
     const ao3Client = await getAo3Client();
-    const updatedFic = await ao3Client.getFanfic(fanficId.toString());
-    const parsedFanfic = await htmlParser(updatedFic, fanficId.toString());
-    console.log(parsedFanfic);
-    console.log(updatedAt);
-    
-    console.log(parsedFanfic?.updatedAt > updatedAt);
+    const updatedFic = await ao3Client.getFanfic(externalId.toString());
+    const parsedFanfic = await htmlParser(updatedFic, externalId.toString());
     if (parsedFanfic?.updatedAt && parsedFanfic.updatedAt > updatedAt) {
-      await updateFanfic(id, parsedFanfic);
+      await updateFanfic(fanficId, parsedFanfic);
       expirePath(`/library/sections/${sectionId}`);
       return { success: true, message: `Updated ${title} successfully!` };
     }

@@ -50,7 +50,7 @@ export default function FanficList({ fanfics, sectionId, transferableSections }:
                   ...fanfic.fanfics,
                   ...fanfic.section_fanfics,
                   id: fanfic.section_fanfics.id,
-                  fanficId: fanfic.fanfics.fanficId,
+                  fanficId: fanfic.fanfics.id,
                 }}
                 index={index}
               />

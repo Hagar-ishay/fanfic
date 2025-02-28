@@ -6,12 +6,7 @@ import type { Section, UserFanfic } from "@/db/types";
 import { useToast } from "@/hooks/use-toast";
 import { kindleSender } from "@/library/sections/[sectionId]/(server)/kindleSender";
 import { FanficHeader } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficHeader";
-import {
-  CircleChevronRight,
-  SendHorizontal,
-  Trash2,
-  RefreshCw,
-} from "lucide-react";
+import { CircleChevronRight, SendHorizontal, Trash2, RefreshCw } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { checkAndUpdateFanfic } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(server)/updateFanfic";
 
@@ -52,8 +47,8 @@ export function FanficContextMenu({
 
   const handleUpdate = async () => {
     const result = await checkAndUpdateFanfic({
-      id: fanfic.id,
       fanficId: fanfic.fanficId,
+      externalId: fanfic.externalId,
       title: fanfic.title,
       updatedAt: fanfic.updatedAt,
       sectionId: fanfic.sectionId,
@@ -116,11 +111,7 @@ export function FanficContextMenu({
 
   return (
     <div>
-      <ContextMenu
-        options={options}
-        trigger={trigger}
-        header={<FanficHeader fanfic={fanfic} />}
-      />
+      <ContextMenu options={options} trigger={trigger} header={<FanficHeader fanfic={fanfic} />} />
     </div>
   );
 }

@@ -157,11 +157,11 @@ class AO3Client {
     }
   }
 
-  public async getFanfic(fanficId: string): Promise<string> {
+  public async getFanfic(externalId: string): Promise<string> {
     console.time("AO3 request total");
-    console.log("Getting fanfic", fanficId);
+    console.log("Getting fanfic", externalId);
     try {
-      const url = `${AO3_LINK}/works/${fanficId}?view_adult=true`;
+      const url = `${AO3_LINK}/works/${externalId}?view_adult=true`;
       const response = await this.request<string>({
         method: "GET",
         url,

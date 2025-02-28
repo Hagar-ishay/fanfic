@@ -5,9 +5,9 @@ import { convert } from "html-to-text";
 import { DateTime } from "luxon";
 import * as consts from "../consts";
 
-export async function htmlParser(html: string, fanficId: string | number) {
+export async function htmlParser(html: string, externalId: string | number) {
   console.time("Total HTML parsing");
-  const extractor = new HtmlParser(html, fanficId);
+  const extractor = new HtmlParser(html, externalId);
   const parsedFanfic = extractor.getObject();
   console.timeEnd("Total HTML parsing");
   return parsedFanfic;
@@ -15,9 +15,9 @@ export async function htmlParser(html: string, fanficId: string | number) {
 
 class HtmlParser {
   private $: cheerio.CheerioAPI;
-  private _fanficId: number;
+  private _externalId: number;
 
-  constructor(html: string, fanficId: string | number) {
+  constructor(html: string, externalId: string | number) {
     console.time("Cheerio initialization");
     this.$ = cheerio.load(html, {
       xml: {
@@ -27,7 +27,7 @@ class HtmlParser {
     console.timeEnd("Cheerio initialization");
 
     this.cleanHtml(html);
-    this._fanficId = +fanficId;
+    this._externalId = +externalId;
   }
 
   private cleanHtml(text: string): string {
@@ -72,14 +72,12 @@ class HtmlParser {
     return DateTime.fromISO(this.$(selector).text().trim()).toJSDate();
   }
 
-  public get fanficId(): number {
-    return this._fanficId;
+  public get externalId(): number {
+    return this._externalId;
   }
 
   public get summary(): string {
-    return this.parseToString(
-      "#workskin div.summary.module blockquote.userstuff"
-    );
+    return this.parseToString("#workskin div.summary.module blockquote.userstuff");
   }
 
   public get downloadLink(): string {
@@ -99,14 +97,9 @@ class HtmlParser {
     console.time("Tags parsing");
     const tags: Tags = {};
     this.$("dl.work.meta.group > dt").each((_, el) => {
-      const category = this.parseToString(el)
-        .replace(/\s+/g, " ")
-        .replace(":", "")
-        .toUpperCase();
+      const category = this.parseToString(el).replace(/\s+/g, " ").replace(":", "").toUpperCase();
       const tagElements = this.$(el).next("dd").find("ul.commas > li > a.tag");
-      const tagList = tagElements
-        .map((_, tagEl) => this.parseToString(tagEl))
-        .get();
+      const tagList = tagElements.map((_, tagEl) => this.parseToString(tagEl)).get();
 
       tags[category] = tagList;
     });
@@ -140,9 +133,7 @@ class HtmlParser {
   }
 
   public get completedAt(): Date | null {
-    return this.$("dt.status").text().startsWith("Completed")
-      ? this.parseToDate("dd.status")
-      : null;
+    return this.$("dt.status").text().startsWith("Completed") ? this.parseToDate("dd.status") : null;
   }
 
   public get createdAt(): Date {
@@ -150,14 +141,14 @@ class HtmlParser {
   }
 
   public get sourceUrl(): string {
-    return `${consts.AO3_LINK}/works/${this.fanficId}`;
+    return `${consts.AO3_LINK}/works/${this.externalId}`;
   }
 
   public getObject(): NewFanfic | null {
     try {
       console.time("Metadata extraction");
       const metadata = {
-        fanficId: this.fanficId,
+        externalId: this.externalId,
         summary: this.summary,
         downloadLink: this.downloadLink,
         tags: this.tags,
