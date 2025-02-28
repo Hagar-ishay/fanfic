@@ -20,11 +20,7 @@ export async function getAo3Client() {
   return ao3Client;
 }
 
-export type AutoCompleteType =
-  | "fandom"
-  | "freeform"
-  | "relationship"
-  | "character";
+export type AutoCompleteType = "fandom" | "freeform" | "relationship" | "character";
 
 class AO3Client {
   private cookieJar: CookieJar;
@@ -34,15 +30,11 @@ class AO3Client {
     Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
     "User-Agent":
-      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Mobile Safari/537.36",
+    "upgrade-insecure-requests": "1",
   };
 
-  private essentialCookies = [
-    "_otwarchive_session",
-    "remember_user_token",
-    "user_credentials",
-    "view_adult",
-  ];
+  private essentialCookies = ["_otwarchive_session", "remember_user_token", "user_credentials", "view_adult"];
 
   constructor() {
     this.cookieJar = new CookieJar();
@@ -74,9 +66,7 @@ class AO3Client {
     });
   }
 
-  private async setSessionCookies(
-    cookies: { key: string; value: string; expires: Date | null | "Infinity" }[]
-  ) {
+  private async setSessionCookies(cookies: { key: string; value: string; expires: Date | null | "Infinity" }[]) {
     // Only store essential cookies
     const session = cookies
       .filter((cookie) => this.essentialCookies.includes(cookie.key))
@@ -103,9 +93,7 @@ class AO3Client {
       "Using cookies:",
       cookies.map((c) => c.key)
     );
-    config.headers.Cookie = cookies
-      .map((cookie) => cookie.cookieString())
-      .join("; ");
+    config.headers.Cookie = cookies.map((cookie) => cookie.cookieString()).join("; ");
 
     try {
       console.time(`AO3 ${config.method} request to ${config.url}`);
@@ -148,13 +136,11 @@ class AO3Client {
         },
       });
 
-      const cookies = (await this.cookieJar.store.getAllCookies()).map(
-        (cookie) => ({
-          key: cookie.key,
-          value: cookie.value,
-          expires: cookie.expires,
-        })
-      );
+      const cookies = (await this.cookieJar.store.getAllCookies()).map((cookie) => ({
+        key: cookie.key,
+        value: cookie.value,
+        expires: cookie.expires,
+      }));
 
       await this.setSessionCookies(cookies);
     } catch (error) {
@@ -181,9 +167,7 @@ class AO3Client {
         url,
       });
 
-      if (
-        response.includes("This work is only available to registered users")
-      ) {
+      if (response.includes("This work is only available to registered users")) {
         throw new Error("Failed to authenticate to AO3");
       }
 
@@ -194,18 +178,12 @@ class AO3Client {
     }
   }
 
-  public async autocomplete(
-    type: string,
-    query: string
-  ): Promise<{ id: string; name: string }[]> {
+  public async autocomplete(type: string, query: string): Promise<{ id: string; name: string }[]> {
     const url = `${AO3_LINK}/autocomplete/${type}?term=${query}`;
     return this.request({ method: "GET", url });
   }
 
-  public async downloadFanfic(
-    url: string,
-    downloadPath: string
-  ): Promise<void> {
+  public async downloadFanfic(url: string, downloadPath: string): Promise<void> {
     const response = await this.request<AxiosResponse>({
       method: "GET",
       url,
@@ -219,10 +197,7 @@ class AO3Client {
     const fileStream = fs.createWriteStream(downloadPath);
 
     await new Promise<void>((resolve, reject) => {
-      (response.data as NodeJS.ReadableStream)
-        .pipe(fileStream)
-        .on("finish", resolve)
-        .on("error", reject);
+      (response.data as NodeJS.ReadableStream).pipe(fileStream).on("finish", resolve).on("error", reject);
     });
   }
 }
