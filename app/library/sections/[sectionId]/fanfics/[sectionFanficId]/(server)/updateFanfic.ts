@@ -23,7 +23,10 @@ export async function checkAndUpdateFanfic({
     const ao3Client = await getAo3Client();
     const updatedFic = await ao3Client.getFanfic(fanficId.toString());
     const parsedFanfic = await htmlParser(updatedFic, fanficId.toString());
-
+    console.log(parsedFanfic);
+    console.log(updatedAt);
+    
+    console.log(parsedFanfic?.updatedAt > updatedAt);
     if (parsedFanfic?.updatedAt && parsedFanfic.updatedAt > updatedAt) {
       await updateFanfic(id, parsedFanfic);
       expirePath(`/library/sections/${sectionId}`);

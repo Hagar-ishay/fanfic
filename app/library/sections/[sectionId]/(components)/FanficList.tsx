@@ -15,18 +15,11 @@ type FanficListProps = {
   transferableSections: Section[];
 };
 
-export default function FanficList({
-  fanfics,
-  sectionId,
-  transferableSections,
-}: FanficListProps) {
+export default function FanficList({ fanfics, sectionId, transferableSections }: FanficListProps) {
   const [, startTransition] = useTransition();
   const [optimisticFics, setOptimistic] = useOptimistic(
     fanfics,
-    (
-      oldFanfics,
-      { fromIndex, toIndex }: { fromIndex: number; toIndex: number }
-    ) => {
+    (oldFanfics, { fromIndex, toIndex }: { fromIndex: number; toIndex: number }) => {
       const newFanfics = [...oldFanfics];
       const [movedFanfic] = newFanfics.splice(fromIndex, 1);
       newFanfics.splice(toIndex, 0, movedFanfic);
@@ -57,6 +50,7 @@ export default function FanficList({
                   ...fanfic.fanfics,
                   ...fanfic.section_fanfics,
                   id: fanfic.section_fanfics.id,
+                  fanficId: fanfic.fanfics.fanficId,
                 }}
                 index={index}
               />
