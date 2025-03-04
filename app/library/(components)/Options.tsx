@@ -3,7 +3,6 @@ import { ContextMenu } from "@/components/base/ContextMenu";
 import LoadableIcon from "@/components/base/LoadableIcon";
 import { Tooltip } from "@/components/base/Tooltip";
 import { Button } from "@/components/ui/button";
-import { AO3_LINK } from "@/consts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { AddNewSectionButton } from "@/library/(components)/AddNewSectionButton";
@@ -11,13 +10,7 @@ import { addFanfic } from "@/library/sections/[sectionId]/(server)/addFanfic";
 import { ClipboardPlus, EllipsisVertical, ListPlus } from "lucide-react";
 import { useRef, useTransition } from "react";
 
-export function Options({
-  sectionId,
-  userId,
-}: {
-  sectionId: number | null;
-  userId: string;
-}) {
+export function Options({ sectionId, userId }: { sectionId: number | null; userId: string }) {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
@@ -28,14 +21,6 @@ export function Options({
     const title = "Add Fanfic";
     try {
       const clipboardText = await navigator.clipboard.readText();
-      if (!clipboardText.startsWith(`${AO3_LINK}/works/`)) {
-        toast({
-          title,
-          description: "Invalid URL. Please copy a valid AO3 fanfic link",
-          variant: "destructive",
-        });
-        return;
-      }
 
       startTransition(async () => {
         console.time("Total add fanfic operation");
@@ -57,10 +42,7 @@ export function Options({
           console.error("Error adding fanfic:", error);
           toast({
             title,
-            description:
-              error instanceof Error
-                ? error.message
-                : "Request timed out or failed",
+            description: error instanceof Error ? error.message : "Request timed out or failed",
             variant: "destructive",
           });
         }
@@ -111,17 +93,9 @@ export function Options({
         <>
           {options.map((option) => (
             <Tooltip description={option.name} key={option.name}>
-              <Button
-                size="icon"
-                variant="default"
-                onClick={option.action}
-                disabled={option.isPending}
-              >
+              <Button size="icon" variant="default" onClick={option.action} disabled={option.isPending}>
                 {option.isPending ? (
-                  <LoadableIcon
-                    defaultIcon={option.icon}
-                    isPending={option.isPending}
-                  />
+                  <LoadableIcon defaultIcon={option.icon} isPending={option.isPending} />
                 ) : (
                   option.icon
                 )}

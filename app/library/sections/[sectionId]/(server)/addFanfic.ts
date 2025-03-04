@@ -1,6 +1,6 @@
 "use server";
 
-import { AO3_LINK } from "@/consts";
+import { VALID_AO3_URLS } from "@/consts";
 import { getFanficByExternalId, insertFanfic, insertSectionFanfic } from "@/db/fanfics";
 import { getSection } from "@/db/sections";
 import { getAo3Client } from "@/lib/ao3Client";
@@ -8,10 +8,13 @@ import { htmlParser } from "@/lib/htmlParser";
 import { errorMessage } from "@/lib/utils";
 
 export async function addFanfic(sectionId: number, userId: string, fanficUrl: string) {
-  const externalId = fanficUrl.toString().replace(`${AO3_LINK}/works/`, "").split("/")[0] ?? "";
+  const ao3Url = VALID_AO3_URLS.find((url) => fanficUrl.startsWith(url));
+  if (!ao3Url) {
+    return { success: false, message: "Invalid URL. Please copy a valid AO3 fanfic link" };
+  }
+  const externalId = fanficUrl.toString().replace(`${ao3Url}/works/`, "").split("/")[0] ?? "";
 
   try {
-    // Run section check and fanfic lookup in parallel
     const [section, existingFanfic] = await Promise.all([getSection(sectionId), getFanficByExternalId(+externalId)]);
 
     if (section?.userId !== userId) {
