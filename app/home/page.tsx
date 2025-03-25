@@ -36,7 +36,7 @@ export default function HomePage() {
         <div className="mb-3">
           <div className="flex items-center justify-center gap-4 mb-4">
             <h1 className="text-4xl font-bold tracking-tight">
-              Welcome to Pendio Fanfic
+              Welcome to Penio Fanfic
             </h1>
           </div>
           <h3 className="text-xl text-muted-foreground font-semibold max-w-2xl mx-auto">

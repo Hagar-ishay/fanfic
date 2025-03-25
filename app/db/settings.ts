@@ -6,6 +6,7 @@ import { db } from "./db";
 import { settings } from "./schema";
 
 export async function getSettings(userId: string) {
+  "use cache"
   const userSettings = await db
     .select()
     .from(settings)

@@ -1,10 +1,9 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Section as DbSection } from "@/db/types";
 import { SectionContextMenu } from "@/library/(components)/SectionContextMenu";
-import { ChevronRight, EllipsisVertical, Loader2 } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useRef } from "react";
 
 export function Section({

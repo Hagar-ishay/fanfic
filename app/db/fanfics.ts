@@ -23,10 +23,12 @@ export const updateSectionFanfic = async (sectionId: number, sectionFanficId: nu
 };
 
 export const selectOngoingFanfics = async () => {
+  "use cache"
   return await db.select().from(fanfics).where(drizzle.isNull(fanfics.completedAt));
 };
 
 export const selectSectionFanfic = async (sectionIds: number[]) => {
+  "use cache"
   return await db
     .select()
     .from(fanfics)
@@ -36,6 +38,7 @@ export const selectSectionFanfic = async (sectionIds: number[]) => {
 };
 
 export const listUserFanfics = async (userId: string) => {
+  "use cache"
   return await db
     .select()
     .from(fanfics)
@@ -46,6 +49,7 @@ export const listUserFanfics = async (userId: string) => {
 };
 
 export const getFanficById = async (sectionFanficId: number) => {
+  "use cache"
   const fanfic = await db
     .select()
     .from(fanfics)
@@ -64,6 +68,7 @@ export const getFanficById = async (sectionFanficId: number) => {
 };
 
 export const getFanficByExternalId = async (externalId: number) => {
+  "use cache"
   const result = await db.select().from(fanfics).where(drizzle.eq(fanfics.externalId, externalId));
   if (result.length > 0) {
     return result[0];

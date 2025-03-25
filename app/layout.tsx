@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { ClerkProvider, SignedIn, SignedOut } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Suspense } from "react";
+
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,6 +20,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
+    <Suspense>
     <ClerkProvider>
       <html suppressHydrationWarning>
         <FontProvider>
@@ -28,10 +30,10 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <SidebarProvider defaultOpen={false}>
-              <SignedIn>
-                <AppSidebar />
-                <div className="flex flex-col h-screen w-screen">
+            <SidebarProvider defaultOpen={false} >
+                <SignedIn>
+                  <AppSidebar />
+                  <div className="flex flex-col h-screen w-screen">
                   <Suspense>
                     <main>{children}</main>
                     <Toaster />
@@ -48,5 +50,6 @@ export default function RootLayout({
         </FontProvider>
       </html>
     </ClerkProvider>
+    </Suspense>
   );
 }

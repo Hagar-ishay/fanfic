@@ -9,6 +9,7 @@ import { PgTransaction } from "drizzle-orm/pg-core";
 import { expirePath } from "next/dist/server/web/spec-extension/revalidate";
 
 export const selectOrCreateSections = async (userId: string) => {
+  "use cache"
   let userSections = await listUserSections(userId);
   if (userSections.length === 0) {
     userSections = await db
@@ -20,6 +21,7 @@ export const selectOrCreateSections = async (userId: string) => {
 };
 
 export const listUserSections = async (userId: string) => {
+  "use cache"
   return await db
     .select()
     .from(sections)
@@ -102,6 +104,7 @@ export const transferSection = async (
 };
 
 export const getSectionByNameUser = async (userId: string, name: string) => {
+  "use cache"
   return await db
     .select()
     .from(sections)
@@ -114,6 +117,7 @@ export const getSectionByNameUser = async (userId: string, name: string) => {
 };
 
 export const listChildSections = async (sectionId: number) => {
+  "use cache"
   return await db
     .select()
     .from(sections)
@@ -121,6 +125,7 @@ export const listChildSections = async (sectionId: number) => {
 };
 
 export const getSection = async (sectionId: number) => {
+  "use cache"
   const section = await db
     .select()
     .from(sections)
@@ -133,6 +138,7 @@ export async function getBreadcrumbs(
   displayName: string,
   parentId: number | null
 ) {
+  "use cache"
   let breadcrumbs = [
     {
       label: displayName,

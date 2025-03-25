@@ -4,6 +4,7 @@ import { getFanficById } from "@/db/fanfics";
 import { currentUser } from "@clerk/nextjs/server";
 import { listUserSections } from "@/db/sections";
 import Fanfic from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/Fanfic";
+import LibraryBreadcrumbs from "@/library/(components)/LibraryBreadcrumbs";
 
 export async function generateMetadata({
   params,
@@ -23,11 +24,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<{ sectionId: string; sectionFanficId: string }>;
-}) {
+export default async function Page({ params }: { params: Promise<{ sectionId: string; sectionFanficId: string }> }) {
   const requestParams = await params;
   const user = await currentUser();
   const sectionId = parseInt(requestParams.sectionId);
@@ -38,13 +35,14 @@ export default async function Page({
   }
 
   const userSections = await listUserSections(user.id);
-  const transferableSections = userSections.filter(
-    (section) => section.id !== sectionId
-  );
+  const transferableSections = userSections.filter((section) => section.id !== sectionId);
 
   return (
-    <div className="w-full">
-      <Fanfic fanfic={fanfic} transferableSections={transferableSections} />
-    </div>
+    <>
+      <LibraryBreadcrumbs userId={user.id} sectionId={sectionId} />
+      <div className="w-full">
+        <Fanfic fanfic={fanfic} transferableSections={transferableSections} />
+      </div>
+    </>
   );
 }

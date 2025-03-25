@@ -1,6 +1,11 @@
 export const AO3_LINK = "https://archiveofourown.gay";
 
-export const VALID_AO3_URLS = ["https://archiveofourown.org", "https://archiveofourown.gay"];
+export const VALID_AO3_URLS = [
+  "https://archiveofourown.org",
+  "https://archiveofourown.gay",
+  "https://archive.transformativeworks.org",
+  "https://archive.transformativeworks.org",
+];
 
 export const TAGS = {
   RATING: "RATING",

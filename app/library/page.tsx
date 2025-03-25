@@ -3,7 +3,7 @@ import { Section } from "@/library/(components)/Section";
 import { currentUser } from "@clerk/nextjs/server";
 import { Metadata } from "next";
 import Link from "next/link";
-
+import LibraryBreadcrumbs from "@/library/(components)/LibraryBreadcrumbs";
 export const metadata: Metadata = {
   title: "Penio Fanfic - Library",
 };
@@ -17,17 +17,18 @@ export default async function Page() {
   const topLevelSections = sections.filter((sec) => sec.parentId === null);
 
   return (
-    <div className="flex flex-col">
-      {topLevelSections.map((section) => (
-        <Link key={section.id} href={`/library/sections/${section.id}`}>
-          <Section
-            section={section}
-            transferableSections={sections.filter(
-              (tranfser) => tranfser.id !== section.id
-            )}
-          />
-        </Link>
-      ))}
-    </div>
+    <>
+      <LibraryBreadcrumbs userId={user.id} />
+      <div className="flex flex-col">
+        {topLevelSections.map((section) => (
+          <Link key={section.id} href={`/library/sections/${section.id}`}>
+            <Section
+              section={section}
+              transferableSections={sections.filter((tranfser) => tranfser.id !== section.id)}
+            />
+          </Link>
+        ))}
+      </div>
+    </>
   );
 }

@@ -16,8 +16,6 @@ export function SectionContextMenu({
   transferableSections: Section[];
   trigger: React.ReactNode;
 }) {
-  const triggerRef = useRef<HTMLDivElement>(null);
-
   async function onDelete() {
     await deleteSection(section.id);
   }
@@ -48,8 +46,7 @@ export function SectionContextMenu({
         <div className="flex flex-col gap-2">
           Are you sure you want to delete section {section.name} ?
           <div className="text-sm">
-            Fics and Child sections belonging to this section will be removed
-            from your library
+            Fics and Child sections belonging to this section will be removed from your library
           </div>
         </div>
       ),
@@ -58,7 +55,5 @@ export function SectionContextMenu({
     },
   ];
 
-  return (
-    <ContextMenu header={section.name} options={options} trigger={trigger} />
-  );
+  return <ContextMenu header={section.name} options={options} trigger={trigger} />;
 }

@@ -4,6 +4,7 @@ import { SessionType } from "@/db/types";
 import * as drizzle from "drizzle-orm";
 
 export const getCredentials = async (type: SessionType) => {
+  "use cache"
   const creds = await db.select().from(credentials).where(drizzle.eq(credentials.type, type));
   if (creds.length > 0) {
     const cred = creds[0];

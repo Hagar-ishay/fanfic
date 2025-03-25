@@ -1,13 +1,15 @@
-import TopBar from "@/(top-bar)/(components)/TopBar";
-import { Header } from "@/components/base/Header";
 import { listUserFanfics } from "@/db/fanfics";
-import { getBreadcrumbs, getSection } from "@/db/sections";
-import { LibraryHelp } from "@/library/(components)/LibraryHelp";
-import { Options } from "@/library/(components)/Options";
-import { Search } from "@/library/(components)/Search";
-import { ShowHideLayout } from "@/library/sections/[sectionId]/(components)/ShowHideLayout";
+import LibraryTopBar from "@/library/(components)/LibraryBreadcrumbs";
 import { currentUser } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
+import { getBreadcrumbs, getSection } from "@/db/sections";
+import { headers } from "next/headers";
+import { Search } from "@/library/(components)/Search";
+import TopBar from "@/(top-bar)/(components)/TopBar";
+import { LibraryHelp } from "@/library/(components)/LibraryHelp";
+import { Header } from "@/components/base/Header";
+import { ShowHideLayout } from "@/library/sections/[sectionId]/(components)/ShowHideLayout";
+import { Options } from "@/library/(components)/Options";
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   const user = await currentUser();
@@ -17,10 +19,6 @@ export default async function Layout({ children }: { children: React.ReactNode }
 
   const userFanfics = await listUserFanfics(user!.id);
 
-  let segments = [{ label: "Library", href: "/library" }];
-  let sectionId: number | null = null;
-
-
   return (
     <div className="flex flex-col min-h-screen">
       <TopBar>
@@ -29,11 +27,6 @@ export default async function Layout({ children }: { children: React.ReactNode }
         </div>
         <LibraryHelp />
       </TopBar>
-      <Header segments={segments}>
-        <ShowHideLayout>
-          <Options sectionId={sectionId} userId={user.id} />
-        </ShowHideLayout>
-      </Header>
       <div className="flex-grow">{children}</div>
     </div>
   );

@@ -5,7 +5,7 @@ import { ArrowRight, Github, UserPlus } from "lucide-react";
 
 export function SignIn() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background to-muted p-4">
+    <div className="flex w-full min-h-screen items-center justify-center bg-gradient-to-br from-background to-muted p-4">
       <div className="w-full max-w-md space-y-8 rounded-lg border bg-card p-6 shadow-lg">
         <div className="text-center">
           <h2 className="text-3xl font-bold tracking-tight">

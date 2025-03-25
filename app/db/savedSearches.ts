@@ -38,6 +38,7 @@ export async function saveSearch({
 }
 
 export async function getSavedSearches(userId: string) {
+  "use cache"
   return await db
     .select()
     .from(savedSearches)
