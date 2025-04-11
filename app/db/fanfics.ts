@@ -4,7 +4,7 @@ import * as drizzle from "drizzle-orm";
 import { db } from "@/db/db";
 import { fanfics, sectionFanfics, sections } from "@/db/schema";
 import { NewFanfic } from "@/db/types";
-import { expirePath } from "next/cache";
+import { revalidatePath } from "next/cache";
 
 export const updateFanfic = async (ficId: number, { ...update }) => {
   return await db.update(fanfics).set(update).where(drizzle.eq(fanfics.id, ficId)).returning({ fanficId: fanfics.id });
@@ -14,21 +14,21 @@ export const tranferSectionFanfic = async (sectionFanficId: number, newSectionId
   const position = await getNextPosition(newSectionId);
   const updateParams = { position, sectionId: newSectionId };
   await db.update(sectionFanfics).set(updateParams).where(drizzle.eq(sectionFanfics.id, sectionFanficId));
-  expirePath(`/library/sections/${oldSectionId}`);
+  revalidatePath(`/library/sections/${oldSectionId}`);
 };
 
 export const updateSectionFanfic = async (sectionId: number, sectionFanficId: number, { ...update }) => {
   await db.update(sectionFanfics).set(update).where(drizzle.eq(sectionFanfics.id, sectionFanficId));
-  expirePath(`/library/sections/${sectionId}/fanfics/${sectionFanficId}`);
+  revalidatePath(`/library/sections/${sectionId}/fanfics/${sectionFanficId}`);
 };
 
 export const selectOngoingFanfics = async () => {
-  "use cache"
+  "use cache";
   return await db.select().from(fanfics).where(drizzle.isNull(fanfics.completedAt));
 };
 
 export const selectSectionFanfic = async (sectionIds: number[]) => {
-  "use cache"
+  "use cache";
   return await db
     .select()
     .from(fanfics)
@@ -38,7 +38,7 @@ export const selectSectionFanfic = async (sectionIds: number[]) => {
 };
 
 export const listUserFanfics = async (userId: string) => {
-  "use cache"
+  "use cache";
   return await db
     .select()
     .from(fanfics)
@@ -49,7 +49,7 @@ export const listUserFanfics = async (userId: string) => {
 };
 
 export const getFanficById = async (sectionFanficId: number) => {
-  "use cache"
+  "use cache";
   const fanfic = await db
     .select()
     .from(fanfics)
@@ -68,7 +68,7 @@ export const getFanficById = async (sectionFanficId: number) => {
 };
 
 export const getFanficByExternalId = async (externalId: number) => {
-  "use cache"
+  "use cache";
   const result = await db.select().from(fanfics).where(drizzle.eq(fanfics.externalId, externalId));
   if (result.length > 0) {
     return result[0];
@@ -87,7 +87,7 @@ export const insertSectionFanfic = async (sectionId: number, userId: string, fan
     .insert(sectionFanfics)
     .values({ sectionId, fanficId, position, userId })
     .returning({ fanficId: sectionFanfics.id });
-  expirePath(`/library/sections/${sectionId}`);
+  revalidatePath(`/library/sections/${sectionId}`);
   return result[0].fanficId;
 };
 
@@ -108,7 +108,7 @@ export const deleteSectionFanfic = async (userFanficId: number) => {
     sectionId: sectionFanfics.sectionId,
   });
   if (result.length === 1) {
-    expirePath(`/library/sections/${result[0].sectionId}`);
+    revalidatePath(`/library/sections/${result[0].sectionId}`);
   }
 };
 
@@ -137,6 +137,6 @@ export const reorderFanfics = async (sectionId: number, fromIndex: number, toInd
     return fanfics;
   });
 
-  expirePath(`/library/sections/${sectionId}`);
+  revalidatePath(`/library/sections/${sectionId}`);
   return result;
 };

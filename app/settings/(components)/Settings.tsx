@@ -3,13 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { saveSettings } from "@/db/settings";
@@ -56,15 +50,9 @@ export function Settings({ settings, userId }: SettingsProps) {
   const enableTranslation = watch("enableTranslation");
   const email = watch("email");
 
-  const isCurrentThemeLight = Boolean(
-    theme ? theme === "light" : systemTheme === "light"
-  );
+  const isCurrentThemeLight = Boolean(theme ? theme === "light" : systemTheme === "light");
 
-  async function onSubmit(data: {
-    email: string;
-    languageCode: string;
-    enableTranslation: boolean;
-  }) {
+  async function onSubmit(data: { email: string; languageCode: string; enableTranslation: boolean }) {
     console.log("onSubmit", data);
     startTransition(async () => {
       try {
@@ -89,7 +77,6 @@ export function Settings({ settings, userId }: SettingsProps) {
   const content = [
     {
       label: "Appearance",
-      description: "Change the appearance of the app",
       fields: [
         {
           label: "Theme",
@@ -170,9 +157,7 @@ export function Settings({ settings, userId }: SettingsProps) {
       <div className="space-y-6">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
-          <p className="text-muted-foreground">
-            Manage your account settings and preferences.
-          </p>
+          <p className="text-muted-foreground">Manage your account settings and preferences.</p>
         </div>
 
         <Separator />
@@ -181,24 +166,16 @@ export function Settings({ settings, userId }: SettingsProps) {
           <div key={index} className="space-y-3">
             <div>
               <h3 className="text-lg font-medium">{section.label}</h3>
-              <p className="text-sm text-muted-foreground">
-                {section.description}
-              </p>
+              <p className="text-sm text-muted-foreground">{section.description}</p>
             </div>
             <div className="flex flex-col gap-6">
               {section.fields.map((field, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label htmlFor={field.label.toLowerCase()}>
-                      {field.label}
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      {field.description}
-                    </p>
+                    <Label htmlFor={field.label.toLowerCase()}>{field.label}</Label>
+                    <p className="text-sm text-muted-foreground">{field.description}</p>
                   </div>
-                  <div className="flex justify-end w-1/3">
-                    {field.component}
-                  </div>
+                  <div className="flex justify-end w-1/3">{field.component}</div>
                 </div>
               ))}
               {index !== content.length - 1 && <Separator />}

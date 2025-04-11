@@ -22,24 +22,6 @@ export function SectionContextMenu({
 
   const options = [
     {
-      icon: <SendHorizontal size={17} />,
-      name: "Transfer Section",
-      subItems: [
-        ...(section.parentId
-          ? [
-              {
-                name: "Move to Top",
-                action: () => transferSection(section.id, null),
-              },
-            ]
-          : []),
-        ...transferableSections.map((transfer) => ({
-          name: transfer.name,
-          action: () => transferSection(section.id, transfer.id),
-        })),
-      ],
-    },
-    {
       icon: <Trash2 size={17} />,
       name: "Delete Section",
       confirmationHeader: (

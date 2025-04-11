@@ -67,19 +67,20 @@ export function Options({ sectionId, userId }: { sectionId: number | null; userI
             isPending: isPending,
           },
         ]
-      : []),
-    {
-      icon: <ListPlus />,
-      name: "Add New Section",
-      action: () => {
-        triggerSectionRef.current?.click();
-      },
-    },
+      : [
+          {
+            icon: <ListPlus />,
+            name: "Add New Section",
+            action: () => {
+              triggerSectionRef.current?.click();
+            },
+          },
+        ]),
   ];
 
   return (
     <>
-      <AddNewSectionButton sectionId={sectionId} ref={triggerSectionRef} />
+      {!sectionId && <AddNewSectionButton sectionId={sectionId} ref={triggerSectionRef} />}
       {isMobile ? (
         <ContextMenu
           options={options}

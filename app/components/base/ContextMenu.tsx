@@ -45,9 +45,7 @@ export function ContextMenu({
   header?: React.ReactNode;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [menuSlides, setMenuSlides] = useState<MenuSlide[]>([
-    { items: options },
-  ]);
+  const [menuSlides, setMenuSlides] = useState<MenuSlide[]>([{ items: options }]);
   const [activeIndex, setActiveIndex] = useState(0);
   const router = useRouter();
 
@@ -65,10 +63,7 @@ export function ContextMenu({
 
   function handleSubItemClick(option: Option) {
     if (option.subItems?.length) {
-      setMenuSlides((prev) => [
-        ...prev,
-        { items: option.subItems!, parentName: option.name },
-      ]);
+      setMenuSlides((prev) => [...prev, { items: option.subItems!, parentName: option.name }]);
       setActiveIndex((prev) => prev + 1);
     } else if (option.action) {
       option.action();
@@ -80,16 +75,11 @@ export function ContextMenu({
     return items.map((option, index) => {
       return option.subItems && !option.disabled ? (
         <DropdownMenuSub key={index}>
-          <DropdownMenuSubTrigger
-            disabled={option.disabled}
-            className="gap-3 text-sm"
-          >
+          <DropdownMenuSubTrigger disabled={option.disabled} className="gap-3 text-sm">
             {option.icon}
             {option.name}
           </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            {renderDropdownMenuItems(option.subItems)}
-          </DropdownMenuSubContent>
+          <DropdownMenuSubContent>{renderDropdownMenuItems(option.subItems)}</DropdownMenuSubContent>
         </DropdownMenuSub>
       ) : (
         <DropdownMenuItem
@@ -113,17 +103,14 @@ export function ContextMenu({
           <DrawerDialogTitle>{header}</DrawerDialogTitle>
           <DrawerDialogDescription />
         </DrawerDialogHeader>
-        <div className="grid">
+        <div className="grid overflow-hidden">
           <div
             className="transition duration-500 ease-in-out w-full"
             style={{ transform: `translateX(-${activeIndex * 100}%)` }}
           >
             <div className="flex">
               {menuSlides.map((slide, slideIndex) => (
-                <div
-                  key={slideIndex}
-                  className="flex flex-col gap-4 min-w-full"
-                >
+                <div key={slideIndex} className="flex flex-col gap-4 min-w-full shrink-0">
                   {slideIndex > 0 && (
                     <Button
                       variant="ghost"
@@ -143,10 +130,7 @@ export function ContextMenu({
                         onSubmit={() => handleSubItemClick(option)}
                         header={option.confirmationHeader}
                         trigger={
-                          <Button
-                            variant="destructive"
-                            className="justify-between text-sm"
-                          >
+                          <Button variant="destructive" className="justify-between text-sm">
                             <div className="gap-3 flex flex-row items-center">
                               {option.icon}
                               {option.name}
@@ -166,9 +150,7 @@ export function ContextMenu({
                           {option.icon}
                           {option.name}
                         </div>
-                        {option.subItems && option.subItems.length > 0 && (
-                          <ChevronRight className="h-4 w-4" />
-                        )}
+                        {option.subItems && option.subItems.length > 0 && <ChevronRight className="h-4 w-4" />}
                       </Button>
                     )
                   )}

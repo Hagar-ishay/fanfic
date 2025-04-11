@@ -14,42 +14,33 @@ export const metadata: Metadata = {
   title: "Fanfic Penio",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <Suspense>
-    <ClerkProvider>
-      <html suppressHydrationWarning>
-        <FontProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <SidebarProvider defaultOpen={false} >
+      <ClerkProvider>
+        <html suppressHydrationWarning>
+          <FontProvider>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+              <SidebarProvider defaultOpen={false}>
                 <SignedIn>
                   <AppSidebar />
                   <div className="flex flex-col h-screen w-screen">
-                  <Suspense>
-                    <main>{children}</main>
-                    <Toaster />
-                  </Suspense>
-                </div>
-              </SignedIn>
-              <SignedOut>
-                <main>
-                  <SignIn />
-                </main>
-              </SignedOut>
-            </SidebarProvider>
-          </ThemeProvider>
-        </FontProvider>
-      </html>
-    </ClerkProvider>
+                    <Suspense>
+                      <main>{children}</main>
+                      <Toaster />
+                    </Suspense>
+                  </div>
+                </SignedIn>
+                <SignedOut>
+                  <main>
+                    <SignIn />
+                  </main>
+                </SignedOut>
+              </SidebarProvider>
+            </ThemeProvider>
+          </FontProvider>
+        </html>
+      </ClerkProvider>
     </Suspense>
   );
 }

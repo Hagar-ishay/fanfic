@@ -28,26 +28,19 @@ export function Help({ title, description, helpContent }: HelpProps) {
           </DrawerDialogTrigger>
         </Tooltip>
 
-        <DrawerDialogContent>
+        <DrawerDialogContent className="p-4">
           <DrawerDialogHeader>
             <DrawerDialogTitle>{title}</DrawerDialogTitle>
           </DrawerDialogHeader>
-          <DrawerDialogDescription className="mb-6">
-            {description}
-          </DrawerDialogDescription>
+          <DrawerDialogDescription className="mb-6">{description}</DrawerDialogDescription>
 
-          <div className="space-y-4">
+          <div className="space-y-4 border-t p-4">
             {helpContent.map(({ icon, content }, index) => (
-              <div
-                key={index}
-                className="flex flex-row items-start gap-3 text-sm"
-              >
+              <div key={index} className="flex flex-row items-start gap-3 text-sm">
                 <div className="flex items-center justify-center p-1 h-6 w-6 text-muted-foreground shrink-0">
                   {icon}
                 </div>
-                <p className="text-muted-foreground leading-tight pt-0.5">
-                  {content}
-                </p>
+                <p className="text-muted-foreground leading-tight pt-0.5">{content}</p>
               </div>
             ))}
           </div>

@@ -1,16 +1,13 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { expirePath } from "next/dist/server/web/spec-extension/revalidate";
+import { revalidatePath } from "next/cache";
 import { db } from "./db";
 import { settings } from "./schema";
 
 export async function getSettings(userId: string) {
-  "use cache"
-  const userSettings = await db
-    .select()
-    .from(settings)
-    .where(eq(settings.userId, userId));
+  "use cache";
+  const userSettings = await db.select().from(settings).where(eq(settings.userId, userId));
 
   return (
     userSettings[0] || {
@@ -59,6 +56,6 @@ export async function saveSettings(data: SettingsData & { id?: number }) {
     return updateSettings(id, updateData);
   }
   const result = await createSettings(data);
-  expirePath("/settings");
+  revalidatePath("/settings");
   return result;
 }

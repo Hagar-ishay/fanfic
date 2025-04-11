@@ -49,13 +49,7 @@ export function Search({
   }, [isDrawerOpen, isDesktop]);
 
   const matchedFanfics = matchSorter(userFanfics, searchInput, {
-    keys: [
-      "fanfics.title",
-      "fanfics.author",
-      "sections.name",
-      "fanfics.tags.*",
-      "section_fanfics.editableLabels",
-    ],
+    keys: ["fanfics.title", "fanfics.author", "sections.name", "fanfics.tags.*", "section_fanfics.editableLabels"],
     threshold: matchSorter.rankings.CONTAINS,
     sorter: (rankedItems) => {
       return rankedItems.sort((a, b) => {
@@ -87,9 +81,9 @@ export function Search({
   }
 
   return (
-    <div className="w-full">
-      <DrawerDialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <DrawerDialogTrigger asChild>
+    <DrawerDialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+      <DrawerDialogTrigger asChild>
+        {isDesktop ? (
           <Button
             variant="outline"
             className={cn(
@@ -97,118 +91,91 @@ export function Search({
             )}
           >
             <SearchIcon className="h-4 w-4 flex-shrink-0 opacity-50" />
-            <h2 className="text-sm text-muted-foreground truncate mt-1 ">
-              Search Library...
-            </h2>
+            <h2 className="text-sm text-muted-foreground truncate mt-1 ">Search Library...</h2>
           </Button>
-        </DrawerDialogTrigger>
-        <DrawerDialogContent className={cn("p-4", isDesktop ? "" : "h-full")}>
-          <DrawerDialogHeader hidden>
-            <DrawerDialogTitle></DrawerDialogTitle>
-          </DrawerDialogHeader>
-          <DrawerDescription></DrawerDescription>
-          <div className="relative">
-            <Input
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              autoFocus
-              type="search"
-              placeholder="Type to search..."
-              className={cn(
-                "w-full pr-4 bg-background border border-input rounded-xl shadow-sm text-sm transition-colors hover:border-accent/50 focus-visible:ring-1 focus-visible:ring-accent text-muted-foreground caret-muted-foreground/50",
-                isDesktop ? "py-2 pl-9" : "py-3 pl-10"
-              )}
-            />
-            <SearchIcon
-              className={cn(
-                "pointer-events-none absolute left-3 size-4 top-1/2 -translate-y-1/2 select-none opacity-50"
-              )}
-            />
-          </div>
-          {searchInput && (
-            <div
-              className={cn(
-                "px-2 text-sm text-muted-foreground",
-                isDesktop ? "mt-0" : "mt-4"
-              )}
-            >
-              {matchedFanfics.length} result
-              {matchedFanfics.length !== 1 ? "s" : ""}
-            </div>
-          )}
-          <div
+        ) : (
+          <Button variant="ghost" className="h-8 w-8">
+            <SearchIcon className="flex-shrink-0 opacity-50" />
+          </Button>
+        )}
+      </DrawerDialogTrigger>
+      <DrawerDialogContent className={cn("p-4", isDesktop ? "" : "h-full")}>
+        <DrawerDialogHeader hidden>
+          <DrawerDialogTitle></DrawerDialogTitle>
+        </DrawerDialogHeader>
+        <DrawerDescription></DrawerDescription>
+        <div className="relative">
+          <Input
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            autoFocus
+            type="search"
+            placeholder="Type to search..."
             className={cn(
-              "space-y-6 overflow-y-auto pr-2",
-              isDesktop
-                ? "mt-0 max-h-[600px]"
-                : "mt-4 max-h-[calc(100vh-200px)]"
+              "w-full pr-4 bg-background border border-input rounded-xl shadow-sm text-sm transition-colors hover:border-accent/50 focus-visible:ring-1 focus-visible:ring-accent text-muted-foreground caret-muted-foreground/50",
+              isDesktop ? "py-2 pl-9" : "py-3 pl-10"
             )}
-          >
-            {Object.entries(groupedFanfics).map(
-              ([sectionId, { section, fanfics }]) => (
-                <div key={sectionId} className="">
-                  <h4 className="text-xs font-medium text-muted-foreground px-2">
-                    {section.name}
-                  </h4>
-                  <div className="space-y-1">
-                    {fanfics.map((fanfic) => (
-                      <Link
-                        onClick={() => setIsDrawerOpen(false)}
-                        href={`/library/sections/${fanfic.sections.id}/fanfics/${fanfic.section_fanfics.id}`}
-                        key={fanfic.section_fanfics.id}
-                        className="block p-3 rounded-lg hover:bg-accent/10 transition-all duration-200 ease-in-out border border-transparent hover:border-border/40"
-                      >
-                        <div className="flex items-baseline justify-between mb-1">
-                          <h3 className="text-sm font-medium text-foreground truncate">
-                            {fanfic.fanfics.title}
-                          </h3>
-                          <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">
-                            {fanfic.fanfics.author}
-                          </span>
-                        </div>
+          />
+          <SearchIcon
+            className={cn("pointer-events-none absolute left-3 size-4 top-1/2 -translate-y-1/2 select-none opacity-50")}
+          />
+        </div>
+        {searchInput && (
+          <div className={cn("px-2 text-sm text-muted-foreground", isDesktop ? "mt-0" : "mt-4")}>
+            {matchedFanfics.length} result
+            {matchedFanfics.length !== 1 ? "s" : ""}
+          </div>
+        )}
+        <div
+          className={cn(
+            "space-y-6 overflow-y-auto pr-2",
+            isDesktop ? "mt-0 max-h-[600px]" : "mt-4 max-h-[calc(100vh-200px)]"
+          )}
+        >
+          {Object.entries(groupedFanfics).map(([sectionId, { section, fanfics }]) => (
+            <div key={sectionId} className="">
+              <h4 className="text-xs font-medium text-muted-foreground px-2">{section.name}</h4>
+              <div className="space-y-1">
+                {fanfics.map((fanfic) => (
+                  <Link
+                    onClick={() => setIsDrawerOpen(false)}
+                    href={`/library/sections/${fanfic.sections.id}/fanfics/${fanfic.section_fanfics.id}`}
+                    key={fanfic.section_fanfics.id}
+                    className="block p-3 rounded-lg hover:bg-accent/10 transition-all duration-200 ease-in-out border border-transparent hover:border-border/40"
+                  >
+                    <div className="flex items-baseline justify-between mb-1">
+                      <h3 className="text-sm font-medium text-foreground truncate">{fanfic.fanfics.title}</h3>
+                      <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">{fanfic.fanfics.author}</span>
+                    </div>
 
-                        <div className="flex flex-row items-center gap-2 text-xs text-muted-foreground">
-                          <div className="flex items-center gap-2 min-w-0">
-                            {fanfic.fanfics.wordCount && (
-                              <span className="flex-shrink-0">
-                                {fanfic.fanfics.wordCount.toLocaleString()}{" "}
-                                words
+                    <div className="flex flex-row items-center gap-2 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2 min-w-0">
+                        {fanfic.fanfics.wordCount && (
+                          <span className="flex-shrink-0">{fanfic.fanfics.wordCount.toLocaleString()} words</span>
+                        )}
+                        {(fanfic.fanfics.completedAt || fanfic.fanfics.updatedAt) && (
+                          <>
+                            <span className="flex-shrink-0">•</span>
+                            {fanfic.fanfics.completedAt && <span className="flex-shrink-0">Complete</span>}
+                            {fanfic.fanfics.completedAt && fanfic.fanfics.updatedAt && (
+                              <span className="flex-shrink-0">•</span>
+                            )}
+                            {fanfic.fanfics.updatedAt && (
+                              <span className="truncate min-w-0">
+                                Updated {DateTime.fromJSDate(fanfic.fanfics.updatedAt).toRelative()}
                               </span>
                             )}
-                            {(fanfic.fanfics.completedAt ||
-                              fanfic.fanfics.updatedAt) && (
-                              <>
-                                <span className="flex-shrink-0">•</span>
-                                {fanfic.fanfics.completedAt && (
-                                  <span className="flex-shrink-0">
-                                    Complete
-                                  </span>
-                                )}
-                                {fanfic.fanfics.completedAt &&
-                                  fanfic.fanfics.updatedAt && (
-                                    <span className="flex-shrink-0">•</span>
-                                  )}
-                                {fanfic.fanfics.updatedAt && (
-                                  <span className="truncate min-w-0">
-                                    Updated{" "}
-                                    {DateTime.fromJSDate(
-                                      fanfic.fanfics.updatedAt
-                                    ).toRelative()}
-                                  </span>
-                                )}
-                              </>
-                            )}
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )
-            )}
-          </div>
-        </DrawerDialogContent>
-      </DrawerDialog>
-    </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </DrawerDialogContent>
+    </DrawerDialog>
   );
 }

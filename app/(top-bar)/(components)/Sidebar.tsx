@@ -45,9 +45,9 @@ export function AppSidebar() {
   const { isMobile } = useSidebar();
 
   return (
-    <Sidebar side="left" className="absolute top-0 h-full" collapsible="icon">
+    <Sidebar side="left" className="fixed top-0 h-full" collapsible="icon">
       <SidebarContent>
-        <SidebarHeader>{!isMobile && <HomeIcon />}</SidebarHeader>
+        <SidebarHeader>{isMobile && <HomeIcon />}</SidebarHeader>
 
         <SidebarMenu>
           {ITEMS.map((item) => (
