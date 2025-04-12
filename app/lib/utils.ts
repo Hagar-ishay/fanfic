@@ -3,6 +3,7 @@ import { twMerge } from "tailwind-merge";
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { DateTime } from "luxon";
+import { AxiosError } from "axios";
 
 const algorithm = "aes-256-cbc";
 const key = Buffer.from("1209r2$9ubb398F1!0@G9fCw9#r6$ur2", "utf8");
@@ -30,6 +31,7 @@ export function decryptPassword(encryptedPassword: string): string {
 export const errorMessage = (error: unknown) => {
   return (
     (typeof error === "string" && error) ||
+    (error instanceof AxiosError && error.response?.data.error_message) ||
     (error instanceof Error && error.message) ||
     ""
   );
@@ -47,14 +49,9 @@ export const formatDate = (date: Date | null) => {
 };
 
 export const getFont = (langCode: string | null) =>
-  ["ru", "ja", "zh", "ko"].includes(langCode || "en")
-    ? "font-wenkai text-xl"
-    : "font-blokletters";
+  ["ru", "ja", "zh", "ko"].includes(langCode || "en") ? "font-wenkai text-xl" : "font-blokletters";
 
-export const debounce = <T extends (...args: any[]) => any>(
-  fn: T,
-  ms = 300
-) => {
+export const debounce = <T extends (...args: any[]) => any>(fn: T, ms = 300) => {
   let timeoutId: ReturnType<typeof setTimeout>;
   return function (this: any, ...args: Parameters<T>) {
     clearTimeout(timeoutId);

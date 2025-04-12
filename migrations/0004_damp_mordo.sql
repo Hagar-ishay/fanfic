@@ -1,0 +1,1 @@
+ALTER TABLE "fanfiction"."section_fanfics" ADD COLUMN "kudos" boolean DEFAULT false;

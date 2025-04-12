@@ -87,7 +87,9 @@ export function FanficContextMenu({
         name: section.name,
         action: async () => {
           await tranferSectionFanfic(fanfic.id, section.id, fanfic.sectionId);
-          router.push(`/library/sections/${section.id}`);
+          if (path.includes("/fanfics/")) {
+            router.push(`/library/sections/${section.id}/fanfics/${fanfic.id}`);
+          }
         },
       })),
     },

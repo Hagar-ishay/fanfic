@@ -112,14 +112,24 @@ class AO3Client {
     }
   }
 
+  private async getToken(): Promise<string> {
+    const tokenUrl = `${AO3_LINK}/token_dispenser.json`;
+    try {
+      const response = await this.axiosInstance.get(tokenUrl);
+      return response.data.token;
+    } catch (error) {
+      console.error("Failed to get token:", error);
+      throw error;
+    }
+  }
+
   public async refreshLogin(): Promise<void> {
     console.log("Refreshing AO3 login");
-    const tokenUrl = `${AO3_LINK}/token_dispenser.json`;
     const loginUrl = `${AO3_LINK}/users/login`;
     try {
-      const tokenResponse = await this.axiosInstance.get(tokenUrl);
+      const tokenResponse = await this.getToken();
       const data = {
-        authenticity_token: tokenResponse.data.token,
+        authenticity_token: tokenResponse,
         "user[login]": ENV.AO3_USERNAME,
         "user[password]": ENV.AO3_PASSWORD,
         "user[remember_me]": 1,
@@ -158,24 +168,12 @@ class AO3Client {
   }
 
   public async getFanfic(externalId: string): Promise<string> {
-    console.time("AO3 request total");
-    console.log("Getting fanfic", externalId);
-    try {
-      const url = `${AO3_LINK}/works/${externalId}?view_adult=true`;
-      const response = await this.request<string>({
-        method: "GET",
-        url,
-      });
-
-      if (response.includes("This work is only available to registered users")) {
-        throw new Error("Failed to authenticate to AO3");
-      }
-
-      return response;
-    } catch (error) {
-      console.timeEnd("AO3 request total");
-      throw error;
-    }
+    const url = `${AO3_LINK}/works/${externalId}?view_adult=true`;
+    const response = await this.request<string>({
+      method: "GET",
+      url,
+    });
+    return response;
   }
 
   public async autocomplete(type: string, query: string): Promise<{ id: string; name: string }[]> {
@@ -199,5 +197,15 @@ class AO3Client {
     await new Promise<void>((resolve, reject) => {
       (response.data as NodeJS.ReadableStream).pipe(fileStream).on("finish", resolve).on("error", reject);
     });
+  }
+
+  public async kudos(externalId: string): Promise<string[]> {
+    const url = `${AO3_LINK}/kudos.js`;
+    const body = {
+      authenticity_token: await this.getToken(),
+      "kudo[commentable_id]": externalId,
+      "kudo[commentable_type]": "Work",
+    };
+    return this.request({ method: "POST", url, data: body });
   }
 }

@@ -57,6 +57,7 @@ export const sectionFanfics = schema.table(
       .notNull(),
     position: integer().notNull(),
     userId: varchar("user_id").notNull(),
+    kudos: boolean("kudos").default(false),
     creationTime: timestamp("creation_time").notNull().defaultNow(),
     updateTime: timestamp("update_time").$onUpdate(() => new Date()),
     lastSent: timestamp("last_sent"),
