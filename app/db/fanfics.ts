@@ -20,6 +20,7 @@ export const tranferSectionFanfic = async (sectionFanficId: number, newSectionId
 export const updateSectionFanfic = async (sectionId: number, sectionFanficId: number, { ...update }) => {
   await db.update(sectionFanfics).set(update).where(drizzle.eq(sectionFanfics.id, sectionFanficId));
   revalidatePath(`/library/sections/${sectionId}/fanfics/${sectionFanficId}`);
+  revalidatePath(`/library/sections/${sectionId}`);
 };
 
 export const selectOngoingFanfics = async () => {

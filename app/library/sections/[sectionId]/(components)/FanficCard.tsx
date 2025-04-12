@@ -40,7 +40,7 @@ export default function FanficCard({
       const result = await sendKudos({
         externalId: fanfic.externalId,
         sectionId: fanfic.sectionId,
-        fanficId: fanfic.id,
+        userFanficId: fanfic.id,
         currentKudos: fanfic.kudos || false,
       });
 
@@ -50,8 +50,6 @@ export default function FanficCard({
           description: result.message,
           variant: "destructive",
         });
-        // Revert optimistic update on error
-        setOptimisticKudos(fanfic.kudos || false);
       }
     });
   };

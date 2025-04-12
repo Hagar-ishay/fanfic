@@ -7,12 +7,12 @@ import { updateSectionFanfic } from "@/db/fanfics";
 export async function sendKudos({
   externalId,
   sectionId,
-  fanficId,
+  userFanficId,
   currentKudos,
 }: {
   externalId: string | number;
   sectionId: number;
-  fanficId: number;
+  userFanficId: number;
   currentKudos: boolean;
 }) {
   try {
@@ -20,7 +20,7 @@ export async function sendKudos({
       const ao3Client = await getAo3Client();
       await ao3Client.kudos(String(externalId));
     }
-    await updateSectionFanfic(sectionId, fanficId, {
+    await updateSectionFanfic(sectionId, userFanficId, {
       kudos: !currentKudos,
     });
 
@@ -28,7 +28,7 @@ export async function sendKudos({
   } catch (error) {
     const err = errorMessage(error);
     if (err.includes("You have already left kudos here")) {
-      await updateSectionFanfic(sectionId, fanficId, {
+      await updateSectionFanfic(sectionId, userFanficId, {
         kudos: !currentKudos,
       });
       return { success: true, message: "", kudos: !currentKudos };

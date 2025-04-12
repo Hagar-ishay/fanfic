@@ -37,7 +37,7 @@ export default function Fanfic({
       const result = await sendKudos({
         externalId: fanfic.externalId,
         sectionId: fanfic.sectionId,
-        fanficId: fanfic.id,
+        userFanficId: fanfic.id,
         currentKudos: fanfic.kudos || false,
       });
 
