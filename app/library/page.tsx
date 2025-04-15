@@ -7,12 +7,17 @@ import { Header } from "@/components/base/Header";
 import { ListPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AddNewSectionButton } from "@/library/(components)/AddNewSectionButton";
+import { Suspense } from "react";
+import { listUserFanfics } from "@/db/fanfics";
 
 export const metadata: Metadata = {
   title: "Penio Fanfic - Library",
 };
 
-export default async function Page() {
+async function LibraryContent() {
+  const session = await auth();
+  const userFanfics = await listUserFanfics(session?.user?.id!);
+
   const { user } = (await auth())!;
 
   const sections = await selectOrCreateSections(user.id);
@@ -34,5 +39,13 @@ export default async function Page() {
         ))}
       </div>
     </>
+  );
+}
+
+export default function LibraryPage() {
+  return (
+    <Suspense fallback={<div>Loading library...</div>}>
+      <LibraryContent />
+    </Suspense>
   );
 }
