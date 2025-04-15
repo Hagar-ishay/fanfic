@@ -55,6 +55,7 @@ export const listUserFanfics = async (userId: string): Promise<UserFanfic[]> => 
     id: row.section_fanfics.id,
     fanficId: row.fanfics.id,
     sectionName: row.sections.name,
+    sectionParentId: row.sections.parentId,
   }));
 };
 
