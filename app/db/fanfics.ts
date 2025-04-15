@@ -31,12 +31,21 @@ export const selectOngoingFanfics = async () => {
 
 export const selectSectionFanfic = async (sectionIds: number[]) => {
   "use cache";
-  return await db
+  const result = await db
     .select()
     .from(fanfics)
     .innerJoin(sectionFanfics, drizzle.eq(fanfics.id, sectionFanfics.fanficId))
+    .innerJoin(sections, drizzle.eq(sectionFanfics.sectionId, sections.id))
     .where(drizzle.inArray(sectionFanfics.sectionId, sectionIds))
     .orderBy(sectionFanfics.sectionId, sectionFanfics.position);
+  return result.map((row) => ({
+    ...row.fanfics,
+    ...row.section_fanfics,
+    id: row.section_fanfics.id,
+    fanficId: row.fanfics.id,
+    sectionName: row.sections.name,
+    sectionParentId: row.sections.parentId,
+  }));
 };
 
 export const listUserFanfics = async (userId: string): Promise<UserFanfic[]> => {

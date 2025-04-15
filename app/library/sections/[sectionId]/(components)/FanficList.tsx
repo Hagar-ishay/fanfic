@@ -3,14 +3,11 @@
 import { DragDropContext, Droppable } from "@hello-pangea/dnd";
 import FanficCard from "./FanficCard";
 import { reorderFanfics } from "@/db/fanfics";
-import { Fanfic, Section, SectionFanfic, UserFanfic } from "@/db/types";
+import { Section, UserFanfic } from "@/db/types";
 import { useOptimistic, useTransition } from "react";
 
 type FanficListProps = {
-  fanfics: {
-    fanfics: Fanfic;
-    section_fanfics: SectionFanfic;
-  }[];
+  fanfics: UserFanfic[];
   sectionId: number;
   transferableSections: Section[];
 };
@@ -43,17 +40,7 @@ export default function FanficList({ fanfics, sectionId, transferableSections }:
         {(provided) => (
           <div ref={provided.innerRef} {...provided.droppableProps}>
             {optimisticFics.map((fanfic, index) => (
-              <FanficCard
-                transferableSections={transferableSections}
-                key={fanfic.section_fanfics.id}
-                fanfic={{
-                  ...fanfic.fanfics,
-                  ...fanfic.section_fanfics,
-                  id: fanfic.section_fanfics.id,
-                  fanficId: fanfic.fanfics.id,
-                }}
-                index={index}
-              />
+              <FanficCard transferableSections={transferableSections} key={fanfic.id} fanfic={fanfic} index={index} />
             ))}
             {provided.placeholder}
           </div>
