@@ -7,7 +7,6 @@ import { AO3_LINK } from "@/consts";
 import { wrapper } from "axios-cookiejar-support";
 import { CookieJar, Cookie } from "tough-cookie";
 import { Credentials } from "@/db/types";
-import { ENV } from "@/config";
 import { getCredentials, refreshSession } from "@/db/credentials";
 
 export async function getAo3Client() {
@@ -130,8 +129,8 @@ class AO3Client {
       const tokenResponse = await this.getToken();
       const data = {
         authenticity_token: tokenResponse,
-        "user[login]": ENV.AO3_USERNAME,
-        "user[password]": ENV.AO3_PASSWORD,
+        "user[login]": process.env.AO3_USERNAME,
+        "user[password]": process.env.AO3_PASSWORD,
         "user[remember_me]": 1,
         commit: "Log in",
       };

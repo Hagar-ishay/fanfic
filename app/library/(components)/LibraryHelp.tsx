@@ -3,7 +3,7 @@ import { ClipboardPlus, Info, ListPlus, Search, SendHorizontal, Trash2 } from "l
 
 const HELP_DESCRIPTION = "Add your fanfics to your library and organize them into sections.";
 
-export function LibraryHelp({ showAsPage }: { showAsPage?: boolean }) {
+export function LibraryHelp({ showAsPage, trigger }: { showAsPage?: boolean; trigger?: React.ReactNode }) {
   const helpContent = [
     {
       icon: <ClipboardPlus />,
@@ -45,6 +45,6 @@ Pressing on the Clipboard icon will add the fanfic to your library.`,
       </div>
     </div>
   ) : (
-    <Help title="Library" description={HELP_DESCRIPTION} helpContent={helpContent} />
+    <Help title="Library" description={HELP_DESCRIPTION} helpContent={helpContent} trigger={trigger} />
   );
 }

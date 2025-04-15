@@ -3,9 +3,9 @@ import * as drizzle from "drizzle-orm";
 
 import { db } from "@/db/db";
 import { fanfics, sectionFanfics, sections } from "@/db/schema";
-import { NewFanfic } from "@/db/types";
+import { NewFanfic, UserFanfic } from "@/db/types";
 import { revalidatePath } from "next/cache";
-
+import { unstable_cacheLife as cacheLife } from "next/cache";
 export const updateFanfic = async (ficId: number, { ...update }) => {
   return await db.update(fanfics).set(update).where(drizzle.eq(fanfics.id, ficId)).returning({ fanficId: fanfics.id });
 };
@@ -25,6 +25,7 @@ export const updateSectionFanfic = async (sectionId: number, sectionFanficId: nu
 
 export const selectOngoingFanfics = async () => {
   "use cache";
+  cacheLife("default");
   return await db.select().from(fanfics).where(drizzle.isNull(fanfics.completedAt));
 };
 
@@ -38,23 +39,33 @@ export const selectSectionFanfic = async (sectionIds: number[]) => {
     .orderBy(sectionFanfics.sectionId, sectionFanfics.position);
 };
 
-export const listUserFanfics = async (userId: string) => {
+export const listUserFanfics = async (userId: string): Promise<UserFanfic[]> => {
   "use cache";
-  return await db
+  cacheLife("default");
+  const result = await db
     .select()
     .from(fanfics)
     .innerJoin(sectionFanfics, drizzle.eq(fanfics.id, sectionFanfics.fanficId))
     .innerJoin(sections, drizzle.eq(sectionFanfics.sectionId, sections.id))
     .where(drizzle.eq(sectionFanfics.userId, userId))
     .orderBy(sectionFanfics.sectionId, sectionFanfics.position);
+  return result.map((row) => ({
+    ...row.fanfics,
+    ...row.section_fanfics,
+    id: row.section_fanfics.id,
+    fanficId: row.fanfics.id,
+    sectionName: row.sections.name,
+  }));
 };
 
 export const getFanficById = async (sectionFanficId: number) => {
   "use cache";
+  cacheLife("default");
   const fanfic = await db
     .select()
     .from(fanfics)
     .innerJoin(sectionFanfics, drizzle.eq(fanfics.id, sectionFanfics.fanficId))
+    .innerJoin(sections, drizzle.eq(sectionFanfics.sectionId, sections.id))
     .where(drizzle.eq(sectionFanfics.id, sectionFanficId))
     .orderBy(sectionFanfics.sectionId, sectionFanfics.position);
   if (fanfic.length === 0) {
@@ -65,11 +76,14 @@ export const getFanficById = async (sectionFanficId: number) => {
     ...fanfic[0].section_fanfics,
     id: fanfic[0].section_fanfics.id,
     fanficId: fanfic[0].fanfics.id,
+    sectionName: fanfic[0].sections.name,
+    sectionParentId: fanfic[0].sections.parentId,
   };
 };
 
 export const getFanficByExternalId = async (externalId: number) => {
   "use cache";
+  cacheLife("default");
   const result = await db.select().from(fanfics).where(drizzle.eq(fanfics.externalId, externalId));
   if (result.length > 0) {
     return result[0];

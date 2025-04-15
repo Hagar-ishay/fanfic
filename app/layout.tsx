@@ -1,46 +1,47 @@
 import { AppSidebar } from "@/(top-bar)/(components)/Sidebar";
-import { SignIn } from "@/components/SignIn";
 import { FontProvider } from "@/components/base/FontProvider";
 import { ThemeProvider } from "@/components/base/theme";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/toaster";
-import { ClerkProvider, SignedIn, SignedOut } from "@clerk/nextjs";
 import type { Metadata } from "next";
-import { Suspense } from "react";
+import { AuthProvider } from "./providers";
 
 import "./globals.css";
+import { auth } from "@/auth";
+import { listUserFanfics } from "@/db/fanfics";
+import { notFound } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Fanfic Penio",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const { user } = (await auth())!;
+  if (!user) {
+    return notFound();
+  }
+
+  const userFanfics = await listUserFanfics(user.id);
+
   return (
-    <Suspense>
-      <ClerkProvider>
-        <html suppressHydrationWarning>
-          <FontProvider>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-              <SidebarProvider defaultOpen={false}>
-                <SignedIn>
-                  <AppSidebar />
+    <AuthProvider>
+      <html suppressHydrationWarning>
+        <FontProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+            <SidebarProvider defaultOpen={false}>
+              {
+                <>
+                  <AppSidebar userFanfics={userFanfics} />
                   <div className="flex flex-col h-screen w-screen">
-                    <Suspense>
-                      <main>{children}</main>
-                      <Toaster />
-                    </Suspense>
+                    <main>{children}</main>
+                    <Toaster />
                   </div>
-                </SignedIn>
-                <SignedOut>
-                  <main>
-                    <SignIn />
-                  </main>
-                </SignedOut>
-              </SidebarProvider>
-            </ThemeProvider>
-          </FontProvider>
-        </html>
-      </ClerkProvider>
-    </Suspense>
+                </>
+              }
+            </SidebarProvider>
+          </ThemeProvider>
+        </FontProvider>
+      </html>
+    </AuthProvider>
   );
 }

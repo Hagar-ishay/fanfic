@@ -15,21 +15,16 @@ import { Label } from "@/components/ui/label";
 import { insertSection } from "@/db/sections";
 import { useToast } from "@/hooks/use-toast";
 import { errorMessage } from "@/lib/utils";
-import { useUser } from "@clerk/nextjs";
+import { ListPlus } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 
-export function AddNewSectionButton({
-  sectionId,
-  ref,
-}: {
-  sectionId: number | null;
-  ref?: React.RefObject<HTMLDivElement>;
-}) {
-  const { user } = useUser();
+export function AddNewSectionButton() {
+  const { data: session } = useSession();
   const { toast } = useToast();
   const { register, handleSubmit } = useForm<{ name: string }>();
 
-  if (!user) {
+  if (!session) {
     return null;
   }
 
@@ -38,8 +33,7 @@ export function AddNewSectionButton({
     try {
       await insertSection({
         name: data.name,
-        userId: user.id,
-        parentId: sectionId,
+        userId: session.user.id,
       });
       toast({ title, description: "Added Successfully!" });
     } catch (err) {
@@ -52,7 +46,10 @@ export function AddNewSectionButton({
   return (
     <DrawerDialog>
       <DrawerDialogTrigger asChild>
-        <div ref={ref} hidden></div>
+        <Button size="sm" variant="default">
+          <ListPlus />
+          <p className="mt-1 text-[10px]">New Section</p>
+        </Button>
       </DrawerDialogTrigger>
       <DrawerDialogContent>
         <DrawerDialogHeader>
@@ -61,11 +58,7 @@ export function AddNewSectionButton({
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="p-6 flex flex-col gap-3">
             <Label htmlFor="name">Name</Label>
-            <Input
-              placeholder="Enter new name..."
-              id="name"
-              {...register("name", { required: true })}
-            />
+            <Input placeholder="Enter new name..." id="name" {...register("name", { required: true })} />
           </div>
           <DrawerDialogFooter>
             <DrawerDialogClose asChild>

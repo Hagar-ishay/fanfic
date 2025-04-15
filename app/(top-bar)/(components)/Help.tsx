@@ -1,3 +1,4 @@
+"use client";
 import {
   DrawerDialog,
   DrawerDialogContent,
@@ -6,33 +7,26 @@ import {
   DrawerDialogTitle,
   DrawerDialogTrigger,
 } from "@/components/base/DrawerDialog";
-import { Tooltip } from "@/components/base/Tooltip";
-import { Button } from "@/components/ui/button";
-import { HelpCircle } from "lucide-react";
+import { getIsDesktop } from "@/lib/utils";
 
 type HelpProps = {
   title: string;
   description: string;
   helpContent: { icon?: React.ReactNode; content: string }[];
+  trigger: React.ReactNode;
 };
 
-export function Help({ title, description, helpContent }: HelpProps) {
+export function Help({ title, description, helpContent, trigger }: HelpProps) {
+  const isDesktop = getIsDesktop();
   return (
     <div className="min-w-fit">
       <DrawerDialog>
-        <Tooltip description="Help">
-          <DrawerDialogTrigger asChild>
-            <Button variant="outline" size="icon" className="h-8 w-8">
-              <HelpCircle />
-            </Button>
-          </DrawerDialogTrigger>
-        </Tooltip>
-
-        <DrawerDialogContent className="p-4">
+        <DrawerDialogTrigger asChild>{trigger}</DrawerDialogTrigger>
+        <DrawerDialogContent className="p-6">
           <DrawerDialogHeader>
             <DrawerDialogTitle>{title}</DrawerDialogTitle>
           </DrawerDialogHeader>
-          <DrawerDialogDescription className="mb-6">{description}</DrawerDialogDescription>
+          <DrawerDialogDescription className={isDesktop ? "" : "mb-6 pl-3"}>{description}</DrawerDialogDescription>
 
           <div className="space-y-4 border-t p-4">
             {helpContent.map(({ icon, content }, index) => (

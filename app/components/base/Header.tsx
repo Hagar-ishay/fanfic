@@ -1,6 +1,8 @@
 "use client";
+import { HomeIcon } from "@/(top-bar)/(components)/HomeIcon";
 import { Breadcrumbs } from "@/components/base/Breadcrumbs";
-
+import { cn } from "@/lib/utils";
+import { useSidebar } from "@/components/ui/sidebar";
 export function Header({
   segments,
   children,
@@ -8,13 +10,21 @@ export function Header({
   segments: { label: string; href: string }[];
   children?: React.ReactNode;
 }) {
+  const { isMobile } = useSidebar();
+
   return (
-    <div className="flex justify-between items-center sticky top-20 bg-accent/80  backdrop-blur-sm z-40 shadow-md py-6">
-      <div className="pl-8">
+    <div
+      className={cn(
+        "flex justify-between items-center sticky top-0 bg-sidebar backdrop-blur-sm z-40 shadow-md",
+        isMobile && "pt-3 pb-3"
+      )}
+    >
+      <div className="pl-2 flex flex-row items-center gap-2">
+        <HomeIcon />
         <Breadcrumbs segments={segments} />
       </div>
       <div className="pr-4">
-        <div className="gap-4 flex flex-row">{children}</div>
+        <div className="flex flex-row">{children}</div>
       </div>
     </div>
   );

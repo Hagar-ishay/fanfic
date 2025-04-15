@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { DrawerDescription } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
-import { Fanfic, Section, SectionFanfic } from "@/db/types";
+import { UserFanfic } from "@/db/types";
 import { cn, getIsDesktop } from "@/lib/utils";
 import { SearchIcon } from "lucide-react";
 import { DateTime } from "luxon";
@@ -17,15 +17,7 @@ import { matchSorter } from "match-sorter";
 import Link from "next/link";
 import React from "react";
 
-export function Search({
-  userFanfics,
-}: {
-  userFanfics: {
-    sections: Section;
-    fanfics: Fanfic;
-    section_fanfics: SectionFanfic;
-  }[];
-}) {
+export function Search({ userFanfics, trigger }: { userFanfics: UserFanfic[]; trigger: React.ReactNode }) {
   const [searchInput, setSearchInput] = React.useState("");
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
   const isDesktop = getIsDesktop();
@@ -49,31 +41,28 @@ export function Search({
   }, [isDrawerOpen, isDesktop]);
 
   const matchedFanfics = matchSorter(userFanfics, searchInput, {
-    keys: ["fanfics.title", "fanfics.author", "sections.name", "fanfics.tags.*", "section_fanfics.editableLabels"],
+    keys: ["title", "author", "sectionName", "tags.*", "editableLabels"],
     threshold: matchSorter.rankings.CONTAINS,
     sorter: (rankedItems) => {
       return rankedItems.sort((a, b) => {
-        // First sort by keyIndex (which key matched)
         const keyIndexDiff = a.keyIndex - b.keyIndex;
         if (keyIndexDiff !== 0) return keyIndexDiff;
-
-        // If keyIndex is the same, sort by updatedAt (most recent first)
-        const aTime = a.item.section_fanfics.updateTime?.getTime() ?? 0;
-        const bTime = b.item.section_fanfics.updateTime?.getTime() ?? 0;
-        return bTime - aTime; // Descending order (newer first)
+        const aTime = a.item.updateTime?.getTime() ?? 0;
+        const bTime = b.item.updateTime?.getTime() ?? 0;
+        return bTime - aTime;
       });
     },
   });
 
   const groupedFanfics: {
-    [key: string]: { section: Section; fanfics: typeof matchedFanfics };
+    [key: string]: { sectionName: string; fanfics: typeof matchedFanfics };
   } = {};
 
   for (const fanfic of matchedFanfics) {
-    const sectionId = fanfic.sections.id;
+    const sectionId = fanfic.sectionId;
     if (!groupedFanfics[sectionId]) {
       groupedFanfics[sectionId] = {
-        section: fanfic.sections,
+        sectionName: fanfic.sectionName,
         fanfics: [],
       };
     }
@@ -82,23 +71,7 @@ export function Search({
 
   return (
     <DrawerDialog open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-      <DrawerDialogTrigger asChild>
-        {isDesktop ? (
-          <Button
-            variant="outline"
-            className={cn(
-              "h-9 relative flex items-center justify-start gap-1 sm:gap-2 px-2 sm:px-3 transition-colors w-full"
-            )}
-          >
-            <SearchIcon className="h-4 w-4 flex-shrink-0 opacity-50" />
-            <h2 className="text-sm text-muted-foreground truncate mt-1 ">Search Library...</h2>
-          </Button>
-        ) : (
-          <Button variant="ghost" className="h-8 w-8">
-            <SearchIcon className="flex-shrink-0 opacity-50" />
-          </Button>
-        )}
-      </DrawerDialogTrigger>
+      <DrawerDialogTrigger asChild>{trigger}</DrawerDialogTrigger>
       <DrawerDialogContent className={cn("p-4", isDesktop ? "" : "h-full")}>
         <DrawerDialogHeader hidden>
           <DrawerDialogTitle></DrawerDialogTitle>
@@ -132,37 +105,35 @@ export function Search({
             isDesktop ? "mt-0 max-h-[600px]" : "mt-4 max-h-[calc(100vh-200px)]"
           )}
         >
-          {Object.entries(groupedFanfics).map(([sectionId, { section, fanfics }]) => (
+          {Object.entries(groupedFanfics).map(([sectionId, { sectionName, fanfics }]) => (
             <div key={sectionId} className="">
-              <h4 className="text-xs font-medium text-muted-foreground px-2">{section.name}</h4>
+              <h4 className="text-xs font-medium text-muted-foreground px-2">{sectionName}</h4>
               <div className="space-y-1">
                 {fanfics.map((fanfic) => (
                   <Link
                     onClick={() => setIsDrawerOpen(false)}
-                    href={`/library/sections/${fanfic.sections.id}/fanfics/${fanfic.section_fanfics.id}`}
-                    key={fanfic.section_fanfics.id}
+                    href={`/library/sections/${fanfic.sectionId}/fanfics/${fanfic.id}`}
+                    key={fanfic.id}
                     className="block p-3 rounded-lg hover:bg-accent/10 transition-all duration-200 ease-in-out border border-transparent hover:border-border/40"
                   >
                     <div className="flex items-baseline justify-between mb-1">
-                      <h3 className="text-sm font-medium text-foreground truncate">{fanfic.fanfics.title}</h3>
-                      <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">{fanfic.fanfics.author}</span>
+                      <h3 className="text-sm font-medium text-foreground truncate">{fanfic.title}</h3>
+                      <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">{fanfic.author}</span>
                     </div>
 
                     <div className="flex flex-row items-center gap-2 text-xs text-muted-foreground">
                       <div className="flex items-center gap-2 min-w-0">
-                        {fanfic.fanfics.wordCount && (
-                          <span className="flex-shrink-0">{fanfic.fanfics.wordCount.toLocaleString()} words</span>
+                        {fanfic.wordCount && (
+                          <span className="flex-shrink-0">{fanfic.wordCount.toLocaleString()} words</span>
                         )}
-                        {(fanfic.fanfics.completedAt || fanfic.fanfics.updatedAt) && (
+                        {(fanfic.completedAt || fanfic.updatedAt) && (
                           <>
                             <span className="flex-shrink-0">•</span>
-                            {fanfic.fanfics.completedAt && <span className="flex-shrink-0">Complete</span>}
-                            {fanfic.fanfics.completedAt && fanfic.fanfics.updatedAt && (
-                              <span className="flex-shrink-0">•</span>
-                            )}
-                            {fanfic.fanfics.updatedAt && (
+                            {fanfic.completedAt && <span className="flex-shrink-0">Complete</span>}
+                            {fanfic.completedAt && fanfic.updatedAt && <span className="flex-shrink-0">•</span>}
+                            {fanfic.updatedAt && (
                               <span className="truncate min-w-0">
-                                Updated {DateTime.fromJSDate(fanfic.fanfics.updatedAt).toRelative()}
+                                Updated {DateTime.fromJSDate(fanfic.updatedAt).toRelative()}
                               </span>
                             )}
                           </>

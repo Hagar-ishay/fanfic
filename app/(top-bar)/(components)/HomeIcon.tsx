@@ -2,13 +2,11 @@
 
 import { useSidebar } from "@/components/ui/sidebar";
 import Image from "next/image";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import React from "react";
 
 export function HomeIcon() {
-  const isMobile = useIsMobile();
-  const { toggleSidebar } = useSidebar();
+  const { toggleSidebar, isMobile } = useSidebar();
   const width = isMobile ? 50 : 70;
 
   return (

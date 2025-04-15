@@ -1,58 +1,16 @@
 "use client";
 
 import { BlockQuote } from "@/components/base/BlockQuote";
-import { Button } from "@/components/ui/button";
-import { Section, UserFanfic } from "@/db/types";
 import { cn, getFont } from "@/lib/utils";
-import { FanficContextMenu } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficContextMenu";
 import { SummaryContent } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/Summary";
-import { Ellipsis, EllipsisVertical, ExternalLink, Heart } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { FanficStats } from "./FanficStats";
 import { Tags } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/Tags";
 import InputLabels from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/InputLabels";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useOptimistic, useTransition } from "react";
-import { sendKudos } from "@/library/sections/[sectionId]/(server)/kudosAction";
-import { useToast } from "@/hooks/use-toast";
+import { UserFanfic } from "@/db/types";
 
-export default function Fanfic({
-  fanfic,
-  transferableSections,
-}: {
-  fanfic: UserFanfic;
-  transferableSections: Section[];
-}) {
-  const isMobile = useIsMobile();
-  const { toast } = useToast();
-  const [isPending, startTransition] = useTransition();
-  const [optimisticKudos, setOptimisticKudos] = useOptimistic(
-    fanfic.kudos || false,
-    (_, newKudos: boolean) => newKudos
-  );
-
-  const handleKudos = () => {
-    startTransition(async () => {
-      setOptimisticKudos(!optimisticKudos);
-      const result = await sendKudos({
-        externalId: fanfic.externalId,
-        sectionId: fanfic.sectionId,
-        userFanficId: fanfic.id,
-        currentKudos: fanfic.kudos || false,
-      });
-
-      if (!result.success) {
-        toast({
-          title: "Could not leave kudos",
-          description: result.message,
-          variant: "destructive",
-        });
-        // Revert optimistic update on error
-        setOptimisticKudos(fanfic.kudos || false);
-      }
-    });
-  };
-
+export default function Fanfic({ fanfic }: { fanfic: UserFanfic }) {
   return (
     <div className="flex flex-col gap-6 p-3 sm:p-6 mx-auto relative w-full">
       <div className="absolute inset-0 bg-gradient-to-b from-accent/5 via-transparent to-accent/5 pointer-events-none" />
@@ -74,28 +32,6 @@ export default function Fanfic({
                 </Link>
               )}
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={isPending}
-              className="text-muted-foreground hover:text-primary transition-colors"
-              onClick={handleKudos}
-            >
-              <Heart className={cn("h-5 w-5", optimisticKudos && "fill-primary text-primary")} />
-            </Button>
-          </div>
-        </div>
-        <div className="w-12 h-12 flex-shrink-0">
-          <div className={cn("absolute top-2", isMobile ? "right-2" : "right-5")}>
-            <FanficContextMenu
-              fanfic={fanfic}
-              sections={transferableSections}
-              trigger={
-                <Button size="icon" variant="ghost">
-                  {isMobile ? <EllipsisVertical /> : <Ellipsis />}
-                </Button>
-              }
-            />
           </div>
         </div>
       </div>

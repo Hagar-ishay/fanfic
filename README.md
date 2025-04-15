@@ -8,20 +8,19 @@ A modern web application that enhances your fanfiction reading experience by pro
 - Send stories directly to your Kindle or other e-readers
 - Smart chapter tracking - only send unread chapters
 - AI-powered translation capabilities
-- Google authentication via Clerk
+- Google authentication via NextAuth
 - Responsive design for both desktop and mobile
 
 ## Tech Stack
 
 - TypeScript
-- Tailwind CSS + Radix/Shadcn 
+- Tailwind CSS + Radix/Shadcn
 - Framework: React + Next.js 15 App Router
 - State management: Zustand
-- Auth: Clerk
+- Auth: Next-Auth
 - ORM: Drizzle
 - DB Provider: Neon Serverless
 - Hosting: Vercel
-
 
 ## Project Structure
 
@@ -55,7 +54,6 @@ pnpm run dev
 
 4. Open [http://localhost:3000](http://localhost:3000) to view the application
 
-
 ## TODO
 
 ### High Priority
@@ -68,7 +66,6 @@ pnpm run dev
 
 - Add support for fanfiction.net content
 - Implement reading suggestions based on user preferences and history
-- Replace Clerk with NextAuth
 
 ## Legal Note
 

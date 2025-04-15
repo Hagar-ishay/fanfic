@@ -8,9 +8,11 @@ import { sectionFanfics, sections } from "@/db/schema";
 import { NeonQueryResultHKT } from "drizzle-orm/neon-serverless";
 import { PgTransaction } from "drizzle-orm/pg-core";
 import { revalidatePath } from "next/cache";
+import { unstable_cacheLife as cacheLife } from "next/cache";
 
 export const selectOrCreateSections = async (userId: string) => {
   "use cache";
+  cacheLife("default");
   let userSections = await listUserSections(userId);
   if (userSections.length === 0) {
     userSections = await db
@@ -23,20 +25,13 @@ export const selectOrCreateSections = async (userId: string) => {
 
 export const listUserSections = async (userId: string) => {
   "use cache";
+  cacheLife("default");
   return await db.select().from(sections).where(drizzle.eq(sections.userId, userId));
 };
 
-export const insertSection = async ({
-  name,
-  userId,
-  parentId,
-}: {
-  name: string;
-  userId: string;
-  parentId: number | null;
-}) => {
-  const result = await db.insert(sections).values({ name, userId, parentId }).returning({ id: sections.id });
-  parentId ? revalidatePath(`/library/sections/${parentId}`) : revalidatePath("/library");
+export const insertSection = async ({ name, userId }: { name: string; userId: string }) => {
+  const result = await db.insert(sections).values({ name, userId }).returning({ id: sections.id });
+  revalidatePath("/library");
   return result[0].id;
 };
 
@@ -85,6 +80,7 @@ export const transferSection = async (sectionId: number, parentId: number | null
 
 export const getSectionByNameUser = async (userId: string, name: string) => {
   "use cache";
+  cacheLife("default");
   return await db
     .select()
     .from(sections)
@@ -93,17 +89,20 @@ export const getSectionByNameUser = async (userId: string, name: string) => {
 
 export const listChildSections = async (sectionId: number) => {
   "use cache";
+  cacheLife("default");
   return await db.select().from(sections).where(drizzle.eq(sections.parentId, sectionId));
 };
 
 export const getSection = async (sectionId: number) => {
   "use cache";
+  cacheLife("default");
   const section = await db.select().from(sections).where(drizzle.eq(sections.id, sectionId));
   return section ? section[0] : null;
 };
 
 export async function getBreadcrumbs(sectionId: number, displayName: string, parentId: number | null) {
   "use cache";
+  cacheLife("default");
   let breadcrumbs = [
     {
       label: displayName,
@@ -117,5 +116,11 @@ export async function getBreadcrumbs(sectionId: number, displayName: string, par
       breadcrumbs = [...parentBreadcrumbs, ...breadcrumbs];
     }
   }
-  return breadcrumbs;
+  return [
+    {
+      label: "Library",
+      href: "/library",
+    },
+    ...breadcrumbs,
+  ];
 }

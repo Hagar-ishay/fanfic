@@ -1,6 +1,20 @@
-import { clerkMiddleware } from "@clerk/nextjs/server";
+import { auth } from "@/auth";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export default clerkMiddleware();
+export default async function middleware(request: NextRequest) {
+  const session = await auth();
+
+  // Public pages or API routes don't require authentication
+  const isPublicPage = request.nextUrl.pathname === "/signin";
+  const isApiRoute = request.nextUrl.pathname.startsWith("/api");
+
+  if (!session && !isPublicPage && !isApiRoute) {
+    return NextResponse.redirect(new URL("/signin", request.url));
+  }
+
+  return NextResponse.next();
+}
 
 export const config = {
   matcher: [

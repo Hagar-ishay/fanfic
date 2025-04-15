@@ -1,24 +1,28 @@
 import { selectOrCreateSections } from "@/db/sections";
 import { Section } from "@/library/(components)/Section";
-import { currentUser } from "@clerk/nextjs/server";
 import { Metadata } from "next";
 import Link from "next/link";
-import LibraryBreadcrumbs from "@/library/(components)/LibraryBreadcrumbs";
+import { auth } from "@/auth";
+import { Header } from "@/components/base/Header";
+import { ListPlus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AddNewSectionButton } from "@/library/(components)/AddNewSectionButton";
+
 export const metadata: Metadata = {
   title: "Penio Fanfic - Library",
 };
 
 export default async function Page() {
-  const user = await currentUser();
-  if (!user) {
-    return null;
-  }
+  const { user } = (await auth())!;
+
   const sections = await selectOrCreateSections(user.id);
   const topLevelSections = sections.filter((sec) => sec.parentId === null);
 
   return (
     <>
-      <LibraryBreadcrumbs userId={user.id} />
+      <Header segments={[{ label: "Library", href: "/library" }]}>
+        <AddNewSectionButton />
+      </Header>
       <div className="flex flex-col">
         {topLevelSections.map((section) => (
           <Link key={section.id} href={`/library/sections/${section.id}`}>

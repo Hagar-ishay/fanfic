@@ -1,19 +1,15 @@
 import { Card } from "@/components/ui/card";
 import { getSavedSearches } from "@/db/savedSearches";
-import { currentUser } from "@clerk/nextjs/server";
+import { auth } from "@/auth";
 import { Metadata } from "next";
 import { SavedSearches } from "@/explore/(components)/SavedSearches";
 
 export const metadata: Metadata = {
-  title: "Penio Fanfic - Library",
+  title: "Penio Fanfic - Explore",
 };
 
 export default async function Page() {
-  const user = await currentUser();
-
-  if (!user) {
-    return null;
-  }
+  const { user } = (await auth())!;
 
   const savedSearches = await getSavedSearches(user.id);
 

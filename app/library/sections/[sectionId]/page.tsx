@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { Section } from "@/library/(components)/Section";
 import { notFound } from "next/navigation";
-import { getSection, listUserSections } from "@/db/sections";
+import { getBreadcrumbs, getSection, listUserSections } from "@/db/sections";
 import { selectSectionFanfic } from "@/db/fanfics";
-import { currentUser } from "@clerk/nextjs/server";
 import FanficList from "@/library/sections/[sectionId]/(components)/FanficList";
-import LibraryBreadcrumbs from "@/library/(components)/LibraryBreadcrumbs";
 import { LibraryHelp } from "@/library/(components)/LibraryHelp";
-
+import { auth } from "@/auth";
+import { Header } from "@/components/base/Header";
+import { AddFanfic } from "@/library/sections/[sectionId]/(components)/AddFanfic";
 export const maxDuration = 59;
 
 type Props = {
@@ -33,13 +33,21 @@ export async function generateMetadata({ params }: Props) {
 export default async function Page({ params }: Props) {
   const resolvedParams = await params;
   const sectionId = parseInt(resolvedParams.sectionId);
-  const user = await currentUser();
+  const { user } = (await auth())!;
 
   if (!user) {
     return notFound();
   }
 
-  const [userSections, fanfics] = await Promise.all([listUserSections(user.id), selectSectionFanfic([sectionId])]);
+  const [userSections, fanfics, currentSection] = await Promise.all([
+    listUserSections(user.id),
+    selectSectionFanfic([sectionId]),
+    getSection(sectionId),
+  ]);
+
+  if (!currentSection) {
+    return notFound();
+  }
 
   const childSections = userSections.filter((section) => section.parentId === sectionId);
 
@@ -47,9 +55,13 @@ export default async function Page({ params }: Props) {
     return section.id !== sectionId && section.parentId !== sectionId;
   });
 
+  const segments = await getBreadcrumbs(sectionId, currentSection.name, currentSection.parentId);
+
   return (
     <>
-      <LibraryBreadcrumbs userId={user.id} sectionId={sectionId} />
+      <Header segments={segments}>
+        <AddFanfic sectionId={sectionId} userId={user.id} />
+      </Header>
       <div className="flex flex-col">
         {childSections.map((child) => (
           <Link key={child.id} href={`/library/sections/${child.id}`}>

@@ -22,18 +22,16 @@ import { autocomplete } from "@/explore/(server)/autocomplete";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AutoCompleteType } from "@/lib/ao3Client";
 import { cn } from "@/lib/utils";
-import { useUser } from "@clerk/nextjs";
 import React from "react";
-
-export function SearchBuilder({
-  trigger,
-  savedSearch,
-}: {
-  trigger: React.ReactNode;
-  savedSearch?: SavedSearch;
-}) {
+import { useSession } from "next-auth/react";
+export function SearchBuilder({ trigger, savedSearch }: { trigger: React.ReactNode; savedSearch?: SavedSearch }) {
   const isMobile = useIsMobile();
-  const { user } = useUser();
+  const { data: session } = useSession({ required: true });
+  const user = session?.user;
+
+  if (!user) {
+    return null;
+  }
 
   const getAutoCompleteTags = async (value: string, name: string) => {
     const result = await autocomplete(name, value);
@@ -43,25 +41,16 @@ export function SearchBuilder({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const entries = Object.fromEntries(formData.entries()) as Record<
-      string,
-      string
-    >;
+    const entries = Object.fromEntries(formData.entries()) as Record<string, string>;
     const { SearchName, ...filters } = entries;
 
-    const formattedSearch = Object.entries(filters).reduce(
-      (acc, [key, value]) => {
-        const parsedValue = JSON.parse(value);
-        if (
-          parsedValue &&
-          (!Array.isArray(parsedValue) || parsedValue.length > 0)
-        ) {
-          return { ...acc, [key]: parsedValue };
-        }
-        return acc;
-      },
-      {}
-    );
+    const formattedSearch = Object.entries(filters).reduce((acc, [key, value]) => {
+      const parsedValue = JSON.parse(value);
+      if (parsedValue && (!Array.isArray(parsedValue) || parsedValue.length > 0)) {
+        return { ...acc, [key]: parsedValue };
+      }
+      return acc;
+    }, {});
 
     await saveSearch({
       ...(savedSearch?.id ? { id: savedSearch.id } : {}),
@@ -86,12 +75,7 @@ export function SearchBuilder({
   return (
     <DrawerDialog>
       <DrawerDialogTrigger asChild>{trigger}</DrawerDialogTrigger>
-      <DrawerDialogContent
-        className={cn(
-          "flex flex-col",
-          isMobile ? "h-[100dvh]" : "h-[85vh] max-h-[850px]"
-        )}
-      >
+      <DrawerDialogContent className={cn("flex flex-col", isMobile ? "h-[100dvh]" : "h-[85vh] max-h-[850px]")}>
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
           <DrawerDialogHeader className="flex flex-col gap-2 flex-shrink-0">
             <DrawerDialogTitle>
