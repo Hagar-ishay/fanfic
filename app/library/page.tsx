@@ -14,9 +14,8 @@ export const metadata: Metadata = {
   title: "Penio Fanfic - Library",
 };
 
-async function LibraryContent() {
+export default async function Page() {
   const session = await auth();
-  const userFanfics = await listUserFanfics(session?.user?.id!);
 
   const { user } = (await auth())!;
 
@@ -39,13 +38,5 @@ async function LibraryContent() {
         ))}
       </div>
     </>
-  );
-}
-
-export default function LibraryPage() {
-  return (
-    <Suspense fallback={<div>Loading library...</div>}>
-      <LibraryContent />
-    </Suspense>
   );
 }

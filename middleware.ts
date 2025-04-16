@@ -13,6 +13,10 @@ export default async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/signin", request.url));
   }
 
+  if (session && isPublicPage) {
+    return NextResponse.redirect(new URL("/library", request.url));
+  }
+
   return NextResponse.next();
 }
 

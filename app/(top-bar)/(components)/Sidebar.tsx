@@ -20,6 +20,7 @@ import { signOut, useSession } from "next-auth/react";
 import { UserFanfic } from "@/db/types";
 import { LibraryHelp } from "@/library/(components)/LibraryHelp";
 import { Help } from "@/(top-bar)/(components)/Help";
+import { redirect } from "next/navigation";
 
 const ITEMS = [
   {
@@ -52,6 +53,10 @@ const ITEMS = [
 export function AppSidebar({ userFanfics }: { userFanfics: UserFanfic[] }) {
   const { data: session } = useSession();
   const { isMobile } = useSidebar();
+
+  if (!session) {
+    return null;
+  }
 
   return (
     <Sidebar side="left" className="h-screen" collapsible="icon">

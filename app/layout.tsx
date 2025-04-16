@@ -8,6 +8,7 @@ import { AuthProvider } from "./providers";
 import { SidebarWrapper } from "@/(top-bar)/(components)/SidebarWrapper";
 
 import "./globals.css";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Fanfic Penio",
@@ -22,7 +23,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <SidebarProvider defaultOpen={false}>
               {
                 <>
-                  {/* <SidebarWrapper /> */}
+                  <Suspense>
+                    <SidebarWrapper />
+                  </Suspense>
                   <div className="flex flex-col h-screen w-screen">
                     <main>{children}</main>
                     <Toaster />
