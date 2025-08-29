@@ -16,9 +16,13 @@ export default [
   prettier,
   {
     rules: {
-      // Add custom rules if necessary
-      "react/react-in-jsx-scope": "off", // React is not needed in scope with Next.js
-      "no-console": "warn", // Optional: Warn on console usage
+      "react/react-in-jsx-scope": "off",
+      "no-console": "warn",
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-unsafe-assignment": "error",
+      "@typescript-eslint/no-unsafe-member-access": "error",
+      "@typescript-eslint/no-unsafe-call": "error",
+      "@typescript-eslint/no-unsafe-return": "error",
     },
   },
 ];

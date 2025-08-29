@@ -4,9 +4,16 @@ import { ContextMenu } from "@/components/base/ContextMenu";
 import { deleteSectionFanfic, tranferSectionFanfic } from "@/db/fanfics";
 import type { Section, UserFanfic } from "@/db/types";
 import { useToast } from "@/hooks/use-toast";
-import { kindleSender } from "@/library/sections/[sectionId]/(server)/kindleSender";
+import { emailSender } from "@/library/sections/[sectionId]/(server)/email";
+import { syncToCloud } from "@/lib/cloudSync";
 import { FanficHeader } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficHeader";
-import { CircleChevronRight, SendHorizontal, Trash2, RefreshCw } from "lucide-react";
+import {
+  CircleChevronRight,
+  SendHorizontal,
+  Trash2,
+  RefreshCw,
+  Cloud,
+} from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { checkAndUpdateFanfic } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(server)/updateFanfic";
 
@@ -26,20 +33,44 @@ export function FanficContextMenu({
   const latestFinalChapter = Number(fanfic.chapterCount?.split("/")[0]);
 
   const handleSend = async (sendLatestChapters?: boolean) => {
-    const result = await kindleSender({
+    const result = await emailSender({
       fanfic,
       sendLatestChapters: sendLatestChapters || false,
       latestFinalChapter,
     });
     if (result.success) {
       toast({
-        title: "Send to Kindle",
+        title: "Send to Email",
         description: `Sent ${fanfic.title} successfully!`,
       });
     } else {
       toast({
-        title: "Send to Kindle",
+        title: "Send to Email",
         description: `Failed to send ${fanfic.title}: ${result.message}`,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCloudSync = async () => {
+    try {
+      const result = await syncToCloud(
+        fanfic.userId,
+        fanfic.sectionId,
+        fanfic.title
+      );
+
+      toast({
+        title: "Cloud Sync",
+        description: result.success
+          ? `Synced ${fanfic.title} to cloud successfully!`
+          : `Failed to sync ${fanfic.title}: ${result.message}`,
+        variant: result.success ? "default" : "destructive",
+      });
+    } catch (error) {
+      toast({
+        title: "Cloud Sync",
+        description: `Failed to sync ${fanfic.title}`,
         variant: "destructive",
       });
     }
@@ -95,8 +126,13 @@ export function FanficContextMenu({
     },
     {
       icon: <SendHorizontal size={17} />,
-      name: "Send to Kindle",
+      name: "Send to Email",
       subItems: subOptions,
+    },
+    {
+      icon: <Cloud size={17} />,
+      name: "Sync to Cloud",
+      action: () => handleCloudSync(),
     },
     {
       icon: <Trash2 size={17} />,
@@ -114,7 +150,11 @@ export function FanficContextMenu({
 
   return (
     <div>
-      <ContextMenu options={options} trigger={trigger} header={<FanficHeader fanfic={fanfic} />} />
+      <ContextMenu
+        options={options}
+        trigger={trigger}
+        header={<FanficHeader fanfic={fanfic} />}
+      />
     </div>
   );
 }

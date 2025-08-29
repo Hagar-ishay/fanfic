@@ -23,7 +23,7 @@ export function SectionContextMenu({
   const options = [
     {
       icon: <Trash2 size={17} />,
-      name: "Delete Section",
+      name: "Delete Section", 
       confirmationHeader: (
         <div className="flex flex-col gap-2">
           Are you sure you want to delete section {section.name} ?

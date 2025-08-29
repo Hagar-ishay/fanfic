@@ -1,4 +1,4 @@
-import { credentials, fanfics, savedSearches, sectionFanfics, sections } from "@/db/schema";
+import { credentials, fanfics, savedSearches, sectionFanfics, sections, integrations, settings, fanficIntegrations } from "@/db/schema";
 
 export type NewFanfic = typeof fanfics.$inferInsert;
 export type Fanfic = typeof fanfics.$inferSelect;
@@ -9,6 +9,16 @@ export interface Tags {
   [key: string]: string[];
 }
 export type Section = typeof sections.$inferSelect;
+export type NewSection = typeof sections.$inferInsert;
+
+export type Integration = typeof integrations.$inferSelect;
+export type NewIntegration = typeof integrations.$inferInsert;
+
+export type FanficIntegration = typeof fanficIntegrations.$inferSelect;
+export type NewFanficIntegration = typeof fanficIntegrations.$inferInsert;
+
+export type Settings = typeof settings.$inferSelect;
+export type NewSettings = typeof settings.$inferInsert;
 
 export type Credentials = typeof credentials.$inferSelect;
 

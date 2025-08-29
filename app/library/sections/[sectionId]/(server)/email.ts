@@ -25,7 +25,7 @@ interface Chapter {
   id: string;
 }
 
-export async function kindleSender({
+export async function emailSender({
   fanfic,
   sendLatestChapters,
   latestFinalChapter,
@@ -36,9 +36,9 @@ export async function kindleSender({
 }) {
   const settings = await getSettings(fanfic.userId);
   const translationLanguage = settings.languageCode;
-  const kindleEmail = settings.kindleEmail;
-  if (!kindleEmail) {
-    throw new Error("Kindle email not found");
+  const readerEmail = settings.readerEmail;
+  if (!readerEmail) {
+    throw new Error("Email not found");
   }
   const startingChapter = fanfic.latestStartingChapter
     ? fanfic.latestStartingChapter + 1
@@ -91,13 +91,12 @@ export async function kindleSender({
       throw new Error("Downloaded file is empty.");
     }
 
-    await sendToKindle(
-      kindleEmail,
+    await send(
+      readerEmail,
       title,
       downloadPath.replace("/tmp/", "").trim(),
       downloadPath
     );
-    console.log("Sent to Kindle:", title);
     await updateSectionFanfic(fanfic.sectionId, fanfic.id, {
       lastSent: new Date(Date.now()),
       latestStartingChapter: latestFinalChapter,
@@ -105,7 +104,7 @@ export async function kindleSender({
 
     return { success: true, message: "" };
   } catch (error) {
-    console.error("Error sending to Kindle:", error);
+    console.error("Error sending email:", error);
     return { success: false, message: errorMessage(error) };
   } finally {
     if (fs.existsSync(downloadPath)) {
@@ -194,8 +193,8 @@ async function buildNewEpub(newEpub: EpubGen.Options, downloadPath: string) {
     });
 }
 
-export async function sendToKindle(
-  kindleEmail: string,
+export async function send(
+  readerEmail: string,
   title: string,
   fileName: string,
   downloadPath: string
@@ -210,7 +209,7 @@ export async function sendToKindle(
 
   const mailOptions = {
     from: ENV.GMAIL_EMAIL,
-    to: kindleEmail,
+    to: readerEmail,
     subject: title,
     text: "Please find the attached book.",
     attachments: [

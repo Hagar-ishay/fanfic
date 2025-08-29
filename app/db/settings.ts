@@ -3,7 +3,8 @@
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "./db";
-import { settings } from "./schema";
+import { settings, integrations } from "./schema";
+import type { NewSettings } from "./types";
 
 export async function getSettings(userId: string) {
   "use cache";
@@ -11,26 +12,23 @@ export async function getSettings(userId: string) {
 
   return (
     userSettings[0] || {
-      kindleEmail: "",
+      readerEmail: "",
+      activeIntegrationId: null,
       languageCode: "en",
       enableTranslation: false,
     }
   );
 }
 
-interface SettingsData {
-  userId: string;
-  kindleEmail: string | null;
-  languageCode: string;
-  enableTranslation: boolean;
-}
+type SettingsData = Omit<NewSettings, 'id' | 'creationTime' | 'updateTime'>;
 
 export async function createSettings(data: SettingsData) {
   return db
     .insert(settings)
     .values({
       userId: data.userId,
-      kindleEmail: data.kindleEmail,
+      readerEmail: data.readerEmail,
+      activeIntegrationId: data.activeIntegrationId,
       languageCode: data.languageCode,
       enableTranslation: data.enableTranslation,
     })
@@ -38,14 +36,17 @@ export async function createSettings(data: SettingsData) {
 }
 
 export async function updateSettings(id: number, data: SettingsData) {
+  const updateData: Partial<NewSettings> = {
+    readerEmail: data.readerEmail,
+    activeIntegrationId: data.activeIntegrationId,
+    languageCode: data.languageCode,
+    enableTranslation: data.enableTranslation,
+    updateTime: new Date(),
+  };
+
   return db
     .update(settings)
-    .set({
-      kindleEmail: data.kindleEmail,
-      languageCode: data.languageCode,
-      enableTranslation: data.enableTranslation,
-      updateTime: new Date(),
-    })
+    .set(updateData)
     .where(eq(settings.id, id))
     .returning();
 }

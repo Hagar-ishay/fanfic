@@ -8,6 +8,7 @@ import { wrapper } from "axios-cookiejar-support";
 import { CookieJar, Cookie } from "tough-cookie";
 import { Credentials } from "@/db/types";
 import { getCredentials, refreshSession } from "@/db/credentials";
+import * as cheerio from "cheerio";
 
 export async function getAo3Client() {
   const credentials = await getCredentials("AO3");
@@ -206,5 +207,150 @@ class AO3Client {
       "kudo[commentable_type]": "Work",
     };
     return this.request({ method: "POST", url, data: body });
+  }
+
+  public async search(params: Record<string, any>): Promise<{
+    results: any[];
+    totalPages: number;
+    currentPage: number;
+    totalResults: number;
+  }> {
+    // Build search URL
+    const searchUrl = new URL(`${AO3_LINK}/works/search`);
+    
+    // Add parameters to URL
+    for (const [key, value] of Object.entries(params)) {
+      if (value !== undefined && value !== null && value !== '') {
+        searchUrl.searchParams.append(`work_search[${key}]`, value.toString());
+      }
+    }
+
+    const response = await this.request<string>({
+      method: "GET",
+      url: searchUrl.toString(),
+    });
+
+    return this.parseSearchResults(response, params.page || 1);
+  }
+
+  private parseSearchResults(html: string, currentPage: number): {
+    results: any[];
+    totalPages: number;
+    currentPage: number;
+    totalResults: number;
+  } {
+    const $ = cheerio.load(html);
+    
+    const results: any[] = [];
+    
+    // Parse search results
+    $("#main ol.work li.work").each((_, element) => {
+      const $work = $(element);
+      
+      // Extract work ID from the blurb
+      const workId = $work.attr('id')?.replace('work_', '') || '';
+      
+      // Extract basic information
+      const title = $work.find('h4.heading a:first').text().trim();
+      const author = $work.find('h4.heading a[rel="author"]').text().trim();
+      const authorUrl = `${AO3_LINK}${$work.find('h4.heading a[rel="author"]').attr('href') || ''}`;
+      
+      // Extract summary
+      const summary = $work.find('blockquote.userstuff').text().trim();
+      
+      // Extract tags
+      const tags: { [category: string]: string[] } = {};
+      $work.find('ul.tags li').each((_, tagElement) => {
+        const $tag = $(tagElement);
+        const className = $tag.attr('class') || '';
+        const tagText = $tag.find('a').text().trim();
+        
+        if (className.includes('fandom')) {
+          tags.fandoms = tags.fandoms || [];
+          tags.fandoms.push(tagText);
+        } else if (className.includes('relationship')) {
+          tags.relationships = tags.relationships || [];
+          tags.relationships.push(tagText);
+        } else if (className.includes('character')) {
+          tags.characters = tags.characters || [];
+          tags.characters.push(tagText);
+        } else if (className.includes('freeform')) {
+          tags.additional = tags.additional || [];
+          tags.additional.push(tagText);
+        }
+      });
+      
+      // Extract metadata
+      const language = $work.find('dd.language').text().trim();
+      const wordsText = $work.find('dd.words').text().replace(/,/g, '');
+      const words = parseInt(wordsText) || 0;
+      const chapters = $work.find('dd.chapters').text().trim();
+      
+      // Extract stats
+      const kudosText = $work.find('dd.kudos a').text().trim();
+      const kudos = parseInt(kudosText) || 0;
+      
+      const commentsText = $work.find('dd.comments a').text().trim();
+      const comments = parseInt(commentsText) || 0;
+      
+      const bookmarksText = $work.find('dd.bookmarks a').text().trim();
+      const bookmarks = parseInt(bookmarksText) || 0;
+      
+      const hitsText = $work.find('dd.hits').text().trim();
+      const hits = parseInt(hitsText) || 0;
+      
+      // Extract dates
+      const publishedText = $work.find('p.datetime').first().text();
+      const updatedText = $work.find('p.datetime').last().text();
+      
+      const published = new Date(publishedText);
+      const updated = new Date(updatedText);
+      
+      // Determine status
+      const isComplete = $work.find('span.complete-yes').length > 0;
+      const status = isComplete ? 'complete' : 'in-progress';
+      
+      // Extract rating and category
+      const rating = $work.find('span.rating').attr('title') || '';
+      const category = $work.find('span.category').attr('title') || '';
+      
+      const sourceUrl = `${AO3_LINK}/works/${workId}`;
+      
+      results.push({
+        workId,
+        title,
+        author,
+        authorUrl,
+        summary,
+        tags,
+        rating,
+        category,
+        status,
+        chapters,
+        words,
+        kudos,
+        comments,
+        bookmarks,
+        hits,
+        published,
+        updated,
+        language,
+        sourceUrl,
+      });
+    });
+    
+    // Extract pagination info
+    const totalResultsText = $('h2.heading').first().text();
+    const totalResultsMatch = totalResultsText.match(/(\d+)/);
+    const totalResults = totalResultsMatch ? parseInt(totalResultsMatch[1]) : results.length;
+    
+    const totalPages = Math.ceil(totalResults / 20); // AO3 shows 20 results per page
+    
+    return {
+      results,
+      totalPages,
+      currentPage,
+      totalResults,
+    };
   }
 }
