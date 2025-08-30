@@ -1,27 +1,21 @@
 "use client";
 
-import { HomeIcon } from "@/(top-bar)/(components)/HomeIcon";
 import { Breadcrumbs } from "@/components/base/Breadcrumbs";
-import { cn } from "@/lib/utils";
-import { useSidebar } from "@/components/ui/sidebar";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useTopbar } from "./TopbarContext";
+import { Separator } from "@/components/ui/separator";
 
 export function GlobalTopbar() {
-  const { isMobile } = useSidebar();
   const { segments, actions } = useTopbar();
 
   return (
-    <div
-      className={cn(
-        "flex justify-between items-center sticky top-0 bg-gradient-to-r from-background/95 to-muted/95 backdrop-blur-md z-40 border-b border-border/50 shadow-md",
-        isMobile ? "px-3 py-2" : "px-4 py-1.5"
-      )}
-    >
-      <div className="flex flex-row items-center gap-3">
-        <HomeIcon />
+    <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+      <div className="flex items-center gap-2 px-4">
+        <SidebarTrigger className="-ml-1" />
+        <Separator orientation="vertical" className="mr-2 h-4" />
         {segments.length > 0 && <Breadcrumbs segments={segments} />}
       </div>
-      <div className="flex flex-row items-center gap-2">{actions}</div>
-    </div>
+      <div className="ml-auto flex items-center gap-2 px-4">{actions}</div>
+    </header>
   );
 }

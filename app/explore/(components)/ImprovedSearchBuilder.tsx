@@ -3,7 +3,13 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Card } from "@/components/ui/card";
 import { MultiSelect } from "@/components/base/MultiSelect";
@@ -21,22 +27,51 @@ interface ImprovedSearchBuilderProps {
 
 interface SearchFilter {
   id: string;
-  type: 'rating' | 'category' | 'complete' | 'sort_column' | 'fandom' | 'character' | 'relationship' | 'tag' | 'query';
+  type:
+    | "rating"
+    | "category"
+    | "complete"
+    | "sort_column"
+    | "fandom"
+    | "character"
+    | "relationship"
+    | "tag"
+    | "query";
   label: string;
   value: any;
   excluded?: boolean;
 }
 
 const filterOptions = [
-  { type: 'query' as const, label: 'General Search', placeholder: 'Enter search terms...' },
-  { type: 'fandom' as const, label: 'Fandom', placeholder: 'Search fandoms...' },
-  { type: 'character' as const, label: 'Character', placeholder: 'Search characters...' },
-  { type: 'relationship' as const, label: 'Relationship', placeholder: 'Search relationships...' },
-  { type: 'tag' as const, label: 'Additional Tags', placeholder: 'Search tags...' },
-  { type: 'rating' as const, label: 'Rating' },
-  { type: 'category' as const, label: 'Category' },
-  { type: 'complete' as const, label: 'Status' },
-  { type: 'sort_column' as const, label: 'Sort By' },
+  {
+    type: "query" as const,
+    label: "General Search",
+    placeholder: "Enter search terms...",
+  },
+  {
+    type: "fandom" as const,
+    label: "Fandom",
+    placeholder: "Search fandoms...",
+  },
+  {
+    type: "character" as const,
+    label: "Character",
+    placeholder: "Search characters...",
+  },
+  {
+    type: "relationship" as const,
+    label: "Relationship",
+    placeholder: "Search relationships...",
+  },
+  {
+    type: "tag" as const,
+    label: "Additional Tags",
+    placeholder: "Search tags...",
+  },
+  { type: "rating" as const, label: "Rating" },
+  { type: "category" as const, label: "Category" },
+  { type: "complete" as const, label: "Status" },
+  { type: "sort_column" as const, label: "Sort By" },
 ];
 
 const staticOptions = {
@@ -69,7 +104,11 @@ const staticOptions = {
   ],
 };
 
-export function ImprovedSearchBuilder({ onSearch, onSaveSearch, isLoading = false }: ImprovedSearchBuilderProps) {
+export function ImprovedSearchBuilder({
+  onSearch,
+  onSaveSearch,
+  isLoading = false,
+}: ImprovedSearchBuilderProps) {
   const [filters, setFilters] = useState<SearchFilter[]>([]);
   const [searchName, setSearchName] = useState("");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
@@ -79,62 +118,73 @@ export function ImprovedSearchBuilder({ onSearch, onSaveSearch, isLoading = fals
   React.useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 640);
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const getAutoCompleteTags = useCallback(async (value: string, name: string) => {
-    try {
-      const result = await autocomplete(name, value);
-      return result.map((tag) => ({ id: tag, name: tag }));
-    } catch (error) {
-      console.error("Autocomplete error:", error);
-      return [];
-    }
-  }, []);
+  const getAutoCompleteTags = useCallback(
+    async (value: string, name: string) => {
+      try {
+        const result = await autocomplete(name, value);
+        return result.map((tag) => ({ id: tag, name: tag }));
+      } catch (error) {
+        logger.error("Autocomplete error:", error);
+        return [];
+      }
+    },
+    []
+  );
 
-  const addFilter = (type: SearchFilter['type']) => {
+  const addFilter = (type: SearchFilter["type"]) => {
     const newFilter: SearchFilter = {
       id: Math.random().toString(36).substr(2, 9),
       type,
-      label: filterOptions.find(opt => opt.type === type)?.label || type,
-      value: type === 'query' ? '' : null,
+      label: filterOptions.find((opt) => opt.type === type)?.label || type,
+      value: type === "query" ? "" : null,
     };
-    setFilters(prev => [...prev, newFilter]);
+    setFilters((prev) => [...prev, newFilter]);
   };
 
   const updateFilter = (id: string, updates: Partial<SearchFilter>) => {
-    setFilters(prev => prev.map(filter => 
-      filter.id === id ? { ...filter, ...updates } : filter
-    ));
+    setFilters((prev) =>
+      prev.map((filter) =>
+        filter.id === id ? { ...filter, ...updates } : filter
+      )
+    );
   };
 
   const removeFilter = (id: string) => {
-    setFilters(prev => prev.filter(filter => filter.id !== id));
+    setFilters((prev) => prev.filter((filter) => filter.id !== id));
   };
 
   const toggleExclude = (id: string) => {
-    setFilters(prev => prev.map(filter => 
-      filter.id === id ? { ...filter, excluded: !filter.excluded } : filter
-    ));
+    setFilters((prev) =>
+      prev.map((filter) =>
+        filter.id === id ? { ...filter, excluded: !filter.excluded } : filter
+      )
+    );
   };
 
   const executeSearch = () => {
     const searchParams: SavedSearchSearch = {};
-    
-    filters.forEach(filter => {
-      if (filter.value && 
-          (typeof filter.value === 'string' ? filter.value.trim() : true) &&
-          (!Array.isArray(filter.value) || filter.value.length > 0)) {
-        
+
+    filters.forEach((filter) => {
+      if (
+        filter.value &&
+        (typeof filter.value === "string" ? filter.value.trim() : true) &&
+        (!Array.isArray(filter.value) || filter.value.length > 0)
+      ) {
         const key = filter.excluded ? `exclude_${filter.type}` : filter.type;
-        
+
         if (Array.isArray(filter.value)) {
           searchParams[key] = filter.value;
-        } else if (typeof filter.value === 'object') {
+        } else if (typeof filter.value === "object") {
           searchParams[key] = filter.value;
         } else {
-          searchParams[key] = { id: filter.value.toString(), name: filter.value.toString() };
+          searchParams[key] = {
+            id: filter.value.toString(),
+            name: filter.value.toString(),
+          };
         }
       }
     });
@@ -144,21 +194,25 @@ export function ImprovedSearchBuilder({ onSearch, onSaveSearch, isLoading = fals
 
   const saveSearch = () => {
     if (!searchName.trim() || !onSaveSearch) return;
-    
+
     const searchParams: SavedSearchSearch = {};
-    filters.forEach(filter => {
-      if (filter.value && 
-          (typeof filter.value === 'string' ? filter.value.trim() : true) &&
-          (!Array.isArray(filter.value) || filter.value.length > 0)) {
-        
+    filters.forEach((filter) => {
+      if (
+        filter.value &&
+        (typeof filter.value === "string" ? filter.value.trim() : true) &&
+        (!Array.isArray(filter.value) || filter.value.length > 0)
+      ) {
         const key = filter.excluded ? `exclude_${filter.type}` : filter.type;
-        
+
         if (Array.isArray(filter.value)) {
           searchParams[key] = filter.value;
-        } else if (typeof filter.value === 'object') {
+        } else if (typeof filter.value === "object") {
           searchParams[key] = filter.value;
         } else {
-          searchParams[key] = { id: filter.value.toString(), name: filter.value.toString() };
+          searchParams[key] = {
+            id: filter.value.toString(),
+            name: filter.value.toString(),
+          };
         }
       }
     });
@@ -169,20 +223,20 @@ export function ImprovedSearchBuilder({ onSearch, onSaveSearch, isLoading = fals
   };
 
   const renderFilterInput = (filter: SearchFilter) => {
-    const filterOption = filterOptions.find(opt => opt.type === filter.type);
-    
-    if (filter.type === 'query') {
+    const filterOption = filterOptions.find((opt) => opt.type === filter.type);
+
+    if (filter.type === "query") {
       return (
         <Input
           placeholder={filterOption?.placeholder}
-          value={filter.value || ''}
+          value={filter.value || ""}
           onChange={(e) => updateFilter(filter.id, { value: e.target.value })}
           className="flex-1"
         />
       );
     }
 
-    if (['fandom', 'character', 'relationship', 'tag'].includes(filter.type)) {
+    if (["fandom", "character", "relationship", "tag"].includes(filter.type)) {
       return (
         <div className="flex-1">
           <MultiSelect
@@ -202,14 +256,18 @@ export function ImprovedSearchBuilder({ onSearch, onSaveSearch, isLoading = fals
     if (options) {
       return (
         <Select
-          value={filter.value?.id || filter.value || ''}
+          value={filter.value?.id || filter.value || ""}
           onValueChange={(value) => {
-            const option = options.find(opt => opt.id === value);
-            updateFilter(filter.id, { value: option ? { id: option.id, name: option.name } : null });
+            const option = options.find((opt) => opt.id === value);
+            updateFilter(filter.id, {
+              value: option ? { id: option.id, name: option.name } : null,
+            });
           }}
         >
           <SelectTrigger className="flex-1">
-            <SelectValue placeholder={`Select ${filter.label.toLowerCase()}...`} />
+            <SelectValue
+              placeholder={`Select ${filter.label.toLowerCase()}...`}
+            />
           </SelectTrigger>
           <SelectContent>
             {options.map((option) => (
@@ -249,7 +307,13 @@ export function ImprovedSearchBuilder({ onSearch, onSaveSearch, isLoading = fals
               className="flex-1 sm:flex-none"
             >
               <Search className="h-4 w-4 mr-1 sm:mr-2" />
-              {isLoading ? (isMobile ? "Searching..." : "Searching...") : (isMobile ? "Search" : "Search")}
+              {isLoading
+                ? isMobile
+                  ? "Searching..."
+                  : "Searching..."
+                : isMobile
+                  ? "Search"
+                  : "Search"}
             </Button>
           </div>
         </div>
@@ -289,18 +353,24 @@ export function ImprovedSearchBuilder({ onSearch, onSaveSearch, isLoading = fals
         {filters.length > 0 && (
           <div className="space-y-3">
             {filters.map((filter) => (
-              <div key={filter.id} className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 rounded-md border bg-background/50">
-                <Badge variant={filter.excluded ? "destructive" : "secondary"} className="shrink-0 w-fit">
+              <div
+                key={filter.id}
+                className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 rounded-md border bg-background/50"
+              >
+                <Badge
+                  variant={filter.excluded ? "destructive" : "secondary"}
+                  className="shrink-0 w-fit"
+                >
                   {filter.excluded && "NOT "}
                   {filter.label}
                 </Badge>
-                
-                <div className="flex-1">
-                  {renderFilterInput(filter)}
-                </div>
-                
+
+                <div className="flex-1">{renderFilterInput(filter)}</div>
+
                 <div className="flex gap-1 justify-end">
-                  {['fandom', 'character', 'relationship', 'tag'].includes(filter.type) && (
+                  {["fandom", "character", "relationship", "tag"].includes(
+                    filter.type
+                  ) && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -336,7 +406,13 @@ export function ImprovedSearchBuilder({ onSearch, onSaveSearch, isLoading = fals
                 variant="outline"
                 size="sm"
                 onClick={() => addFilter(option.type)}
-                disabled={filters.some(f => f.type === option.type && !['fandom', 'character', 'relationship', 'tag'].includes(option.type))}
+                disabled={filters.some(
+                  (f) =>
+                    f.type === option.type &&
+                    !["fandom", "character", "relationship", "tag"].includes(
+                      option.type
+                    )
+                )}
                 className="text-xs justify-start sm:justify-center"
               >
                 <Plus className="h-3 w-3 mr-1" />

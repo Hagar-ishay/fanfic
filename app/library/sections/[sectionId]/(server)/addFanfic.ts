@@ -1,21 +1,37 @@
 "use server";
 
 import { VALID_AO3_URLS } from "@/consts";
-import { getFanficByExternalId, insertFanfic, insertSectionFanfic } from "@/db/fanfics";
+import {
+  getFanficByExternalId,
+  insertFanfic,
+  insertSectionFanfic,
+} from "@/db/fanfics";
 import { getSection } from "@/db/sections";
 import { getAo3Client } from "@/lib/ao3Client";
 import { htmlParser } from "@/lib/htmlParser";
 import { errorMessage } from "@/lib/utils";
+import logger from "@/logger";
 
-export async function addFanfic(sectionId: number, userId: string, fanficUrl: string) {
+export async function addFanfic(
+  sectionId: number,
+  userId: string,
+  fanficUrl: string
+) {
   const ao3Url = VALID_AO3_URLS.find((url) => fanficUrl.startsWith(url));
   if (!ao3Url) {
-    return { success: false, message: "Invalid URL. Please copy a valid AO3 fanfic link" };
+    return {
+      success: false,
+      message: "Invalid URL. Please copy a valid AO3 fanfic link",
+    };
   }
-  const externalId = fanficUrl.toString().replace(`${ao3Url}/works/`, "").split("/")[0] ?? "";
+  const externalId =
+    fanficUrl.toString().replace(`${ao3Url}/works/`, "").split("/")[0] ?? "";
 
   try {
-    const [section, existingFanfic] = await Promise.all([getSection(sectionId), getFanficByExternalId(+externalId)]);
+    const [section, existingFanfic] = await Promise.all([
+      getSection(sectionId),
+      getFanficByExternalId(+externalId),
+    ]);
 
     if (section?.userId !== userId) {
       return { success: false, message: "Invalid section request" };
@@ -37,7 +53,7 @@ export async function addFanfic(sectionId: number, userId: string, fanficUrl: st
     await insertSectionFanfic(sectionId, userId, dbFanficId);
     return { success: true, message: "" };
   } catch (error) {
-    console.log({ error });
+    logger.info({ error });
     let err = errorMessage(error);
     if (err.includes("duplicate key value violates unique constraint")) {
       err = "This Fic already exists";

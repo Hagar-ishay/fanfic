@@ -1,7 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { UserFanfic } from "@/db/types";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { sendKudos } from "@/library/sections/[sectionId]/(server)/kudosAction";
@@ -9,7 +8,6 @@ import { Heart } from "lucide-react";
 import { useOptimistic, useTransition } from "react";
 
 export function Kudos({ fanfic }: { fanfic: UserFanfic }) {
-  const isMobile = useIsMobile();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
   const [optimisticKudos, setOptimisticKudos] = useOptimistic(

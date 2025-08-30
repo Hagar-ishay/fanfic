@@ -5,23 +5,23 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  useSidebar,
 } from "@/components/ui/sidebar";
 import { HelpCircleIcon, Home, Library, LogOut, Settings } from "lucide-react";
 import { MdOutlineExplore } from "react-icons/md";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
-import { UserFanfic } from "@/db/types";
 import { LibraryHelp } from "@/library/(components)/LibraryHelp";
-import { Help } from "@/(top-bar)/(components)/Help";
 import { useEffect, useState } from "react";
 
-const ITEMS = [
+const PLATFORM_ITEMS = [
   {
     title: "Home",
     url: "/home",
@@ -37,6 +37,9 @@ const ITEMS = [
     url: "/library",
     icon: Library,
   },
+];
+
+const SETTINGS_ITEMS = [
   {
     title: "Settings",
     url: "/settings",
@@ -47,7 +50,6 @@ const ITEMS = [
 export function AppSidebar() {
   const [isMounted, setIsMounted] = useState(false);
   const { data: session, status } = useSession();
-  const { isMobile } = useSidebar();
 
   useEffect(() => {
     setIsMounted(true);
@@ -63,48 +65,86 @@ export function AppSidebar() {
   }
 
   return (
-    <Sidebar
-      side="left"
-      className="h-screen bg-secondary text-secondary-foreground border-r border-secondary/20"
-      collapsible="icon"
-    >
-      <SidebarContent className="bg-secondary">
-        <SidebarHeader className="bg-secondary/95  border-secondary-foreground/10">
-          {isMobile && <HomeIcon />}
+    <Sidebar side="left" variant="inset" collapsible="icon">
+      <SidebarContent>
+        <SidebarHeader>
+          <div className="flex items-center gap-2">
+            <div className="flex aspect-square size-12 items-center justify-center rounded-lg">
+              <span className="text-sm font-semibold">
+                <HomeIcon />
+              </span>
+            </div>
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <span className="truncate font-semibold">Fanfic Penio</span>
+            </div>
+          </div>
         </SidebarHeader>
 
-        <SidebarMenu className="px-2 py-4">
-          {ITEMS.map((item) => (
-            <Link key={item.url} href={item.url || ""}>
-              <SidebarMenuItem className="mb-1">
-                <SidebarMenuButton className="w-full hover:bg-secondary-foreground/10 text-secondary-foreground hover:text-secondary-foreground transition-all duration-200 rounded-lg">
-                  {item.icon && <item.icon className="w-5 h-5 mr-3" />}
-                  {item.title}
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </Link>
-          ))}
-        </SidebarMenu>
+        <SidebarGroup>
+          <SidebarGroupLabel>Platform</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {PLATFORM_ITEMS.map((item) => (
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton asChild>
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Settings</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {SETTINGS_ITEMS.map((item) => (
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton asChild>
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="bg-secondary border-secondary-foreground/10">
-        <SidebarMenu className="py-2">
-          <SidebarMenuItem className="mb-1">
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
             <LibraryHelp
               trigger={
-                <SidebarMenuButton className="w-full hover:bg-secondary-foreground/10 text-secondary-foreground hover:text-secondary-foreground transition-all duration-200 rounded-lg">
-                  <HelpCircleIcon className="w-5 h-5 mr-3" />
-                  <p>Help</p>
+                <SidebarMenuButton>
+                  <HelpCircleIcon />
+                  <span>Help</span>
                 </SidebarMenuButton>
               }
             />
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
-              onClick={() => signOut({ redirectTo: "/signin" })}
-              className="w-full hover:bg-secondary-foreground/10 text-secondary-foreground hover:text-secondary-foreground transition-all duration-200 rounded-lg"
+              onClick={() => void signOut({ redirectTo: "/signin" })}
+              className="w-full"
             >
-              <LogOut className="w-5 h-5 mr-3" />
-              <p className="truncate">Signed in as {session?.user?.name}</p>
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                <span className="text-xs font-semibold">
+                  {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
+                </span>
+              </div>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-semibold">
+                  {session?.user?.name || "User"}
+                </span>
+                <span className="truncate text-xs">{session?.user?.email}</span>
+              </div>
+              <LogOut className="ml-auto size-4" />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

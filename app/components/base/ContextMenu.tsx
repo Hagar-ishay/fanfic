@@ -10,12 +10,6 @@ import {
   DrawerDialogTrigger,
 } from "@/components/base/DrawerDialog";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenuItem,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-} from "@/components/ui/dropdown-menu";
 import { ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
@@ -49,12 +43,6 @@ export function ContextMenu({
   const [activeIndex, setActiveIndex] = useState(0);
   const router = useRouter();
 
-  function handleSelect(option: Option) {
-    if (option.action) {
-      option.action();
-    }
-    router.back();
-  }
 
   function handleBack() {
     setActiveIndex((prev) => prev - 1);
@@ -71,29 +59,6 @@ export function ContextMenu({
     }
   }
 
-  const renderDropdownMenuItems = (items: Option[]) => {
-    return items.map((option, index) => {
-      return option.subItems && !option.disabled ? (
-        <DropdownMenuSub key={index}>
-          <DropdownMenuSubTrigger disabled={option.disabled} className="gap-3 text-sm">
-            {option.icon}
-            {option.name}
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>{renderDropdownMenuItems(option.subItems)}</DropdownMenuSubContent>
-        </DropdownMenuSub>
-      ) : (
-        <DropdownMenuItem
-          key={index}
-          onSelect={() => handleSelect(option)}
-          disabled={option.disabled}
-          className="gap-3 text-sm"
-        >
-          {option.icon}
-          {option.name}
-        </DropdownMenuItem>
-      );
-    });
-  };
 
   return (
     <DrawerDialog open={isOpen} onOpenChange={setIsOpen}>

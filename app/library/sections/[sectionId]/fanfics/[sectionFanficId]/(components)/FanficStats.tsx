@@ -5,7 +5,6 @@ import {
   BookOpen,
   Languages,
   BarChart2,
-  Send,
   CheckCircle2,
 } from "lucide-react";
 import { cn, formatDate } from "@/lib/utils";

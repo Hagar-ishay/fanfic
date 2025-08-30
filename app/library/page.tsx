@@ -6,7 +6,6 @@ import { auth } from "@/auth";
 import { SetTopbar } from "@/components/base/SetTopbar";
 import { AddNewSectionButton } from "@/library/(components)/AddNewSectionButton";
 import { LibraryTopbarSearch } from "@/library/(components)/LibraryTopbarSearch";
-import { Suspense } from "react";
 import { listUserFanfics } from "@/db/fanfics";
 
 export const metadata: Metadata = {
@@ -14,8 +13,6 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const session = await auth();
-
   const { user } = (await auth())!;
 
   const sections = await selectOrCreateSections(user.id);
@@ -24,21 +21,21 @@ export default async function Page() {
 
   return (
     <>
-      <SetTopbar 
-        segments={[{ label: "Library", href: "/library" }]}
-      >
+      <SetTopbar segments={[{ label: "Library", href: "/library" }]}>
         <LibraryTopbarSearch userFanfics={userFanfics} />
         <AddNewSectionButton />
       </SetTopbar>
-      <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
+      <div className="bg-gradient-to-br from-background via-muted/20 to-background">
         <div className="container mx-auto px-4 pt-8 pb-6">
           <div className="grid gap-4">
-            {topLevelSections.map((section, index) => (
+            {topLevelSections.map((section) => (
               <Link key={section.id} href={`/library/sections/${section.id}`}>
                 <div className="transform transition-all duration-200 hover:scale-[1.02] hover:shadow-lg">
                   <Section
                     section={section}
-                    transferableSections={sections.filter((tranfser) => tranfser.id !== section.id)}
+                    transferableSections={sections.filter(
+                      (tranfser) => tranfser.id !== section.id
+                    )}
                   />
                 </div>
               </Link>

@@ -22,21 +22,32 @@ type SearchResults = {
   totalResults: number;
 };
 
-export function ExploreClientWrapper({ savedSearches, userId }: ExploreClientWrapperProps) {
-  const [searchResultsCallback, setSearchResultsCallback] = useState<((results: SearchResults) => void) | null>(null);
+export function ExploreClientWrapper({
+  savedSearches,
+  userId,
+}: ExploreClientWrapperProps) {
+  const [searchResultsCallback, setSearchResultsCallback] = useState<
+    ((results: SearchResults) => void) | null
+  >(null);
 
-  const handleSearchResults = useCallback((results: SearchResults) => {
-    if (searchResultsCallback) {
-      searchResultsCallback(results);
-    }
-  }, [searchResultsCallback]);
+  const handleSearchResults = useCallback(
+    (results: SearchResults) => {
+      if (searchResultsCallback) {
+        searchResultsCallback(results);
+      }
+    },
+    [searchResultsCallback]
+  );
 
-  const registerCallback = useCallback((callback: (results: SearchResults) => void) => {
-    setSearchResultsCallback(() => callback);
-  }, []);
+  const registerCallback = useCallback(
+    (callback: (results: SearchResults) => void) => {
+      setSearchResultsCallback(() => callback);
+    },
+    []
+  );
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-background via-muted/10 to-background">
+    <div className="flex flex-col bg-gradient-to-br from-background via-muted/10 to-background">
       <SetTopbar segments={[{ label: "Explore", href: "/explore" }]}>
         <ExploreTopbarSearch onSearch={handleSearchResults} />
         {process.env.NODE_ENV === "development" && (
@@ -50,9 +61,9 @@ export function ExploreClientWrapper({ savedSearches, userId }: ExploreClientWra
         )}
       </SetTopbar>
       <div className="flex-grow">
-        <ExplorePage 
-          savedSearches={savedSearches} 
-          userId={userId} 
+        <ExplorePage
+          savedSearches={savedSearches}
+          userId={userId}
           onSearchResults={registerCallback}
         />
       </div>

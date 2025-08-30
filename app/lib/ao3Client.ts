@@ -9,6 +9,7 @@ import { CookieJar, Cookie } from "tough-cookie";
 import { Credentials } from "@/db/types";
 import { getCredentials, refreshSession } from "@/db/credentials";
 import * as cheerio from "cheerio";
+import logger from "@/logger";
 
 export async function getAo3Client() {
   const credentials = await getCredentials("AO3");
@@ -100,7 +101,7 @@ class AO3Client {
   }): Promise<T> {
     config.headers = { ...this.defaultHeaders, ...config.headers };
     const cookies = await this.cookieJar.store.getAllCookies();
-    console.log(
+    logger.info(
       "Using cookies:",
       cookies.map((c) => c.key)
     );
@@ -109,18 +110,16 @@ class AO3Client {
       .join("; ");
 
     try {
-      console.time(`AO3 ${config.method} request to ${config.url}`);
       const response = await this.axiosInstance.request<T>({
         ...config,
       });
-      console.timeEnd(`AO3 ${config.method} request to ${config.url}`);
+
       if (config.responseType === "stream") {
         return response as T;
       }
       return response.data;
     } catch (error) {
-      console.timeEnd(`AO3 ${config.method} request to ${config.url}`);
-      console.error("Request failed:", error);
+      logger.error("Request failed:", error);
       throw error;
     }
   }
@@ -131,13 +130,13 @@ class AO3Client {
       const response = await this.axiosInstance.get(tokenUrl);
       return response.data.token;
     } catch (error) {
-      console.error("Failed to get token:", error);
+      logger.error("Failed to get token:", error);
       throw error;
     }
   }
 
   public async refreshLogin(): Promise<void> {
-    console.log("Refreshing AO3 login");
+    logger.info("Refreshing AO3 login");
     const loginUrl = `${AO3_LINK}/users/login`;
     try {
       const tokenResponse = await this.getToken();
@@ -169,7 +168,7 @@ class AO3Client {
 
       await this.setSessionCookies(cookies);
     } catch (error) {
-      console.log(error);
+      logger.info(error);
       throw new Error(`Failed to login: ${error}`);
     }
   }
@@ -247,7 +246,7 @@ class AO3Client {
       }
     }
 
-    console.log({ searchUrl });
+    logger.info({ searchUrl });
 
     const response = await this.request<string>({
       method: "GET",
@@ -255,12 +254,14 @@ class AO3Client {
     });
 
     // Debug: Log first few lines of response to check if filtering is working
-    const lines = response.split('\n').slice(0, 10);
-    console.log('AO3 Response preview:', lines);
+    const lines = response.split("\n").slice(0, 10);
+    logger.info("AO3 Response preview:", lines);
 
     const results = this.parseSearchResults(response, params.page || 1);
-    console.log(`Found ${results.results.length} results, total: ${results.totalResults}`);
-    
+    logger.info(
+      `Found ${results.results.length} results, total: ${results.totalResults}`
+    );
+
     return results;
   }
 

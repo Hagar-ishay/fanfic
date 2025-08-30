@@ -71,9 +71,9 @@ export function SearchBuilder({
 
     await saveSearch({
       ...(savedSearch?.id ? { id: savedSearch.id } : {}),
-      name: SearchName as string,
+      name: SearchName,
       search: formattedSearch,
-      userId: user!.id,
+      userId: user.id,
     });
   };
 
@@ -94,9 +94,9 @@ export function SearchBuilder({
     // Save the search first
     await saveSearch({
       ...(savedSearch?.id ? { id: savedSearch.id } : {}),
-      name: SearchName as string,
+      name: SearchName,
       search: formattedSearch,
-      userId: user!.id,
+      userId: user.id,
     });
 
     // Then execute the search if onSearch callback is provided

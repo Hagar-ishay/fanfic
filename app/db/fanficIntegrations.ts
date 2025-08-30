@@ -100,7 +100,11 @@ export async function updateSyncStatus(
   error?: string | null,
   cloudPath?: string
 ) {
-  const updateData: any = {
+  const updateData: {
+    syncStatus: string;
+    lastError: string | null;
+    cloudPath?: string;
+  } = {
     syncStatus: status,
     lastError: error || null,
   };

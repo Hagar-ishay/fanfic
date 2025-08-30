@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { createIntegration } from "@/db/integrations";
+import logger from "@/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,7 +22,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const body = await request.json();
+    const body = (await request.json()) as { name?: string; folderId?: string };
     const { name, folderId } = body;
 
     if (!name) {
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, integration });
   } catch (error) {
-    console.error("Google Drive integration error:", error);
+    logger.error("Google Drive integration error:", error);
     return NextResponse.json(
       {
         error: "Failed to create Google Drive integration",

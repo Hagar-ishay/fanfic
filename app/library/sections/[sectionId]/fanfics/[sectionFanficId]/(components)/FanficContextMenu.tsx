@@ -8,6 +8,7 @@ import type {
   UserFanfic,
   UserFanficIntegration,
 } from "@/db/types";
+import logger from "@/logger";
 
 import { useToast } from "@/hooks/use-toast";
 import { emailSender } from "@/library/sections/[sectionId]/(server)/email";
@@ -106,7 +107,7 @@ export function FanficContextMenu({
         description: `Starting sync of ${fanfic.title} to ${integration.name}`,
       });
 
-      console.log({ fanficIntegrations, integration });
+      logger.info({ fanficIntegrations, integration });
 
       const fanficIntegration =
         fanficIntegrations.find((fi) => fi.integration.id === integration.id) ||

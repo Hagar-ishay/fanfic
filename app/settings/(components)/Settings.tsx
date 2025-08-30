@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -21,11 +20,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { saveSettings } from "@/db/settings";
-import {
-  createIntegration,
-  updateIntegration,
-  deleteIntegration,
-} from "@/db/integrations";
+import { createIntegration, deleteIntegration } from "@/db/integrations";
 import { useToast } from "@/hooks/use-toast";
 import {
   Moon,
@@ -62,7 +57,7 @@ interface SettingsProps {
     id: number;
     type: string;
     name: string;
-    config: Record<string, any>;
+    config: Record<string, unknown>;
     isActive: boolean;
   }>;
   userId: string;
@@ -119,12 +114,11 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
     theme ? theme === "light" : systemTheme === "light"
   );
 
-  async function onSubmit(data: {
+  function onSubmit(data: {
     activeIntegrationId: number | null;
     languageCode: string;
     enableTranslation: boolean;
   }) {
-    console.log("onSubmit", data);
     startTransition(async () => {
       try {
         await saveSettings({
@@ -138,25 +132,36 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
           title: "Settings",
           description: "Your settings have been saved",
         });
-      } catch (error) {
-        console.error(error);
+      } catch {
         throw new Error("Failed to save settings");
       }
     });
   }
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    void handleSubmit(onSubmit)(e);
+  };
+
+  const handleCreateIntegrationWrapper = (
+    type: string,
+    config: Record<string, string>,
+    category: string
+  ) => {
+    void handleCreateIntegration(type, config, category);
+  };
 
   async function handleCreateIntegration(
     type: string,
     config: Record<string, string>,
     category: string
   ) {
-    console.log("Creating integration:", { type, config, userId });
     try {
       // Use type as name since there's only one per type
       const name =
         type.charAt(0).toUpperCase() + type.slice(1).replace("_", " ");
 
-      const result = await createIntegration({
+      await createIntegration({
         userId,
         category,
         type,
@@ -164,8 +169,6 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
         config,
         isActive: integrations.length === 0,
       });
-
-      console.log("Integration created successfully:", result);
 
       toast({
         title: "Integration Created",
@@ -176,7 +179,6 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
       // Refresh to show the new integration
       router.refresh();
     } catch (error) {
-      console.error("Failed to create integration:", error);
       toast({
         title: "Integration Failed",
         description:
@@ -196,7 +198,7 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
         description: `${name} integration deleted successfully`,
       });
       router.refresh();
-    } catch (error) {
+    } catch {
       toast({
         title: "Delete Failed",
         description: "Failed to delete integration",
@@ -272,7 +274,7 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/10 to-background">
+    <div className="bg-gradient-to-br from-background via-muted/10 to-background">
       <div className="container mx-auto px-4 pt-8 pb-6 max-w-4xl">
         <div className="space-y-8">
           <div className="text-center md:text-left">
@@ -305,7 +307,7 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
             </TabsList>
 
             <TabsContent value="general" className="space-y-6 mt-6">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={handleFormSubmit} className="space-y-6">
                 {generalSettings.map((section, index) => (
                   <div
                     key={index}
@@ -398,12 +400,12 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() =>
-                              handleDeleteIntegration(
+                            onClick={() => {
+                              void handleDeleteIntegration(
                                 integration.id,
                                 integration.name
-                              )
-                            }
+                              );
+                            }}
                             className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground flex-shrink-0 self-start sm:self-center"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -425,7 +427,7 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
                         <DialogTitle>Add New Integration</DialogTitle>
                       </DialogHeader>
                       <NewIntegrationForm
-                        onSubmit={handleCreateIntegration}
+                        onSubmit={handleCreateIntegrationWrapper}
                         onCancel={() => setIsDialogOpen(false)}
                         onSuccess={() => {
                           setIsDialogOpen(false);

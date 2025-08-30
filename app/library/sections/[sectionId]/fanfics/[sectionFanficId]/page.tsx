@@ -8,10 +8,7 @@ import { SetTopbar } from "@/components/base/SetTopbar";
 import { EllipsisVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FanficContextMenu } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficContextMenu";
-import {
-  getActiveIntegrations,
-  getIntegrationsByCategory,
-} from "@/db/integrations";
+import { getActiveIntegrations } from "@/db/integrations";
 import { getFanficIntegrations } from "@/db/fanficIntegrations";
 import { Kudos } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/Kudos";
 export async function generateMetadata({

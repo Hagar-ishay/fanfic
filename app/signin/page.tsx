@@ -16,7 +16,7 @@ export default function SignIn() {
           variant="outline"
           className="w-full gap-2 hover:bg-secondary/80"
           size="lg"
-          onClick={() => signIn("google", { callbackUrl: "/library" })}
+          onClick={() => void signIn("google", { callbackUrl: "/library" })}
         >
           <>
             <FcGoogle className="h-5 w-5" />

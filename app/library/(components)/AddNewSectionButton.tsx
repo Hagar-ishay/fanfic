@@ -8,6 +8,7 @@ import {
   DrawerDialogTitle,
   DrawerDialogTrigger,
 } from "@/components/base/DrawerDialog";
+import logger from "@/logger";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,7 +39,7 @@ export function AddNewSectionButton() {
       toast({ title, description: "Added Successfully!" });
     } catch (err) {
       const error = errorMessage(err);
-      console.error(err);
+      logger.error(err);
       toast({ title, description: error, variant: "destructive" });
     }
   };
@@ -46,8 +47,8 @@ export function AddNewSectionButton() {
   return (
     <DrawerDialog>
       <DrawerDialogTrigger asChild>
-        <Button 
-          size="default" 
+        <Button
+          size="default"
           variant="default"
           className="h-9 px-3 shadow-sm hover:shadow-md transition-all duration-200 bg-primary hover:bg-primary/90"
         >
@@ -62,7 +63,11 @@ export function AddNewSectionButton() {
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="p-6 flex flex-col gap-3">
             <Label htmlFor="name">Name</Label>
-            <Input placeholder="Enter new name..." id="name" {...register("name", { required: true })} />
+            <Input
+              placeholder="Enter new name..."
+              id="name"
+              {...register("name", { required: true })}
+            />
           </div>
           <DrawerDialogFooter>
             <DrawerDialogClose asChild>

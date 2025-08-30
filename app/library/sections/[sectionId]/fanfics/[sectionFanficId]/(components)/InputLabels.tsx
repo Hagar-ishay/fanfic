@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { updateSectionFanfic } from "@/db/fanfics";
-import { Tag, TagsIcon, X } from "lucide-react";
+import { TagsIcon } from "lucide-react";
 import type React from "react";
 import { useOptimistic, useRef, useState, useTransition } from "react";
 import { cn } from "@/lib/utils";

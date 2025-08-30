@@ -6,6 +6,7 @@ import axios from "axios";
 import path from "path";
 import { getAo3Client } from "@/lib/ao3Client";
 import { updateIntegration } from "@/db/integrations";
+import logger from "@/logger";
 
 interface CloudSyncResult {
   success: boolean;
@@ -92,7 +93,7 @@ export async function syncToCloud({
       };
     }
   } catch (error) {
-    console.error("Cloud sync error:", error);
+    logger.error("Cloud sync error:", error);
     const errorMessage =
       error instanceof Error ? error.message : "Unknown cloud sync error";
     await updateSyncStatus(
@@ -148,7 +149,7 @@ async function syncToGoogleDrive({
         );
       }
     } catch (error) {
-      console.warn("Failed to refresh Google Drive token:", error);
+      logger.warn("Failed to refresh Google Drive token:", error);
     }
   }
 
@@ -251,7 +252,7 @@ async function syncToGoogleDrive({
       cloudPath: `/${folderName}/${fileName}`,
     };
   } catch (error) {
-    console.error("Google Drive sync error:", error);
+    logger.error("Google Drive sync error:", error);
     return {
       success: false,
       message: `Google Drive sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -271,7 +272,7 @@ async function syncToWebDAV({
   fileName: string;
 }): Promise<CloudSyncResult> {
   const { url, username, password } = fanficIntegration.integration.config;
-  console.log("WebDAV config:", { url, username, password });
+  logger.info("WebDAV config:", { url, username, password });
   if (!url || !username) {
     return { success: false, message: "WebDAV credentials not configured" };
   }
@@ -279,7 +280,7 @@ async function syncToWebDAV({
   try {
     const cloudPath = path.posix.join("/PenioFanfic", sectionName, fileName);
 
-    console.log({ cloudPath });
+    logger.info({ cloudPath });
     const fs = await import("fs/promises");
     const epubBuffer = await fs.readFile(epubPath);
 
@@ -306,7 +307,7 @@ async function syncToWebDAV({
       cloudPath: cloudPath,
     };
   } catch (error) {
-    console.error("WebDAV sync error:", error);
+    logger.error("WebDAV sync error:", error);
     return {
       success: false,
       message: `WebDAV sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -398,7 +399,7 @@ async function findGoogleDriveFile(
     const files = response.data.files || [];
     return files.length > 0 ? files[0].id : null;
   } catch (error) {
-    console.warn(
+    logger.warn(
       `Error finding Google Drive file: ${error instanceof Error ? error.message : "Unknown error"}`
     );
     return null;
@@ -439,7 +440,7 @@ async function createWebDAVDirectory(
       } catch (error) {
         // Directory doesn't exist (404), try to create it
         if (!axios.isAxiosError(error) || error.response?.status !== 404) {
-          console.warn(
+          logger.warn(
             `Could not check WebDAV directory ${currentPath}:`,
             error
           );
@@ -466,14 +467,11 @@ async function createWebDAVDirectory(
         ) {
           continue;
         }
-        console.warn(
-          `Could not create WebDAV directory ${currentPath}:`,
-          error
-        );
+        logger.warn(`Could not create WebDAV directory ${currentPath}:`, error);
       }
     }
   } catch (error) {
-    console.warn("Could not create WebDAV directory structure:", error);
+    logger.warn("Could not create WebDAV directory structure:", error);
   }
 }
 
@@ -525,7 +523,7 @@ async function syncToDropbox({
       cloudPath: cloudPath,
     };
   } catch (error) {
-    console.error("Dropbox sync error:", error);
+    logger.error("Dropbox sync error:", error);
     return {
       success: false,
       message: `Dropbox sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,

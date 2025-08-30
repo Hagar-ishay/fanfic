@@ -3,8 +3,9 @@
 import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "./db";
-import { integrations, fanficIntegrations, sectionFanfics } from "./schema";
+import { integrations, fanficIntegrations } from "./schema";
 import type { NewIntegration, NewFanficIntegration } from "./types";
+import logger from "@/logger";
 
 export async function getIntegrations(userId: string) {
   "use cache";
@@ -58,7 +59,7 @@ type IntegrationData = Omit<
 >;
 
 export async function createIntegration(data: IntegrationData) {
-  console.log("DB: Creating integration with data:", data);
+  logger.info("DB: Creating integration with data:", data);
   try {
     const result = await db
       .insert(integrations)
@@ -72,11 +73,11 @@ export async function createIntegration(data: IntegrationData) {
       })
       .returning();
 
-    console.log("DB: Integration created successfully:", result[0]);
+    logger.info("DB: Integration created successfully:", result[0]);
     revalidatePath("/settings");
     return result[0];
   } catch (error) {
-    console.error("DB: Failed to create integration:", error);
+    logger.error("DB: Failed to create integration:", error);
     throw error;
   }
 }

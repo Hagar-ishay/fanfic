@@ -9,11 +9,19 @@ import {
   sessions,
   verificationTokens,
 } from "@/db/schema";
+import logger from "@/logger";
 
-async function refreshAccessToken(token: any) {
+interface TokenWithRefresh {
+  refreshToken?: string;
+  expiresAt?: number;
+  accessToken?: string;
+  [key: string]: unknown;
+}
+
+async function refreshAccessToken(token: TokenWithRefresh) {
   try {
-    console.log("Attempting to refresh access token");
-    
+    logger.info("Attempting to refresh access token");
+
     const response = await fetch("https://oauth2.googleapis.com/token", {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -27,22 +35,29 @@ async function refreshAccessToken(token: any) {
       }),
     });
 
-    const refreshedTokens = await response.json();
+    const refreshedTokens = (await response.json()) as {
+      access_token?: string;
+      expires_in?: number;
+      refresh_token?: string;
+      error?: string;
+    };
 
     if (!response.ok) {
-      console.error("Token refresh failed:", refreshedTokens);
-      throw refreshedTokens;
+      logger.error("Token refresh failed:", refreshedTokens);
+      throw new Error(refreshedTokens.error || "Token refresh failed");
     }
 
-    console.log("Token refresh successful");
+    logger.info("Token refresh successful");
     return {
       ...token,
       accessToken: refreshedTokens.access_token,
-      expiresAt: Math.floor(Date.now() / 1000 + refreshedTokens.expires_in),
+      expiresAt: refreshedTokens.expires_in
+        ? Math.floor(Date.now() / 1000 + refreshedTokens.expires_in)
+        : token.expiresAt,
       refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
     };
   } catch (error) {
-    console.error("Error refreshing access token", error);
+    logger.error("Error refreshing access token", error);
 
     return {
       ...token,
@@ -66,13 +81,14 @@ export const { handlers, auth } = NextAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       authorization: {
         params: {
-          scope: "openid email profile https://www.googleapis.com/auth/drive.file",
+          scope:
+            "openid email profile https://www.googleapis.com/auth/drive.file",
         },
       },
     }),
   ],
   callbacks: {
-    async session({ session, token }) {
+    session({ session, token }) {
       if (session.user && token.sub) {
         session.user.id = token.sub;
       }
@@ -85,43 +101,51 @@ export const { handlers, auth } = NextAuth({
       return session;
     },
     async jwt({ token, user, account }) {
-      console.log("JWT callback called", { hasUser: !!user, hasAccount: !!account, hasToken: !!token });
-      
+      logger.info("JWT callback called", {
+        hasUser: !!user,
+        hasAccount: !!account,
+        hasToken: !!token,
+      });
+
       if (user) {
-        console.log("Setting user ID:", user.id);
+        logger.info("Setting user ID:", user.id);
         token.sub = user.id;
       }
-      
+
       if (account) {
-        console.log("Setting tokens from account", { 
+        logger.info("Setting tokens from account", {
           hasAccessToken: !!account.access_token,
           hasRefreshToken: !!account.refresh_token,
-          expiresAt: account.expires_at 
+          expiresAt: account.expires_at,
         });
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
         token.expiresAt = account.expires_at;
       }
-      
+
       // Return token immediately if this is a new login (account exists)
       if (account) {
-        console.log("New login, returning token");
+        logger.info("New login, returning token");
         return token;
       }
-      
+
       // Return previous token if the access token has not expired yet
       if (token.expiresAt && Date.now() < (token.expiresAt as number) * 1000) {
-        console.log("Token still valid, returning existing token");
+        logger.info("Token still valid, returning existing token");
         return token;
       }
 
       // If we have a refresh token and the access token has expired, try to update it
-      if (token.refreshToken && token.expiresAt && Date.now() >= (token.expiresAt as number) * 1000) {
-        console.log("Token expired, attempting refresh");
+      if (
+        token.refreshToken &&
+        token.expiresAt &&
+        Date.now() >= (token.expiresAt as number) * 1000
+      ) {
+        logger.info("Token expired, attempting refresh");
         return refreshAccessToken(token);
       }
 
-      console.log("Returning token as-is");
+      logger.info("Returning token as-is");
       return token;
     },
   },

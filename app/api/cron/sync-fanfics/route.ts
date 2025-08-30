@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFanficsNeedingSync } from "@/db/fanficIntegrations";
 import { syncToCloud } from "@/lib/cloudSync";
-import { getAo3Client } from "@/lib/ao3Client";
-import path from "path";
-import fs from "fs/promises";
-import { fanficIntegrations } from "@/db/schema";
 
 export async function GET(request: NextRequest) {
   try {
@@ -14,19 +10,19 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    console.log("Starting fanfic sync cronjob...");
+    logger.info("Starting fanfic sync cronjob...");
 
     const fanficsNeedingSync = await getFanficsNeedingSync();
 
     if (fanficsNeedingSync.length === 0) {
-      console.log("No fanfics need syncing");
+      logger.info("No fanfics need syncing");
       return NextResponse.json({
         message: "No fanfics need syncing",
         count: 0,
       });
     }
 
-    console.log(`Found ${fanficsNeedingSync.length} fanfics needing sync`);
+    logger.info(`Found ${fanficsNeedingSync.length} fanfics needing sync`);
 
     const results = [];
 
@@ -41,7 +37,7 @@ export async function GET(request: NextRequest) {
           continue;
         }
 
-        console.log(
+        logger.info(
           `Syncing fanfic: ${item.fanfic.title} to ${item.integration.type}`
         );
 
@@ -59,10 +55,8 @@ export async function GET(request: NextRequest) {
           success: syncResult.success,
           message: syncResult.message,
         });
-
-      
       } catch (error) {
-        console.error(`Failed to sync fanfic ${item.fanfic.title}:`, error);
+        logger.error(`Failed to sync fanfic ${item.fanfic.title}:`, error);
         results.push({
           fanficId: item.fanfic.id,
           fanficTitle: item.fanfic.title,
@@ -76,7 +70,7 @@ export async function GET(request: NextRequest) {
     const successCount = results.filter((r) => r.success).length;
     const failCount = results.filter((r) => !r.success).length;
 
-    console.log(
+    logger.info(
       `Sync completed: ${successCount} successful, ${failCount} failed`
     );
 
@@ -88,7 +82,7 @@ export async function GET(request: NextRequest) {
       results: results,
     });
   } catch (error) {
-    console.error("Fanfic sync cronjob error:", error);
+    logger.error("Fanfic sync cronjob error:", error);
     return NextResponse.json(
       {
         error: "Internal server error",

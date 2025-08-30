@@ -35,16 +35,16 @@ export async function executeSearch(
 }> {
   const ao3Client = await getAo3Client();
 
-  // Parameter mapping from saved search format to AO3 search format  
+  // Parameter mapping from saved search format to AO3 search format
   const parameterMapping: Record<string, string> = {
     rating_ids: "rating_ids",
     category_ids: "category_ids",
-    fandom: "fandom_names", 
+    fandom: "fandom_names",
     character: "character_names",
-    relationship: "relationship_names", 
+    relationship: "relationship_names",
     tag: "freeform_names",
     complete: "complete",
-    sort_column: "sort_column", 
+    sort_column: "sort_column",
     query: "query",
   };
 
@@ -87,7 +87,7 @@ export async function executeSearch(
     const searchResults = await ao3Client.search(ao3SearchParams);
     return searchResults;
   } catch (error) {
-    console.error("Search error:", error);
+    logger.error("Search error:", error);
     throw new Error("Failed to execute search. Please try again.");
   }
 }

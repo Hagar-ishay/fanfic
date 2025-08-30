@@ -3,7 +3,7 @@
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "./db";
-import { settings, integrations } from "./schema";
+import { settings } from "./schema";
 import type { NewSettings } from "./types";
 
 export async function getSettings(userId: string) {

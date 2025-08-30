@@ -7,15 +7,12 @@ import { Button } from "@/components/ui/button";
 import { SavedSearches } from "./SavedSearches";
 import { ImprovedSearchBuilder } from "./ImprovedSearchBuilder";
 import { SearchResults } from "./SearchResults";
-import {
-  executeSearch,
-  SearchResult,
-} from "../(server)/search";
+import { executeSearch, SearchResult } from "../(server)/search";
 import { saveSearch } from "@/db/savedSearches";
 import { SavedSearch, SavedSearchSearch } from "@/db/types";
 import { useToast } from "@/hooks/use-toast";
-import { SearchBuilder } from "./SearchBuilder";
-import { Plus, BookOpen, Search, History } from "lucide-react";
+import { Plus, BookOpen, History } from "lucide-react";
+import logger from "@/logger";
 
 interface ExplorePageProps {
   savedSearches: SavedSearch[];
@@ -30,7 +27,11 @@ type SearchResults = {
   totalResults: number;
 };
 
-export function ExplorePage({ savedSearches, userId, onSearchResults }: ExplorePageProps) {
+export function ExplorePage({
+  savedSearches,
+  userId,
+  onSearchResults,
+}: ExplorePageProps) {
   const [searchResults, setSearchResults] = useState<SearchResults | null>(
     null
   );
@@ -46,12 +47,13 @@ export function ExplorePage({ savedSearches, userId, onSearchResults }: ExploreP
       onSearchResults((results) => {
         setSearchResults(results);
         setCurrentPage(1);
-        setLastSearchParams({ query: { id: "topbar-search", name: "Topbar Search" } });
+        setLastSearchParams({
+          query: { id: "topbar-search", name: "Topbar Search" },
+        });
         setActiveTab("results");
       });
     }
   }, [onSearchResults]);
-
 
   const handleAdvancedSearch = (searchParams: SavedSearchSearch) => {
     startTransition(async () => {
@@ -62,7 +64,7 @@ export function ExplorePage({ savedSearches, userId, onSearchResults }: ExploreP
         setLastSearchParams(searchParams);
         setActiveTab("results");
       } catch (error) {
-        console.error("Search error:", error);
+        logger.error("Search error:", error);
         toast({
           title: "Search Error",
           description: "Failed to execute search. Please try again.",
@@ -87,7 +89,7 @@ export function ExplorePage({ savedSearches, userId, onSearchResults }: ExploreP
         description: "Your search has been saved successfully.",
       });
     } catch (error) {
-      console.error("Save error:", error);
+      logger.error("Save error:", error);
       toast({
         title: "Save Error",
         description: "Failed to save search. Please try again.",
@@ -105,7 +107,7 @@ export function ExplorePage({ savedSearches, userId, onSearchResults }: ExploreP
         setSearchResults(results);
         setCurrentPage(page);
       } catch (error) {
-        console.error("Page change error:", error);
+        logger.error("Page change error:", error);
         toast({
           title: "Page Error",
           description: "Failed to load page. Please try again.",
@@ -170,11 +172,12 @@ export function ExplorePage({ savedSearches, userId, onSearchResults }: ExploreP
             )}
           </TabsList>
 
-
           <TabsContent value="advanced" className="space-y-4">
             <ImprovedSearchBuilder
               onSearch={handleAdvancedSearch}
-              onSaveSearch={handleSaveSearch}
+              onSaveSearch={(name, params) =>
+                void handleSaveSearch(name, params)
+              }
               isLoading={isPending}
             />
           </TabsContent>
@@ -198,8 +201,8 @@ export function ExplorePage({ savedSearches, userId, onSearchResults }: ExploreP
                         className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
                         onClick={() => handleSavedSearchSelect(search)}
                       >
-                        <SavedSearches 
-                          savedSearches={[search]} 
+                        <SavedSearches
+                          savedSearches={[search]}
                           onSearch={(params, results) => {
                             setSearchResults(results);
                             setCurrentPage(1);

@@ -13,6 +13,7 @@ import {
 import { ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
+import logger from "@/logger";
 
 interface NewIntegrationFormProps {
   onSubmit: (
@@ -78,10 +79,10 @@ export function NewIntegrationForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submit:", { type, selectedType, config });
+    logger.info("Form submit:", { type, selectedType, config });
 
     if (!type || !selectedType) {
-      console.error("Missing type or selectedType");
+      logger.error("Missing type or selectedType");
       return;
     }
 
@@ -96,35 +97,37 @@ export function NewIntegrationForm({
     const isValid = selectedType.configFields.every((field) => {
       // folderId is optional for Google Drive
       if (field === "folderId") {
-        console.log(
+        logger.info(
           `Field ${field}: ${config[field]} -> optional (always valid)`
         );
         return true;
       }
       const hasValue = config[field]?.trim();
-      console.log(
+      logger.info(
         `Field ${field}: ${config[field]} -> ${hasValue ? "valid" : "invalid"}`
       );
       return hasValue;
     });
 
     if (!isValid) {
-      console.error("Form validation failed");
+      logger.error("Form validation failed");
       return;
     }
 
-    console.log("Form valid, submitting...");
+    logger.info("Form valid, submitting...");
     onSubmit(type, config, category);
   };
 
   const handleGoogleDriveIntegration = async () => {
     if (!session?.accessToken) {
-      alert("Please sign out and sign in again to grant Google Drive permissions.");
+      alert(
+        "Please sign out and sign in again to grant Google Drive permissions."
+      );
       return;
     }
 
     setIsCreatingGoogleDrive(true);
-    
+
     try {
       const response = await fetch("/api/integrations/google-drive", {
         method: "POST",
@@ -151,7 +154,7 @@ export function NewIntegrationForm({
         alert(result.error || "Failed to create Google Drive integration");
       }
     } catch (error) {
-      console.error("Google Drive integration error:", error);
+      logger.error("Google Drive integration error:", error);
       alert("Failed to create Google Drive integration");
     } finally {
       setIsCreatingGoogleDrive(false);
@@ -192,7 +195,7 @@ export function NewIntegrationForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
       <div className="space-y-2">
         <Label className="text-sm font-medium">Integration Type</Label>
         <Select
@@ -223,7 +226,8 @@ export function NewIntegrationForm({
             </p>
             {type === "google_drive" && !session?.accessToken && (
               <p className="text-sm text-orange-600 dark:text-orange-400 font-medium">
-                ⚠️ Please sign out and sign in again to grant Google Drive permissions.
+                ⚠️ Please sign out and sign in again to grant Google Drive
+                permissions.
               </p>
             )}
             <a
@@ -259,9 +263,9 @@ export function NewIntegrationForm({
           </div>
 
           <div className="flex flex-col gap-3 pt-2">
-            <Button 
-              type="submit" 
-              size="sm" 
+            <Button
+              type="submit"
+              size="sm"
               className="w-full"
               disabled={isCreatingGoogleDrive}
             >
