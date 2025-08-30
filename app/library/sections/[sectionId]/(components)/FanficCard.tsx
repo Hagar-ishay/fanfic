@@ -18,10 +18,16 @@ export default function FanficCard({
   fanfic,
   index,
   transferableSections,
+  userId,
+  userIntegrations,
+  fanficIntegrations,
 }: {
   fanfic: UserFanfic;
   index: number;
   transferableSections: Section[];
+  userId: string;
+  userIntegrations: any[];
+  fanficIntegrations: any[];
 }) {
   const triggerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -61,6 +67,9 @@ export default function FanficCard({
           <FanficContextMenu
             sections={transferableSections}
             fanfic={fanfic}
+            userId={userId}
+            userIntegrations={userIntegrations}
+            fanficIntegrations={fanficIntegrations}
             trigger={<div hidden ref={triggerRef} />}
           />
 
@@ -114,16 +123,10 @@ export default function FanficCard({
                     </Button>
                   </Tooltip>
 
-                  {fanfic.lastSent && fanfic.updatedAt > fanfic.lastSent && (
-                    <Tooltip description="New update">
-                      <BookUp size="18" />
-                    </Tooltip>
-                  )}
-                  {!fanfic.lastSent && (
-                    <Tooltip description="Not uploaded yet">
-                      <BookUp2 size="18" />
-                    </Tooltip>
-                  )}
+                  {/* TODO: Implement integration-based lastSent check */}
+                  <Tooltip description="Not uploaded yet">
+                    <BookUp2 size="18" />
+                  </Tooltip>
                   {fanfic.completedAt && (
                     <Tooltip description="Completed">
                       <CircleCheck size="16" />

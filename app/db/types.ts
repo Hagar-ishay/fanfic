@@ -1,9 +1,19 @@
-import { credentials, fanfics, savedSearches, sectionFanfics, sections, integrations, settings, fanficIntegrations } from "@/db/schema";
+import {
+  credentials,
+  fanfics,
+  savedSearches,
+  sectionFanfics,
+  sections,
+  integrations,
+  settings,
+  fanficIntegrations,
+} from "@/db/schema";
 
 export type NewFanfic = typeof fanfics.$inferInsert;
 export type Fanfic = typeof fanfics.$inferSelect;
 export type SectionFanfic = typeof sectionFanfics.$inferSelect;
-export type UserFanfic = Fanfic & SectionFanfic & { sectionName: string; sectionParentId: number | null };
+export type UserFanfic = Fanfic &
+  SectionFanfic & { sectionName: string; sectionParentId: number | null };
 
 export interface Tags {
   [key: string]: string[];
@@ -30,6 +40,35 @@ export type SessionType = (typeof enumValues)[keyof typeof enumValues];
 export type SavedSearch = typeof savedSearches.$inferSelect;
 
 export type SavedSearchSearch = (typeof savedSearches.$inferSelect)["search"];
+
+export type UserFanficIntegration = {
+  fanficIntegrationId: number;
+  sectionFanficId: number;
+  integrationId: number;
+  lastTriggered: Date | null;
+  syncStatus: "pending" | "syncing" | "success" | "error";
+  cloudPath: string | null;
+  enabled: boolean;
+  fanfic: {
+    id: number;
+    externalId: number;
+    title: string;
+    author: string;
+    updatedAt: Date;
+    downloadLink: string | null;
+  };
+  section: {
+    id: number;
+    name: string;
+    userId: string;
+  };
+  integration: {
+    id: number;
+    name: string;
+    type: string;
+    config: Record<string, any>;
+  };
+};
 
 declare module "next-auth" {
   interface Session {

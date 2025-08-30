@@ -10,9 +10,12 @@ type FanficListProps = {
   fanfics: UserFanfic[];
   sectionId: number;
   transferableSections: Section[];
+  userId: string;
+  userIntegrations: any[];
+  fanficIntegrationsMap: Record<number, any[]>;
 };
 
-export default function FanficList({ fanfics, sectionId, transferableSections }: FanficListProps) {
+export default function FanficList({ fanfics, sectionId, transferableSections, userId, userIntegrations, fanficIntegrationsMap }: FanficListProps) {
   const [, startTransition] = useTransition();
   const [optimisticFics, setOptimistic] = useOptimistic(
     fanfics,
@@ -40,7 +43,15 @@ export default function FanficList({ fanfics, sectionId, transferableSections }:
         {(provided) => (
           <div ref={provided.innerRef} {...provided.droppableProps}>
             {optimisticFics.map((fanfic, index) => (
-              <FanficCard transferableSections={transferableSections} key={fanfic.id} fanfic={fanfic} index={index} />
+              <FanficCard 
+                transferableSections={transferableSections} 
+                key={fanfic.id} 
+                fanfic={fanfic} 
+                index={index} 
+                userId={userId}
+                userIntegrations={userIntegrations}
+                fanficIntegrations={fanficIntegrationsMap[fanfic.id] || []}
+              />
             ))}
             {provided.placeholder}
           </div>

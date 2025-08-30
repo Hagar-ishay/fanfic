@@ -3,6 +3,7 @@ import { Metadata } from "next";
 import { Settings } from "./(components)/Settings";
 import { auth } from "@/auth";
 import { getIntegrations } from "@/db/integrations";
+import { SetTopbar } from "@/components/base/SetTopbar";
 export const metadata: Metadata = {
   title: "Settings - Fanfic",
 };
@@ -14,10 +15,13 @@ export default async function Page() {
   const integrations = await getIntegrations(user.id);
 
   return (
-    <Settings
-      settings={settings}
-      integrations={integrations}
-      userId={user.id}
-    />
+    <>
+      <SetTopbar segments={[{ label: "Settings", href: "/settings" }]} />
+      <Settings
+        settings={settings}
+        integrations={integrations}
+        userId={user.id}
+      />
+    </>
   );
 }

@@ -12,6 +12,14 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { saveSettings } from "@/db/settings";
 import {
   createIntegration,
@@ -27,8 +35,10 @@ import {
   Settings as SettingsIcon,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useTransition, useState } from "react";
+import { useTransition, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { NewIntegrationForm } from "./NewIntegrationForm";
 
 const languages = [
   { code: "en", name: "English" },
@@ -44,7 +54,6 @@ const languages = [
 interface SettingsProps {
   settings: {
     id?: number;
-    readerEmail: string | null;
     activeIntegrationId: number | null;
     languageCode: string;
     enableTranslation: boolean;
@@ -60,29 +69,57 @@ interface SettingsProps {
 }
 
 export function Settings({ settings, integrations, userId }: SettingsProps) {
-  console.log("Settings", settings);
   const { theme, systemTheme, setTheme } = useTheme();
-  const { watch, handleSubmit, setValue } = useForm({
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  const { watch, handleSubmit, setValue, reset } = useForm<{
+    activeIntegrationId: number | null;
+    languageCode: string;
+    enableTranslation: boolean;
+  }>({
     defaultValues: {
-      readerEmail: settings?.readerEmail || "",
-      activeIntegrationId: settings?.activeIntegrationId || null,
-      languageCode: settings?.languageCode || "en",
-      enableTranslation: settings?.enableTranslation || false,
+      activeIntegrationId: null,
+      languageCode: "en",
+      enableTranslation: false,
     },
   });
   const [isPending, startTransition] = useTransition();
-  const [showNewIntegration, setShowNewIntegration] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { toast } = useToast();
 
+  // Set form values after mount to avoid hydration issues
+  useEffect(() => {
+    setMounted(true);
+    reset({
+      activeIntegrationId: settings?.activeIntegrationId ?? null,
+      languageCode: settings?.languageCode ?? "en",
+      enableTranslation: settings?.enableTranslation ?? false,
+    });
+  }, [settings, reset]);
+
   const enableTranslation = watch("enableTranslation");
-  const readerEmail = watch("readerEmail");
+
+  // Don't render form content until mounted
+  if (!mounted) {
+    return (
+      <div className="mx-auto p-4 sm:p-6 lg:p-10 max-w-4xl">
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
+              Settings
+            </h2>
+            <p className="text-sm text-muted-foreground">Loading...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const isCurrentThemeLight = Boolean(
     theme ? theme === "light" : systemTheme === "light"
   );
 
   async function onSubmit(data: {
-    readerEmail: string;
     activeIntegrationId: number | null;
     languageCode: string;
     enableTranslation: boolean;
@@ -93,7 +130,6 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
         await saveSettings({
           id: settings?.id,
           userId,
-          readerEmail: data.readerEmail,
           activeIntegrationId: data.activeIntegrationId,
           languageCode: data.languageCode,
           enableTranslation: data.enableTranslation,
@@ -111,29 +147,42 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
 
   async function handleCreateIntegration(
     type: string,
-    name: string,
-    config: Record<string, string>
+    config: Record<string, string>,
+    category: string
   ) {
+    console.log("Creating integration:", { type, config, userId });
     try {
-      await createIntegration({
+      // Use type as name since there's only one per type
+      const name =
+        type.charAt(0).toUpperCase() + type.slice(1).replace("_", " ");
+
+      const result = await createIntegration({
         userId,
+        category,
         type,
         name,
         config,
         isActive: integrations.length === 0,
       });
 
+      console.log("Integration created successfully:", result);
+
       toast({
         title: "Integration Created",
         description: `${name} integration created successfully`,
       });
 
-      setShowNewIntegration(false);
-      setNewIntegrationType("");
+      setIsDialogOpen(false);
+      // Refresh to show the new integration
+      router.refresh();
     } catch (error) {
+      console.error("Failed to create integration:", error);
       toast({
         title: "Integration Failed",
-        description: "Failed to create integration",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to create integration",
         variant: "destructive",
       });
     }
@@ -146,6 +195,7 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
         title: "Integration Deleted",
         description: `${name} integration deleted successfully`,
       });
+      router.refresh();
     } catch (error) {
       toast({
         title: "Delete Failed",
@@ -155,7 +205,7 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
     }
   }
 
-  const content = [
+  const generalSettings = [
     {
       label: "Appearance",
       fields: [
@@ -178,100 +228,6 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
       ],
     },
     {
-      label: "E-Reader Settings",
-      description: "Configure your e-reader delivery preferences",
-      fields: [
-        {
-          label: "E-Reader Email",
-          description: "Email address to send books to your e-reader",
-          component: (
-            <Input
-              defaultValue={settings?.readerEmail || ""}
-              onChange={(e) => setValue("readerEmail", e.target.value)}
-              placeholder="your-kindle@kindle.com or personal email"
-              className="text-sm"
-            />
-          ),
-        },
-      ],
-    },
-    {
-      label: "Integrations",
-      description: "Manage your cloud storage and email integrations",
-      fields: [
-        {
-          label: "Active Integrations",
-          description:
-            "Configure integrations for cloud sync and email delivery",
-          component: (
-            <div className="w-full space-y-3">
-              {integrations.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  No integrations configured
-                </p>
-              ) : (
-                <div className="space-y-2">
-                  {integrations.map((integration) => (
-                    <div
-                      key={integration.id}
-                      className="flex items-center justify-between p-3 border rounded-lg bg-card"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <SettingsIcon className="h-4 w-4 text-muted-foreground" />
-                        <div>
-                          <p className="font-medium text-sm">
-                            {integration.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {integration.type}{" "}
-                            {integration.isActive && "• Active"}
-                          </p>
-                        </div>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() =>
-                          handleDeleteIntegration(
-                            integration.id,
-                            integration.name
-                          )
-                        }
-                        className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Add New Integration Button */}
-              {!showNewIntegration ? (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowNewIntegration(true)}
-                  className="w-full sm:w-auto"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Integration
-                </Button>
-              ) : (
-                <NewIntegrationForm
-                  onSubmit={handleCreateIntegration}
-                  onCancel={() => {
-                    setShowNewIntegration(false);
-                    setNewIntegrationType("");
-                  }}
-                />
-              )}
-            </div>
-          ),
-        },
-      ],
-    },
-    {
       label: "Translation Settings",
       description: "Configure automatic translation for non-English content",
       fields: [
@@ -281,7 +237,6 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
             "Automatically translate content to your preferred language",
           component: (
             <Switch
-              disabled={!readerEmail}
               checked={enableTranslation}
               onCheckedChange={(checked) => {
                 setValue("enableTranslation", checked);
@@ -317,220 +272,174 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
   ];
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="mx-auto p-4 sm:p-10">
-      <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
-          <p className="text-muted-foreground">
-            Manage your account settings and preferences.
-          </p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/10 to-background">
+      <div className="container mx-auto px-4 pt-8 pb-6 max-w-4xl">
+        <div className="space-y-8">
+          <div className="text-center md:text-left">
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              Settings
+            </h2>
+            <p className="text-base text-muted-foreground mt-2">
+              Manage your account settings and preferences.
+            </p>
+          </div>
 
-        <Separator />
+          <Separator className="opacity-50" />
 
-        {content.map((section, index) => (
-          <div key={index} className="space-y-3">
-            <div>
-              <h3 className="text-lg font-medium">{section.label}</h3>
-              <p className="text-sm text-muted-foreground">
-                {section.description}
-              </p>
-            </div>
-            <div className="flex flex-col gap-6">
-              {section.fields.map((field, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label htmlFor={field.label.toLowerCase()}>
-                      {field.label}
-                    </Label>
-                    <p className="text-sm text-muted-foreground">
-                      {field.description}
-                    </p>
+          <Tabs defaultValue="general" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1">
+              <TabsTrigger
+                value="general"
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                <SettingsIcon className="h-4 w-4 mr-2" />
+                General
+              </TabsTrigger>
+              <TabsTrigger
+                value="integrations"
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Integrations
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="general" className="space-y-6 mt-6">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                {generalSettings.map((section, index) => (
+                  <div
+                    key={index}
+                    className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-200 space-y-6"
+                  >
+                    <div>
+                      <h3 className="text-lg font-semibold text-foreground">
+                        {section.label}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {section.description}
+                      </p>
+                    </div>
+                    <div className="space-y-6">
+                      {section.fields.map((field, fieldIndex) => (
+                        <div
+                          key={fieldIndex}
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4"
+                        >
+                          <div className="space-y-1 flex-1">
+                            <Label
+                              htmlFor={field.label.toLowerCase()}
+                              className="text-sm font-medium"
+                            >
+                              {field.label}
+                            </Label>
+                            <p className="text-xs sm:text-sm text-muted-foreground">
+                              {field.description}
+                            </p>
+                          </div>
+                          <div className="flex-shrink-0 w-full sm:w-auto sm:min-w-[200px]">
+                            {field.component}
+                          </div>
+                        </div>
+                      ))}
+                      {index !== generalSettings.length - 1 && (
+                        <Separator className="mt-6" />
+                      )}
+                    </div>
                   </div>
-                  <div className="flex justify-end w-1/3">
-                    {field.component}
-                  </div>
+                ))}
+
+                <div className="flex justify-center sm:justify-end pt-4">
+                  <Button
+                    type="submit"
+                    disabled={isPending}
+                    className="w-full sm:w-auto"
+                  >
+                    {isPending ? "Saving..." : "Save changes"}
+                  </Button>
                 </div>
-              ))}
-              {index !== content.length - 1 && <Separator />}
-            </div>
-          </div>
-        ))}
+              </form>
+            </TabsContent>
 
-        <div className="flex justify-end">
-          <Button type="submit" disabled={isPending}>
-            {isPending ? "Saving..." : "Save changes"}
-          </Button>
+            <TabsContent value="integrations" className="space-y-6 mt-6">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-base sm:text-lg font-medium">
+                    Integrations
+                  </h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground">
+                    Manage your cloud storage and email integrations
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  {integrations.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">
+                      No integrations configured
+                    </p>
+                  ) : (
+                    <div className="space-y-3">
+                      {integrations.map((integration) => (
+                        <div
+                          key={integration.id}
+                          className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-border/50 rounded-lg bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-200 gap-3"
+                        >
+                          <div className="flex items-center space-x-3 min-w-0 flex-1">
+                            <SettingsIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                            <div className="min-w-0 flex-1">
+                              <p className="font-medium text-sm truncate">
+                                {integration.name}
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {integration.type.replace("_", " ")}{" "}
+                                {integration.isActive && "• Active"}
+                              </p>
+                            </div>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              handleDeleteIntegration(
+                                integration.id,
+                                integration.name
+                              )
+                            }
+                            className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground flex-shrink-0 self-start sm:self-center"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="w-full">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Integration
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[600px]">
+                      <DialogHeader>
+                        <DialogTitle>Add New Integration</DialogTitle>
+                      </DialogHeader>
+                      <NewIntegrationForm
+                        onSubmit={handleCreateIntegration}
+                        onCancel={() => setIsDialogOpen(false)}
+                        onSuccess={() => {
+                          setIsDialogOpen(false);
+                          router.refresh();
+                        }}
+                      />
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
-    </form>
-  );
-}
-
-function NewIntegrationForm({
-  onSubmit,
-  onCancel,
-}: {
-  onSubmit: (
-    type: string,
-    name: string,
-    config: Record<string, string>
-  ) => void;
-  onCancel: () => void;
-}) {
-  const [type, setType] = useState("");
-  const [name, setName] = useState("");
-  const [config, setConfig] = useState<Record<string, string>>({});
-
-  const integrationTypes = [
-    {
-      value: "google_drive",
-      label: "Google Drive",
-      configFields: ["accessToken", "folderId"],
-    },
-    { value: "dropbox", label: "Dropbox", configFields: ["accessToken"] },
-    {
-      value: "webdav",
-      label: "WebDAV Server (Koofr/Nextcloud)",
-      configFields: ["url", "username", "password"],
-    },
-    {
-      value: "email",
-      label: "Email Delivery",
-      configFields: [
-        "smtp_host",
-        "smtp_port",
-        "smtp_username",
-        "smtp_password",
-        "from_email",
-      ],
-    },
-  ];
-
-  const selectedType = integrationTypes.find((t) => t.value === type);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!type || !name || !selectedType) return;
-
-    const isValid = selectedType.configFields.every((field) =>
-      config[field]?.trim()
-    );
-    if (!isValid) return;
-
-    onSubmit(type, name, config);
-  };
-
-  const updateConfig = (field: string, value: string) => {
-    setConfig((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const getFieldLabel = (field: string): string => {
-    const labels: Record<string, string> = {
-      url: "Server URL",
-      username: "Username",
-      password: "Password",
-      accessToken: "Access Token",
-      folderId: "Parent Folder ID (Optional)",
-      smtp_host: "SMTP Host",
-      smtp_port: "SMTP Port",
-      smtp_username: "SMTP Username",
-      smtp_password: "SMTP Password",
-      from_email: "From Email",
-    };
-    return labels[field] || field;
-  };
-
-  const getFieldPlaceholder = (field: string): string => {
-    const placeholders: Record<string, string> = {
-      url: "https://app.koofr.net/dav/Koofr",
-      username: "your-username", 
-      password: "your-password",
-      accessToken: field === "accessToken" && type === "google_drive" 
-        ? "Your Google Drive OAuth2 access token" 
-        : "Your access token",
-      folderId: "Leave empty to use root folder",
-      smtp_host: "smtp.gmail.com",
-      smtp_port: "587", 
-      smtp_username: "your-email@gmail.com",
-      smtp_password: "your-app-password",
-      from_email: "your-email@gmail.com",
-    };
-    return placeholders[field] || "";
-  };
-
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-4 p-4 border rounded-lg bg-muted/30"
-    >
-      <div className="space-y-2">
-        <Label>Integration Type</Label>
-        <Select
-          value={type}
-          onValueChange={(value) => {
-            setType(value);
-            setConfig({});
-          }}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select integration type" />
-          </SelectTrigger>
-          <SelectContent>
-            {integrationTypes.map((intType) => (
-              <SelectItem key={intType.value} value={intType.value}>
-                {intType.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {type && (
-        <>
-          <div className="space-y-2">
-            <Label>Integration Name</Label>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={`My ${selectedType?.label}`}
-              required
-            />
-          </div>
-
-          {selectedType?.configFields.map((field) => (
-            <div key={field} className="space-y-2">
-              <Label>{getFieldLabel(field)}</Label>
-              <Input
-                type={
-                  field.includes("password") || field.includes("token")
-                    ? "password"
-                    : "text"
-                }
-                value={config[field] || ""}
-                onChange={(e) => updateConfig(field, e.target.value)}
-                placeholder={getFieldPlaceholder(field)}
-                required={field !== "folderId"}
-              />
-            </div>
-          ))}
-
-          <div className="flex flex-col sm:flex-row gap-2 pt-2">
-            <Button type="submit" size="sm" className="flex-1 sm:flex-initial">
-              Create Integration
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={onCancel}
-              className="flex-1 sm:flex-initial"
-            >
-              Cancel
-            </Button>
-          </div>
-        </>
-      )}
-    </form>
+    </div>
   );
 }

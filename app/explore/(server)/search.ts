@@ -24,14 +24,30 @@ export interface SearchResult {
   sourceUrl: string;
 }
 
-export async function executeSearch(searchParams: SavedSearchSearch, page = 1): Promise<{
+export async function executeSearch(
+  searchParams: SavedSearchSearch,
+  page = 1
+): Promise<{
   results: SearchResult[];
   totalPages: number;
   currentPage: number;
   totalResults: number;
 }> {
   const ao3Client = await getAo3Client();
-  
+
+  // Parameter mapping from saved search format to AO3 search format  
+  const parameterMapping: Record<string, string> = {
+    rating_ids: "rating_ids",
+    category_ids: "category_ids",
+    fandom: "fandom_names", 
+    character: "character_names",
+    relationship: "relationship_names", 
+    tag: "freeform_names",
+    complete: "complete",
+    sort_column: "sort_column", 
+    query: "query",
+  };
+
   // Convert search params to AO3 format
   const ao3SearchParams: Record<string, any> = {
     page,
@@ -39,27 +55,31 @@ export async function executeSearch(searchParams: SavedSearchSearch, page = 1): 
 
   // Handle single values and arrays
   for (const [key, value] of Object.entries(searchParams)) {
+    const ao3ParamName = parameterMapping[key] || key;
     if (Array.isArray(value)) {
-      // Handle excluded tags
-      const included = value.filter(item => !item.excluded).map(item => item.id || item.name);
-      const excluded = value.filter(item => item.excluded).map(item => item.id || item.name);
-      
+      const included = value
+        .filter((item) => !item.excluded)
+        .map((item) => item.id || item.name);
+      const excluded = value
+        .filter((item) => item.excluded)
+        .map((item) => item.id || item.name);
+
       if (included.length > 0) {
-        ao3SearchParams[key] = included.join(',');
+        ao3SearchParams[ao3ParamName] = included.join(",");
       }
       if (excluded.length > 0) {
-        ao3SearchParams[`exclude_${key}`] = excluded.join(',');
+        ao3SearchParams[`exclude_${ao3ParamName}`] = excluded.join(",");
       }
-    } else if (typeof value === 'object' && value !== null) {
+    } else if (typeof value === "object" && value !== null) {
       // Handle single value objects
       if (value.excluded) {
-        ao3SearchParams[`exclude_${key}`] = value.id || value.name;
+        ao3SearchParams[`exclude_${ao3ParamName}`] = value.id || value.name;
       } else {
-        ao3SearchParams[key] = value.id || value.name;
+        ao3SearchParams[ao3ParamName] = value.id || value.name;
       }
     } else {
       // Handle primitive values
-      ao3SearchParams[key] = value;
+      ao3SearchParams[ao3ParamName] = value;
     }
   }
 
@@ -72,13 +92,19 @@ export async function executeSearch(searchParams: SavedSearchSearch, page = 1): 
   }
 }
 
-export async function executeQuickSearch(query: string, page = 1): Promise<{
+export async function executeQuickSearch(
+  query: string,
+  page = 1
+): Promise<{
   results: SearchResult[];
   totalPages: number;
   currentPage: number;
   totalResults: number;
 }> {
-  return executeSearch({
-    query: { id: query, name: query }
-  }, page);
+  return executeSearch(
+    {
+      query: { id: query, name: query },
+    },
+    page
+  );
 }

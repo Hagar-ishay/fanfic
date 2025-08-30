@@ -12,15 +12,14 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { HelpCircleIcon, Home, Library, LogOut, SearchIcon, Settings } from "lucide-react";
-import { Search } from "@/library/(components)/Search";
+import { HelpCircleIcon, Home, Library, LogOut, Settings } from "lucide-react";
 import { MdOutlineExplore } from "react-icons/md";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { UserFanfic } from "@/db/types";
 import { LibraryHelp } from "@/library/(components)/LibraryHelp";
 import { Help } from "@/(top-bar)/(components)/Help";
-import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const ITEMS = [
   {
@@ -34,11 +33,6 @@ const ITEMS = [
     icon: MdOutlineExplore,
   },
   {
-    title: "Search",
-    component: Search,
-    icon: SearchIcon,
-  },
-  {
     title: "Library",
     url: "/library",
     icon: Library,
@@ -50,65 +44,67 @@ const ITEMS = [
   },
 ];
 
-export function AppSidebar({ userFanfics }: { userFanfics: UserFanfic[] }) {
-  const { data: session } = useSession();
+export function AppSidebar() {
+  const [isMounted, setIsMounted] = useState(false);
+  const { data: session, status } = useSession();
   const { isMobile } = useSidebar();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Handle SSR and loading states
+  if (!isMounted || status === "loading") {
+    return null;
+  }
 
   if (!session) {
     return null;
   }
 
   return (
-    <Sidebar side="left" className="h-screen" collapsible="icon">
-      <SidebarContent>
-        <SidebarHeader>{isMobile && <HomeIcon />}</SidebarHeader>
+    <Sidebar
+      side="left"
+      className="h-screen bg-secondary text-secondary-foreground border-r border-secondary/20"
+      collapsible="icon"
+    >
+      <SidebarContent className="bg-secondary">
+        <SidebarHeader className="bg-secondary/95  border-secondary-foreground/10">
+          {isMobile && <HomeIcon />}
+        </SidebarHeader>
 
-        <SidebarMenu>
-          {ITEMS.map((item) =>
-            item.component ? (
-              <SidebarMenuItem key={item.title} className="flex items-center ml-2">
-                <item.component
-                  userFanfics={userFanfics}
-                  trigger={
-                    <SidebarMenuButton>
-                      {item.icon && <item.icon className="w-6 h-6 mr-2" />}
-                      {item.title}
-                    </SidebarMenuButton>
-                  }
-                />
+        <SidebarMenu className="px-2 py-4">
+          {ITEMS.map((item) => (
+            <Link key={item.url} href={item.url || ""}>
+              <SidebarMenuItem className="mb-1">
+                <SidebarMenuButton className="w-full hover:bg-secondary-foreground/10 text-secondary-foreground hover:text-secondary-foreground transition-all duration-200 rounded-lg">
+                  {item.icon && <item.icon className="w-5 h-5 mr-3" />}
+                  {item.title}
+                </SidebarMenuButton>
               </SidebarMenuItem>
-            ) : (
-              <Link key={item.url} href={item.url || ""}>
-                <SidebarMenuItem className="flex items-center ml-2">
-                  <SidebarMenuButton>
-                    {item.icon && <item.icon className="w-6 h-6 mr-2" />}
-                    {item.title}
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </Link>
-            )
-          )}
+            </Link>
+          ))}
         </SidebarMenu>
       </SidebarContent>
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem className="flex items-center">
+      <SidebarFooter className="bg-secondary border-secondary-foreground/10">
+        <SidebarMenu className="py-2">
+          <SidebarMenuItem className="mb-1">
             <LibraryHelp
               trigger={
-                <SidebarMenuButton>
-                  <HelpCircleIcon />
+                <SidebarMenuButton className="w-full hover:bg-secondary-foreground/10 text-secondary-foreground hover:text-secondary-foreground transition-all duration-200 rounded-lg">
+                  <HelpCircleIcon className="w-5 h-5 mr-3" />
                   <p>Help</p>
                 </SidebarMenuButton>
               }
             />
           </SidebarMenuItem>
-          <SidebarMenuItem className="flex items-center">
+          <SidebarMenuItem>
             <SidebarMenuButton
               onClick={() => signOut({ redirectTo: "/signin" })}
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="w-full hover:bg-secondary-foreground/10 text-secondary-foreground hover:text-secondary-foreground transition-all duration-200 rounded-lg"
             >
-              <LogOut className="w-6 h-6 mr-2" />
-              <p>Signed in as {session?.user?.name}</p>
+              <LogOut className="w-5 h-5 mr-3" />
+              <p className="truncate">Signed in as {session?.user?.name}</p>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

@@ -1,10 +1,15 @@
 "use server";
 
-import { eq, and, or, desc, asc } from "drizzle-orm";
+import { eq, and, asc } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "./db";
-import { fanficIntegrations, sectionFanfics, fanfics, sections, integrations } from "./schema";
-import type { NewFanficIntegration, FanficIntegration } from "./types";
+import {
+  fanficIntegrations,
+  sectionFanfics,
+  fanfics,
+  sections,
+  integrations,
+} from "./schema";
 
 export async function getFanficIntegrations(sectionFanficId: number) {
   "use cache";
@@ -24,11 +29,15 @@ export async function getFanficIntegrations(sectionFanficId: number) {
         id: integrations.id,
         type: integrations.type,
         name: integrations.name,
+        category: integrations.category,
         config: integrations.config,
       },
     })
     .from(fanficIntegrations)
-    .innerJoin(integrations, eq(fanficIntegrations.integrationId, integrations.id))
+    .innerJoin(
+      integrations,
+      eq(fanficIntegrations.integrationId, integrations.id)
+    )
     .where(eq(fanficIntegrations.sectionFanficId, sectionFanficId))
     .orderBy(asc(integrations.type));
 }
@@ -56,28 +65,37 @@ export async function createFanficIntegration(
       syncStatus: "pending",
     })
     .returning();
-  
+
   revalidatePath("/library");
-  return result[0];
+
+  // Return detailed structure using shared query builder
+  const detailedResult = await buildDetailedFanficIntegrationQuery().where(
+    eq(fanficIntegrations.id, result[0].id)
+  );
+
+  return detailedResult[0];
 }
 
-export async function updateLastTriggered(id: number, timestamp: Date = new Date()) {
+export async function updateLastTriggered(
+  id: number,
+  timestamp: Date = new Date()
+) {
   const result = await db
     .update(fanficIntegrations)
-    .set({ 
+    .set({
       lastTriggered: timestamp,
       syncStatus: "success",
       lastError: null,
     })
     .where(eq(fanficIntegrations.id, id))
     .returning();
-    
+
   revalidatePath("/library");
   return result[0];
 }
 
 export async function updateSyncStatus(
-  id: number, 
+  id: number,
   status: "pending" | "syncing" | "success" | "error",
   error?: string | null,
   cloudPath?: string
@@ -86,11 +104,11 @@ export async function updateSyncStatus(
     syncStatus: status,
     lastError: error || null,
   };
-  
+
   if (cloudPath) {
     updateData.cloudPath = cloudPath;
   }
-  
+
   if (status === "success") {
     updateData.lastTriggered = new Date();
   }
@@ -100,12 +118,15 @@ export async function updateSyncStatus(
     .set(updateData)
     .where(eq(fanficIntegrations.id, id))
     .returning();
-    
+
   revalidatePath("/library");
   return result[0];
 }
 
-export async function enableFanficSync(sectionFanficId: number, integrationId: number) {
+export async function enableFanficSync(
+  sectionFanficId: number,
+  integrationId: number
+) {
   // Check if record exists
   const existing = await db
     .select()
@@ -130,7 +151,10 @@ export async function enableFanficSync(sectionFanficId: number, integrationId: n
   }
 }
 
-export async function disableFanficSync(sectionFanficId: number, integrationId: number) {
+export async function disableFanficSync(
+  sectionFanficId: number,
+  integrationId: number
+) {
   const result = await db
     .update(fanficIntegrations)
     .set({ enabled: false })
@@ -141,14 +165,14 @@ export async function disableFanficSync(sectionFanficId: number, integrationId: 
       )
     )
     .returning();
-    
+
   revalidatePath("/library");
   return result[0];
 }
 
-export async function getFanficsNeedingSync() {
-  "use cache";
-  return await db
+// Reusable query builder for detailed fanfic integration data
+function buildDetailedFanficIntegrationQuery() {
+  return db
     .select({
       fanficIntegrationId: fanficIntegrations.id,
       sectionFanficId: fanficIntegrations.sectionFanficId,
@@ -156,12 +180,14 @@ export async function getFanficsNeedingSync() {
       lastTriggered: fanficIntegrations.lastTriggered,
       syncStatus: fanficIntegrations.syncStatus,
       cloudPath: fanficIntegrations.cloudPath,
+      enabled: fanficIntegrations.enabled,
       fanfic: {
         id: fanfics.id,
         externalId: fanfics.externalId,
         title: fanfics.title,
         author: fanfics.author,
         updatedAt: fanfics.updatedAt,
+        downloadLink: fanfics.downloadLink,
       },
       section: {
         id: sections.id,
@@ -176,21 +202,27 @@ export async function getFanficsNeedingSync() {
       },
     })
     .from(fanficIntegrations)
-    .innerJoin(sectionFanfics, eq(fanficIntegrations.sectionFanficId, sectionFanfics.id))
+    .innerJoin(
+      sectionFanfics,
+      eq(fanficIntegrations.sectionFanficId, sectionFanfics.id)
+    )
     .innerJoin(fanfics, eq(sectionFanfics.fanficId, fanfics.id))
     .innerJoin(sections, eq(sectionFanfics.sectionId, sections.id))
-    .innerJoin(integrations, eq(fanficIntegrations.integrationId, integrations.id))
-    .where(
-      and(
-        eq(fanficIntegrations.enabled, true),
-        // Only cloud integrations (not email)
-        or(
-          eq(integrations.type, "google_drive"),
-          eq(integrations.type, "webdav"), 
-          eq(integrations.type, "dropbox")
-        )
-      )
+    .innerJoin(
+      integrations,
+      eq(fanficIntegrations.integrationId, integrations.id)
     );
+}
+
+export async function getFanficsNeedingSync() {
+  "use cache";
+  return await buildDetailedFanficIntegrationQuery().where(
+    and(
+      eq(fanficIntegrations.enabled, true),
+      // Only cloud integrations (not email)
+      eq(integrations.category, "cloud_storage")
+    )
+  );
 }
 
 export async function deleteFanficIntegration(id: number) {

@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import React, { useState, useTransition } from "react";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { SavedSearches } from "./SavedSearches";
-import { QuickSearch } from "./QuickSearch";
 import { ImprovedSearchBuilder } from "./ImprovedSearchBuilder";
 import { SearchResults } from "./SearchResults";
-import { executeSearch, executeQuickSearch, SearchResult } from "../(server)/search";
+import {
+  executeSearch,
+  SearchResult,
+} from "../(server)/search";
 import { saveSearch } from "@/db/savedSearches";
 import { SavedSearch, SavedSearchSearch } from "@/db/types";
 import { useToast } from "@/hooks/use-toast";
@@ -18,6 +20,7 @@ import { Plus, BookOpen, Search, History } from "lucide-react";
 interface ExplorePageProps {
   savedSearches: SavedSearch[];
   userId: string;
+  onSearchResults?: (callback: (results: SearchResults) => void) => void;
 }
 
 type SearchResults = {
@@ -27,32 +30,28 @@ type SearchResults = {
   totalResults: number;
 };
 
-export function ExplorePage({ savedSearches, userId }: ExplorePageProps) {
-  const [searchResults, setSearchResults] = useState<SearchResults | null>(null);
+export function ExplorePage({ savedSearches, userId, onSearchResults }: ExplorePageProps) {
+  const [searchResults, setSearchResults] = useState<SearchResults | null>(
+    null
+  );
   const [currentPage, setCurrentPage] = useState(1);
-  const [lastSearchParams, setLastSearchParams] = useState<SavedSearchSearch | null>(null);
+  const [lastSearchParams, setLastSearchParams] =
+    useState<SavedSearchSearch | null>(null);
   const [isPending, startTransition] = useTransition();
-  const [activeTab, setActiveTab] = useState("quick");
+  const [activeTab, setActiveTab] = useState("advanced");
   const { toast } = useToast();
 
-  const handleQuickSearch = (query: string) => {
-    startTransition(async () => {
-      try {
-        const results = await executeQuickSearch(query, 1);
+  React.useEffect(() => {
+    if (onSearchResults) {
+      onSearchResults((results) => {
         setSearchResults(results);
         setCurrentPage(1);
-        setLastSearchParams({ query: { id: query, name: query } });
+        setLastSearchParams({ query: { id: "topbar-search", name: "Topbar Search" } });
         setActiveTab("results");
-      } catch (error) {
-        console.error("Search error:", error);
-        toast({
-          title: "Search Error",
-          description: "Failed to execute search. Please try again.",
-          variant: "destructive",
-        });
-      }
-    });
-  };
+      });
+    }
+  }, [onSearchResults]);
+
 
   const handleAdvancedSearch = (searchParams: SavedSearchSearch) => {
     startTransition(async () => {
@@ -73,7 +72,10 @@ export function ExplorePage({ savedSearches, userId }: ExplorePageProps) {
     });
   };
 
-  const handleSaveSearch = async (name: string, searchParams: SavedSearchSearch) => {
+  const handleSaveSearch = async (
+    name: string,
+    searchParams: SavedSearchSearch
+  ) => {
     try {
       await saveSearch({
         name,
@@ -96,7 +98,7 @@ export function ExplorePage({ savedSearches, userId }: ExplorePageProps) {
 
   const handlePageChange = (page: number) => {
     if (!lastSearchParams) return;
-    
+
     startTransition(async () => {
       try {
         const results = await executeSearch(lastSearchParams, page);
@@ -122,54 +124,55 @@ export function ExplorePage({ savedSearches, userId }: ExplorePageProps) {
       <div className="space-y-4 sm:space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">Explore Fanfiction</h1>
+            <h1 className="text-2xl sm:text-3xl pt-5 font-bold">
+              Explore Fanfiction
+            </h1>
             <p className="text-sm sm:text-base text-muted-foreground">
               Search and discover new stories from Archive of Our Own
             </p>
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-1">
-            <TabsTrigger value="quick" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-              <Search className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Quick Search</span>
-              <span className="sm:hidden">Quick</span>
-            </TabsTrigger>
-            <TabsTrigger value="advanced" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-4"
+        >
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 gap-1">
+            <TabsTrigger
+              value="advanced"
+              className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+            >
               <BookOpen className="h-3 w-3 sm:h-4 sm:w-4" />
               <span className="hidden sm:inline">Advanced Search</span>
               <span className="sm:hidden">Advanced</span>
             </TabsTrigger>
-            <TabsTrigger value="saved" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+            <TabsTrigger
+              value="saved"
+              className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+            >
               <History className="h-3 w-3 sm:h-4 sm:w-4" />
-              <span className="hidden sm:inline">Saved ({savedSearches.length})</span>
+              <span className="hidden sm:inline">
+                Saved ({savedSearches.length})
+              </span>
               <span className="sm:hidden">Saved</span>
             </TabsTrigger>
             {searchResults && (
-              <TabsTrigger value="results" className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
-                <span className="hidden sm:inline">Results ({searchResults.totalResults})</span>
+              <TabsTrigger
+                value="results"
+                className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
+              >
+                <span className="hidden sm:inline">
+                  Results ({searchResults.totalResults})
+                </span>
                 <span className="sm:hidden">Results</span>
               </TabsTrigger>
             )}
           </TabsList>
 
-          <TabsContent value="quick" className="space-y-4">
-            <Card className="p-6">
-              <div className="space-y-4">
-                <div>
-                  <h2 className="text-xl font-semibold mb-2">Quick Search</h2>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Enter keywords to search across titles, summaries, and tags
-                  </p>
-                </div>
-                <QuickSearch onSearch={handleQuickSearch} isLoading={isPending} />
-              </div>
-            </Card>
-          </TabsContent>
 
           <TabsContent value="advanced" className="space-y-4">
-            <ImprovedSearchBuilder 
+            <ImprovedSearchBuilder
               onSearch={handleAdvancedSearch}
               onSaveSearch={handleSaveSearch}
               isLoading={isPending}
@@ -190,9 +193,20 @@ export function ExplorePage({ savedSearches, userId }: ExplorePageProps) {
                   </div>
                   <div className="space-y-4">
                     {savedSearches.map((search) => (
-                      <Card key={search.id} className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={() => handleSavedSearchSelect(search)}>
-                        <SavedSearches savedSearches={[search]} />
+                      <Card
+                        key={search.id}
+                        className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                        onClick={() => handleSavedSearchSelect(search)}
+                      >
+                        <SavedSearches 
+                          savedSearches={[search]} 
+                          onSearch={(params, results) => {
+                            setSearchResults(results);
+                            setCurrentPage(1);
+                            setLastSearchParams(params);
+                            setActiveTab("results");
+                          }}
+                        />
                       </Card>
                     ))}
                   </div>
@@ -203,12 +217,15 @@ export function ExplorePage({ savedSearches, userId }: ExplorePageProps) {
                 <div className="text-center py-8 space-y-4">
                   <div className="text-muted-foreground">
                     <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <h3 className="text-lg font-medium mb-2">No Saved Searches</h3>
+                    <h3 className="text-lg font-medium mb-2">
+                      No Saved Searches
+                    </h3>
                     <p className="text-sm">
-                      Create and save search queries to quickly access them later.
+                      Create and save search queries to quickly access them
+                      later.
                     </p>
                   </div>
-                  <Button 
+                  <Button
                     onClick={() => setActiveTab("advanced")}
                     variant="outline"
                   >

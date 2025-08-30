@@ -93,14 +93,13 @@ export const FanficStats = ({ fanfic }: { fanfic: UserFanfic }) => {
   ];
 
   const personalStats = [
-    {
-      icon: <Send className="h-4 w-4" />,
-      label: "Last Sent",
-      value: formatDate(fanfic.lastSent),
-      tooltip: fanfic.lastSent
-        ? DateTime.fromJSDate(fanfic.lastSent).toLocaleString()
-        : undefined,
-    },
+    // TODO: Implement integration-based last sent tracking
+    // {
+    //   icon: <Send className="h-4 w-4" />,
+    //   label: "Last Sent",
+    //   value: formatDate(lastSent),
+    //   tooltip: lastSent ? DateTime.fromJSDate(lastSent).toLocaleString() : undefined,
+    // },
     fanfic.latestStartingChapter && {
       icon: <BookOpen className="h-4 w-4" />,
       label: "New Chapters",

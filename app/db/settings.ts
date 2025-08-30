@@ -12,7 +12,6 @@ export async function getSettings(userId: string) {
 
   return (
     userSettings[0] || {
-      readerEmail: "",
       activeIntegrationId: null,
       languageCode: "en",
       enableTranslation: false,
@@ -27,7 +26,6 @@ export async function createSettings(data: SettingsData) {
     .insert(settings)
     .values({
       userId: data.userId,
-      readerEmail: data.readerEmail,
       activeIntegrationId: data.activeIntegrationId,
       languageCode: data.languageCode,
       enableTranslation: data.enableTranslation,
@@ -37,7 +35,6 @@ export async function createSettings(data: SettingsData) {
 
 export async function updateSettings(id: number, data: SettingsData) {
   const updateData: Partial<NewSettings> = {
-    readerEmail: data.readerEmail,
     activeIntegrationId: data.activeIntegrationId,
     languageCode: data.languageCode,
     enableTranslation: data.enableTranslation,

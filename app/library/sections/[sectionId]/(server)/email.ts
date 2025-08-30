@@ -16,6 +16,7 @@ import { promisify } from "node:util";
 import nodemailer from "nodemailer";
 import { ENV } from "../../../../config";
 import { getSettings } from "@/db/settings";
+import { getUserEmailAddress, updateFanficIntegrationLastTriggered } from "@/db/integrations";
 
 const unlinkAsync = promisify(fs.unlink);
 const statAsync = promisify(fs.stat);
@@ -36,9 +37,9 @@ export async function emailSender({
 }) {
   const settings = await getSettings(fanfic.userId);
   const translationLanguage = settings.languageCode;
-  const readerEmail = settings.readerEmail;
+  const readerEmail = await getUserEmailAddress(fanfic.userId);
   if (!readerEmail) {
-    throw new Error("Email not found");
+    throw new Error("No email integration configured");
   }
   const startingChapter = fanfic.latestStartingChapter
     ? fanfic.latestStartingChapter + 1
@@ -98,9 +99,11 @@ export async function emailSender({
       downloadPath
     );
     await updateSectionFanfic(fanfic.sectionId, fanfic.id, {
-      lastSent: new Date(Date.now()),
       latestStartingChapter: latestFinalChapter,
     });
+    
+    // Update the fanficIntegration lastTriggered
+    await updateFanficIntegrationLastTriggered(fanfic.id, fanfic.userId);
 
     return { success: true, message: "" };
   } catch (error) {

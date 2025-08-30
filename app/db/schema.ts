@@ -169,7 +169,6 @@ export const sectionFanfics = schema.table(
     kudos: boolean("kudos").default(false),
     creationTime: timestamp("creation_time").notNull().defaultNow(),
     updateTime: timestamp("update_time").$onUpdate(() => new Date()),
-    lastSent: timestamp("last_sent"),
     latestStartingChapter: integer("latest_starting_chapter"),
     editableLabels: jsonb("edditable_labels")
       .$type<string[]>()
@@ -239,6 +238,7 @@ export const integrations = schema.table(
       .references(() => users.id),
     type: varchar("type").notNull(),
     name: varchar("name").notNull(),
+    category: varchar("category").notNull(),
     config: jsonb("config").$type<Record<string, any>>().notNull(),
     isActive: boolean("is_active").notNull().default(true),
     creationTime: timestamp("creation_time").notNull().defaultNow(),
@@ -286,7 +286,6 @@ export const settings = schema.table("settings", {
   userId: varchar("user_id")
     .notNull()
     .references(() => users.id),
-  readerEmail: varchar("reader_email"),
   activeIntegrationId: integer("active_integration_id").references(
     () => integrations.id
   ),

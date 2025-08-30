@@ -18,13 +18,13 @@ export function Section({
   return (
     <>
       <Card
-        className="cursor-pointer p-4 border-none border-0 shadow-none hover:bg-accent/50 transition-colors relative"
+        className="cursor-pointer bg-card/80 backdrop-blur-sm border border-border/50 shadow-md hover:shadow-lg hover:bg-accent/30 transition-all duration-200 relative group"
         onContextMenu={(e) => {
           e.preventDefault();
           triggerRef.current?.click();
         }}
       >
-        <CardContent className="flex items-center py-4 pt-5 px-3 justify-between">
+        <CardContent className="flex items-center py-5 px-6 justify-between">
           <div className="flex items-center">
             <div
               onClick={(e) => {
@@ -37,14 +37,13 @@ export function Section({
                 trigger={<div hidden ref={triggerRef} />}
               />
             </div>
-            <span className="pl-2 text-lg font-semibold text-foreground/90">
+            <span className="pl-2 text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
               {section.name}
             </span>
           </div>
-          <ChevronRight className="ml-2 h-4 w-4 text-muted-foreground" />
+          <ChevronRight className="ml-2 h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
         </CardContent>
       </Card>
-      <Separator className="opacity-50" />
     </>
   );
 }

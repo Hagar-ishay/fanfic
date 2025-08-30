@@ -46,9 +46,13 @@ export function AddNewSectionButton() {
   return (
     <DrawerDialog>
       <DrawerDialogTrigger asChild>
-        <Button size="sm" variant="default">
-          <ListPlus />
-          <p className="mt-1 text-[10px]">New Section</p>
+        <Button 
+          size="default" 
+          variant="default"
+          className="h-9 px-3 shadow-sm hover:shadow-md transition-all duration-200 bg-primary hover:bg-primary/90"
+        >
+          <ListPlus className="h-4 w-4 mr-2" />
+          <span className="text-sm font-medium">New Section</span>
         </Button>
       </DrawerDialogTrigger>
       <DrawerDialogContent>
