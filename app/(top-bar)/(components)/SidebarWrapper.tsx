@@ -7,11 +7,10 @@ import { connection } from "next/dist/server/request/connection";
 export async function SidebarWrapper() {
   await connection();
   const session = await auth();
-  
+
   if (!session?.user) {
     return null;
   }
 
-  const userFanfics = await listUserFanfics(session.user.id);
-  return <AppSidebar userFanfics={userFanfics} />;
+  return <AppSidebar />;
 }
