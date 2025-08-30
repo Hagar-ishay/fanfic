@@ -10,6 +10,7 @@ import {
   verificationTokens,
 } from "@/db/schema";
 import logger from "@/logger";
+import { errorMessage } from "@/lib/utils";
 
 interface TokenWithRefresh {
   refreshToken?: string;
@@ -43,7 +44,7 @@ async function refreshAccessToken(token: TokenWithRefresh) {
     };
 
     if (!response.ok) {
-      logger.error("Token refresh failed:", refreshedTokens);
+      logger.error(`Token refresh failed: ${JSON.stringify(refreshedTokens)}`);
       throw new Error(refreshedTokens.error || "Token refresh failed");
     }
 
@@ -57,7 +58,7 @@ async function refreshAccessToken(token: TokenWithRefresh) {
       refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
     };
   } catch (error) {
-    logger.error("Error refreshing access token", error);
+    logger.error(`Error refreshing access token: ${errorMessage(error)}`);
 
     return {
       ...token,
@@ -83,6 +84,8 @@ export const { handlers, auth } = NextAuth({
         params: {
           scope:
             "openid email profile https://www.googleapis.com/auth/drive.file",
+          access_type: "offline",
+          prompt: "consent",
         },
       },
     }),

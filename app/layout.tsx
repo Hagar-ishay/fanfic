@@ -1,4 +1,4 @@
-import { FontProvider } from "@/components/base/FontProvider";
+import { FontProvider, fontClasses } from "@/components/base/FontProvider";
 import { ThemeProvider } from "@/components/base/theme";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/toaster";
@@ -24,7 +24,7 @@ export default function RootLayout({
     <AuthProvider>
       <html suppressHydrationWarning>
         <FontProvider>
-          <body className="h-screen overflow-hidden">
+          <body className={`h-screen overflow-hidden ${fontClasses}`}>
             <ThemeProvider
               attribute="class"
               defaultTheme="system"
@@ -39,9 +39,9 @@ export default function RootLayout({
                     >
                       <SidebarWrapper />
                     </Suspense>
-                    <SidebarInset className="">
+                    <SidebarInset className="flex flex-col h-screen">
                       <TopbarWrapper />
-                      <main>{children}</main>
+                      <main className="flex-1 overflow-y-auto">{children}</main>
                       <Toaster />
                     </SidebarInset>
                   </>

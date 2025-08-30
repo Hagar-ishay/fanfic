@@ -1,19 +1,17 @@
 "use client";
 
 import { Section } from "@/db/types";
-import { SendHorizontal, Trash2 } from "lucide-react";
-import React, { useRef } from "react";
+import { Trash2 } from "lucide-react";
+import React from "react";
 
 import { ContextMenu } from "@/components/base/ContextMenu";
-import { deleteSection, transferSection } from "@/db/sections";
+import { deleteSection } from "@/db/sections";
 
 export function SectionContextMenu({
   section,
-  transferableSections,
   trigger,
 }: {
   section: Section;
-  transferableSections: Section[];
   trigger: React.ReactNode;
 }) {
   async function onDelete() {

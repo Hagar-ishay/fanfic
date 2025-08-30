@@ -135,7 +135,8 @@ async function ParseFanfic(
   const chapters: { data: string; title: string }[] = [];
 
   return new Promise<{ data: string; title: string }[]>((resolve, reject) => {
-    epub.on("end", async () => {
+    epub.on("end", () => {
+      void (async () => {
       try {
         const startingSlice =
           sendLatestChapters && startingChapter ? startingChapter : 0;
@@ -156,8 +157,9 @@ async function ParseFanfic(
         }
         resolve(chapters);
       } catch (error) {
-        reject(error);
+        reject(new Error(String(error)));
       }
+      })();
     });
 
     epub.parse();

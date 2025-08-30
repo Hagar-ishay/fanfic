@@ -15,11 +15,21 @@ type FanficListProps = {
   fanficIntegrationsMap: Record<number, any[]>;
 };
 
-export default function FanficList({ fanfics, sectionId, transferableSections, userId, userIntegrations, fanficIntegrationsMap }: FanficListProps) {
+export default function FanficList({
+  fanfics,
+  sectionId,
+  transferableSections,
+  userId,
+  userIntegrations,
+  fanficIntegrationsMap,
+}: FanficListProps) {
   const [, startTransition] = useTransition();
   const [optimisticFics, setOptimistic] = useOptimistic(
     fanfics,
-    (oldFanfics, { fromIndex, toIndex }: { fromIndex: number; toIndex: number }) => {
+    (
+      oldFanfics,
+      { fromIndex, toIndex }: { fromIndex: number; toIndex: number }
+    ) => {
       const newFanfics = [...oldFanfics];
       const [movedFanfic] = newFanfics.splice(fromIndex, 1);
       newFanfics.splice(toIndex, 0, movedFanfic);
@@ -29,7 +39,7 @@ export default function FanficList({ fanfics, sectionId, transferableSections, u
 
   return (
     <DragDropContext
-      onDragEnd={async (result) => {
+      onDragEnd={(result) => {
         if (!result.destination) return;
         const fromIndex = result.source.index;
         const toIndex = result.destination.index;
@@ -43,11 +53,11 @@ export default function FanficList({ fanfics, sectionId, transferableSections, u
         {(provided) => (
           <div ref={provided.innerRef} {...provided.droppableProps}>
             {optimisticFics.map((fanfic, index) => (
-              <FanficCard 
-                transferableSections={transferableSections} 
-                key={fanfic.id} 
-                fanfic={fanfic} 
-                index={index} 
+              <FanficCard
+                transferableSections={transferableSections}
+                key={fanfic.id}
+                fanfic={fanfic}
+                index={index}
                 userId={userId}
                 userIntegrations={userIntegrations}
                 fanficIntegrations={fanficIntegrationsMap[fanfic.id] || []}

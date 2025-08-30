@@ -1,6 +1,5 @@
 "use client";
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { Section as DbSection } from "@/db/types";
 import { SectionContextMenu } from "@/library/(components)/SectionContextMenu";
 import { ChevronRight } from "lucide-react";

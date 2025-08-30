@@ -8,13 +8,28 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export const errorMessage = (error: unknown) => {
-  return (
-    (typeof error === "string" && error) ||
-    (error instanceof AxiosError && error.response?.data.error_message) ||
-    (error instanceof Error && error.message) ||
-    ""
-  );
+export const errorMessage = (error: unknown): string => {
+  if (typeof error === "string") {
+    return error;
+  }
+
+  if (error instanceof AxiosError) {
+    const data = error.response?.data as unknown;
+    if (
+      data &&
+      typeof data === "object" &&
+      "error_message" in data &&
+      typeof (data as { error_message: unknown }).error_message === "string"
+    ) {
+      return (data as { error_message: string }).error_message;
+    }
+  }
+
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  return "";
 };
 
 export const getIsDesktop = () => useMediaQuery("(min-width: 768px)");
@@ -29,12 +44,19 @@ export const formatDate = (date: Date | null) => {
 };
 
 export const getFont = (langCode: string | null) =>
-  ["ru", "ja", "zh", "ko"].includes(langCode || "en") ? "font-wenkai text-xl" : "font-blokletters";
+  ["ru", "ja", "zh", "ko"].includes(langCode || "en")
+    ? "font-wenkai text-xl"
+    : "font-blokletters";
 
-export const debounce = <T extends (...args: any[]) => any>(fn: T, ms = 300) => {
+export const debounce = <T extends (...args: never[]) => unknown>(
+  fn: T,
+  ms = 300
+): ((...args: Parameters<T>) => void) => {
   let timeoutId: ReturnType<typeof setTimeout>;
-  return function (this: any, ...args: Parameters<T>) {
+  return function (...args: Parameters<T>) {
     clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => fn.apply(this, args), ms);
+    timeoutId = setTimeout(() => {
+      fn(...args);
+    }, ms);
   };
 };

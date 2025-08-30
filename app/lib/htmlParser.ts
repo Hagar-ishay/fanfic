@@ -1,4 +1,3 @@
-"use server";
 import { NewFanfic, Tags } from "@/db/types";
 import * as cheerio from "cheerio";
 import { convert } from "html-to-text";
@@ -6,7 +5,7 @@ import { DateTime } from "luxon";
 import * as consts from "../consts";
 import logger from "@/logger";
 
-export async function htmlParser(html: string, externalId: string | number) {
+export function htmlParser(html: string, externalId: string | number) {
   const extractor = new HtmlParser(html, externalId);
   const parsedFanfic = extractor.getObject();
 

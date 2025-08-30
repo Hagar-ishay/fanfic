@@ -42,7 +42,7 @@ export async function addFanfic(
     if (!dbFanficId) {
       const ao3Client = await getAo3Client();
       const data = await ao3Client.getFanfic(externalId);
-      const metadata = await htmlParser(data, externalId);
+      const metadata = htmlParser(data, externalId);
 
       if (!metadata) {
         return { success: false, message: "Failed to parse Fic" };

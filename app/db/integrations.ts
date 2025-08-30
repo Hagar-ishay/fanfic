@@ -5,7 +5,6 @@ import { revalidatePath } from "next/cache";
 import { db } from "./db";
 import { integrations, fanficIntegrations } from "./schema";
 import type { NewIntegration, NewFanficIntegration } from "./types";
-import logger from "@/logger";
 
 export async function getIntegrations(userId: string) {
   "use cache";
@@ -59,27 +58,20 @@ type IntegrationData = Omit<
 >;
 
 export async function createIntegration(data: IntegrationData) {
-  logger.info("DB: Creating integration with data:", data);
-  try {
-    const result = await db
-      .insert(integrations)
-      .values({
-        category: data.category,
-        userId: data.userId,
-        type: data.type,
-        name: data.name,
-        config: data.config,
-        isActive: data.isActive ?? true,
-      })
-      .returning();
+  const result = await db
+    .insert(integrations)
+    .values({
+      category: data.category,
+      userId: data.userId,
+      type: data.type,
+      name: data.name,
+      config: data.config,
+      isActive: data.isActive ?? true,
+    })
+    .returning();
 
-    logger.info("DB: Integration created successfully:", result[0]);
-    revalidatePath("/settings");
-    return result[0];
-  } catch (error) {
-    logger.error("DB: Failed to create integration:", error);
-    throw error;
-  }
+  revalidatePath("/settings");
+  return result[0];
 }
 
 export async function updateIntegration(

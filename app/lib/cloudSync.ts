@@ -136,6 +136,18 @@ async function syncToGoogleDrive({
     };
   }
 
+  // Create an updated integration object with refreshed token
+  let updatedIntegration = { ...fanficIntegration.integration };
+
+  // Check if we have a refresh token to attempt refresh
+  if (!refreshToken) {
+    return {
+      success: false,
+      message:
+        "Google Drive access has expired and no refresh token is available. Please sign out and sign back in to re-authenticate your Google account.",
+    };
+  }
+
   // Try to refresh the token if we have a refresh token
   if (refreshToken) {
     try {
@@ -145,11 +157,31 @@ async function syncToGoogleDrive({
         // Update the integration with the new token
         await updateIntegrationTokens(
           fanficIntegration.integration.id,
-          refreshedTokens
+          refreshedTokens,
+          fanficIntegration.integration.config
         );
+        // Update our working copy of the integration with the new token
+        updatedIntegration = {
+          ...fanficIntegration.integration,
+          config: {
+            ...fanficIntegration.integration.config,
+            accessToken: refreshedTokens.accessToken,
+          },
+        };
       }
     } catch (error) {
       logger.warn("Failed to refresh Google Drive token:", error);
+      // If refresh token is invalid, we should return an error indicating re-authentication is needed
+      if (
+        axios.isAxiosError(error) &&
+        error.response?.data?.error === "invalid_grant"
+      ) {
+        return {
+          success: false,
+          message:
+            "Google Drive access has expired. Please remove and re-add your Google Drive integration in Settings to authenticate again.",
+        };
+      }
     }
   }
 
@@ -166,7 +198,7 @@ async function syncToGoogleDrive({
     if (folderId && folderId !== "root" && !folderId.includes("-")) {
       // This looks like a folder name, not an ID - try to find it
       const foundFolderId = await findGoogleDriveFile(
-        fanficIntegration.integration,
+        updatedIntegration,
         folderId,
         "root",
         true
@@ -176,7 +208,7 @@ async function syncToGoogleDrive({
       } else {
         // Folder doesn't exist, create it
         parentFolderId = await createGoogleDriveFolder(
-          fanficIntegration.integration,
+          updatedIntegration,
           folderId,
           "root"
         );
@@ -185,7 +217,7 @@ async function syncToGoogleDrive({
 
     // Find or create folder structure
     const finalFolderId = await createGoogleDriveFolder(
-      fanficIntegration.integration,
+      updatedIntegration,
       folderName,
       parentFolderId
     );
@@ -193,7 +225,7 @@ async function syncToGoogleDrive({
     // Check if file already exists and get its ID
     const existingFileId =
       (await findGoogleDriveFile(
-        fanficIntegration.integration,
+        updatedIntegration,
         fileName,
         finalFolderId
       )) || "";
@@ -208,7 +240,7 @@ async function syncToGoogleDrive({
     let response;
 
     if (existingFileId) {
-      response = await axios.patch(uploadUrl, epubBuffer, {
+      await axios.patch(uploadUrl, epubBuffer, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/epub+zip",
@@ -230,7 +262,7 @@ async function syncToGoogleDrive({
         Buffer.from(close_delim, "utf8"),
       ]);
 
-      response = await axios.post(
+      await axios.post(
         "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
         bodyBuffer,
         {
@@ -284,8 +316,8 @@ async function syncToWebDAV({
     const fs = await import("fs/promises");
     const epubBuffer = await fs.readFile(epubPath);
 
-    // const dirPath = path.posix.dirname(cloudPath);
-    // await createWebDAVDirectory(fanficIntegration.integration, dirPath);
+    const dirPath = path.posix.dirname(cloudPath);
+    await createWebDAVDirectory(fanficIntegration.integration, dirPath);
 
     const uploadUrl = new URL(cloudPath, url).toString();
 
@@ -616,7 +648,11 @@ async function testGoogleDriveConnection(
       ) {
         const refreshedTokens = await refreshGoogleDriveToken(refreshToken);
         accessToken = refreshedTokens.accessToken;
-        await updateIntegrationTokens(integration.id, refreshedTokens);
+        await updateIntegrationTokens(
+          integration.id,
+          refreshedTokens,
+          integration.config
+        );
 
         // Retry with new token
         await axios.get(
@@ -699,10 +735,12 @@ async function refreshGoogleDriveToken(refreshToken: string) {
 
 async function updateIntegrationTokens(
   integrationId: number,
-  tokens: { accessToken: string; refreshToken: string; expiresAt: number }
+  tokens: { accessToken: string; refreshToken: string; expiresAt: number },
+  existingConfig: Record<string, any>
 ) {
   await updateIntegration(integrationId, {
     config: {
+      ...existingConfig,
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       expiresAt: tokens.expiresAt,

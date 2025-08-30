@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { getBreadcrumbs, getSection, listUserSections } from "@/db/sections";
 import { selectSectionFanfic } from "@/db/fanfics";
 import FanficList from "@/library/sections/[sectionId]/(components)/FanficList";
-import { getIntegrationsByCategory } from "@/db/integrations";
+import { getActiveIntegrations } from "@/db/integrations";
 import { getFanficIntegrations } from "@/db/fanficIntegrations";
 import { LibraryHelp } from "@/library/(components)/LibraryHelp";
 import { auth } from "@/auth";
@@ -51,66 +51,53 @@ export default async function Page({ params }: Props) {
     return notFound();
   }
 
-  const childSections = userSections.filter((section) => section.parentId === sectionId);
+  const childSections = userSections.filter(
+    (section) => section.parentId === sectionId
+  );
 
   const transferableSections = userSections.filter((section) => {
     return section.id !== sectionId && section.parentId !== sectionId;
   });
 
-  const segments = await getBreadcrumbs(sectionId, currentSection.name, currentSection.parentId);
-  
-  // Fetch integrations for context menus
-  const [cloudIntegrations, deliveryIntegrations] = await Promise.all([
-    getIntegrationsByCategory(user.id, "cloud_storage"),
-    getIntegrationsByCategory(user.id, "delivery"),
-  ]);
-  const userIntegrations = [...cloudIntegrations, ...deliveryIntegrations];
-  
+  const segments = await getBreadcrumbs(
+    sectionId,
+    currentSection.name,
+    currentSection.parentId
+  );
+
+  const userIntegrations = await getActiveIntegrations(user.id);
+
   // Fetch fanfic integrations for each fanfic
   const fanficIntegrationsMap: Record<number, any[]> = {};
   for (const fanfic of fanfics) {
     fanficIntegrationsMap[fanfic.id] = await getFanficIntegrations(fanfic.id);
   }
-  
-  // Serialize the data for client components (convert Date objects to strings)
-  const serializedUserIntegrations = userIntegrations.map(integration => ({
-    ...integration,
-    creationTime: integration.creationTime.toISOString(),
-    updateTime: integration.updateTime?.toISOString() || null,
-  }));
-  
+
   const serializedFanficIntegrationsMap: Record<number, any[]> = {};
-  for (const [fanficId, integrations] of Object.entries(fanficIntegrationsMap)) {
-    serializedFanficIntegrationsMap[Number(fanficId)] = integrations.map(fi => ({
-      ...fi,
-      creationTime: fi.creationTime.toISOString(),
-      updateTime: fi.updateTime?.toISOString() || null,
-      lastTriggered: fi.lastTriggered?.toISOString() || null,
-    }));
+  for (const [fanficId, integrations] of Object.entries(
+    fanficIntegrationsMap
+  )) {
+    serializedFanficIntegrationsMap[Number(fanficId)] = integrations.map(
+      (fi) => fi
+    );
   }
-  
-  // Serialize the fanfics as well
-  const serializedFanfics = fanfics.map(fanfic => ({
-    ...fanfic,
-    createdAt: fanfic.createdAt.toISOString(),
-    updatedAt: fanfic.updatedAt.toISOString(),
-    completedAt: fanfic.completedAt?.toISOString() || null,
-    creationTime: fanfic.creationTime.toISOString(),
-    updateTime: fanfic.updateTime?.toISOString() || null,
-  }));
 
   return (
     <>
-      <SetTopbar segments={segments}>
-        <AddFanfic sectionId={sectionId} userId={user.id} />
-      </SetTopbar>
-      <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
-        <div className="container mx-auto px-4 pt-8 pb-6">
+      <SetTopbar segments={segments} />
+      <div className="bg-gradient-to-br from-background via-muted/20 to-background">
+        <div className="container mx-auto px-4 pt-8 pb-12">
+          <div className="mb-4 flex justify-end">
+            <AddFanfic sectionId={sectionId} userId={user.id} />
+          </div>
           <div className="space-y-4">
             {childSections.map((child) => (
               <Link key={child.id} href={`/library/sections/${child.id}`}>
                 <div className="transform transition-all duration-200 hover:scale-[1.02] hover:shadow-lg">
-                  <Section section={child} transferableSections={transferableSections} />
+                  <Section
+                    section={child}
+                    transferableSections={transferableSections}
+                  />
                 </div>
               </Link>
             ))}
@@ -119,12 +106,12 @@ export default async function Page({ params }: Props) {
                 <LibraryHelp showAsPage />
               </div>
             ) : (
-              <FanficList 
-                fanfics={serializedFanfics} 
-                sectionId={sectionId} 
-                transferableSections={transferableSections} 
+              <FanficList
+                fanfics={fanfics}
+                sectionId={sectionId}
+                transferableSections={transferableSections}
                 userId={user.id}
-                userIntegrations={serializedUserIntegrations}
+                userIntegrations={userIntegrations}
                 fanficIntegrationsMap={serializedFanficIntegrationsMap}
               />
             )}

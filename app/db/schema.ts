@@ -239,7 +239,7 @@ export const integrations = schema.table(
     type: varchar("type").notNull(),
     name: varchar("name").notNull(),
     category: varchar("category").notNull(),
-    config: jsonb("config").$type<Record<string, any>>().notNull(),
+    config: jsonb("config").$type<Record<string, string>>().notNull(),
     isActive: boolean("is_active").notNull().default(true),
     creationTime: timestamp("creation_time").notNull().defaultNow(),
     updateTime: timestamp("update_time").$onUpdate(() => new Date()),
@@ -253,7 +253,12 @@ export const integrations = schema.table(
   })
 );
 
-export const syncStatus = schema.enum("sync_status", ["pending", "syncing", "success", "error"]);
+export const syncStatus = schema.enum("sync_status", [
+  "pending",
+  "syncing",
+  "success",
+  "error",
+]);
 
 export const fanficIntegrations = schema.table(
   "fanfic_integrations",
@@ -274,10 +279,9 @@ export const fanficIntegrations = schema.table(
     updateTime: timestamp("update_time").$onUpdate(() => new Date()),
   },
   (table) => ({
-    sectionFanficIntegrationUnique: uniqueIndex("section_fanfic_integration_unique").on(
-      table.sectionFanficId,
-      table.integrationId
-    ),
+    sectionFanficIntegrationUnique: uniqueIndex(
+      "section_fanfic_integration_unique"
+    ).on(table.sectionFanficId, table.integrationId),
   })
 );
 

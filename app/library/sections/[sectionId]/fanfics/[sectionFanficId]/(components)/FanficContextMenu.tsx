@@ -1,6 +1,6 @@
 "use client";
 
-import { ContextMenu } from "@/components/base/ContextMenu";
+import { ContextMenu, Option } from "@/components/base/ContextMenu";
 import { deleteSectionFanfic, tranferSectionFanfic } from "@/db/fanfics";
 import type {
   Integration,
@@ -158,7 +158,7 @@ export function FanficContextMenu({
   };
 
   const buildIntegrationOptions = () => {
-    const options: any[] = [
+    const options: Option[] = [
       {
         icon: <RefreshCw size={17} />,
         name: "Check for updates",

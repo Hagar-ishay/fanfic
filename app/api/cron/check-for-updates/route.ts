@@ -20,7 +20,7 @@ export async function GET(request: Request) {
       fanfics.map(async (fanfic) => {
         const externalId = fanfic.externalId.toString();
         const updatedFic = await ao3Client.getFanfic(externalId);
-        const parsedFanfic = await htmlParser(updatedFic, externalId);
+        const parsedFanfic = htmlParser(updatedFic, externalId);
 
         if (
           parsedFanfic?.updatedAt &&

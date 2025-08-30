@@ -54,7 +54,7 @@ export function AddFanfic({
   };
 
   return (
-    <Button variant="default" onClick={handleAddFanficFromClipboard}>
+    <Button variant="default" onClick={() => { void handleAddFanficFromClipboard(); }}>
       <ClipboardPlus />
       <p className="mt-1 text-[10px]">Add Fanfic</p>
     </Button>

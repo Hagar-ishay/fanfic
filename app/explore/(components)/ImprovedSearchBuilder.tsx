@@ -18,7 +18,8 @@ import { AutoCompleteType } from "@/lib/ao3Client";
 import React, { useState, useCallback } from "react";
 import { X, Plus, Search, Save } from "lucide-react";
 import { SavedSearchSearch } from "@/db/types";
-
+import logger from "@/logger";
+import { errorMessage } from "@/lib/utils";
 interface ImprovedSearchBuilderProps {
   onSearch: (searchParams: SavedSearchSearch) => void;
   onSaveSearch?: (name: string, searchParams: SavedSearchSearch) => void;
@@ -38,7 +39,7 @@ interface SearchFilter {
     | "tag"
     | "query";
   label: string;
-  value: any;
+  value: unknown;
   excluded?: boolean;
 }
 
@@ -128,7 +129,7 @@ export function ImprovedSearchBuilder({
         const result = await autocomplete(name, value);
         return result.map((tag) => ({ id: tag, name: tag }));
       } catch (error) {
-        logger.error("Autocomplete error:", error);
+        logger.error(`Autocomplete error: ${errorMessage(error)}`);
         return [];
       }
     },
@@ -178,12 +179,13 @@ export function ImprovedSearchBuilder({
 
         if (Array.isArray(filter.value)) {
           searchParams[key] = filter.value;
-        } else if (typeof filter.value === "object") {
+        } else if (typeof filter.value === "object" && filter.value !== null) {
           searchParams[key] = filter.value;
-        } else {
+        } else if (typeof filter.value === "string" || typeof filter.value === "number") {
+          const valueStr = String(filter.value);
           searchParams[key] = {
-            id: filter.value.toString(),
-            name: filter.value.toString(),
+            id: valueStr,
+            name: valueStr,
           };
         }
       }
@@ -206,12 +208,13 @@ export function ImprovedSearchBuilder({
 
         if (Array.isArray(filter.value)) {
           searchParams[key] = filter.value;
-        } else if (typeof filter.value === "object") {
+        } else if (typeof filter.value === "object" && filter.value !== null) {
           searchParams[key] = filter.value;
-        } else {
+        } else if (typeof filter.value === "string" || typeof filter.value === "number") {
+          const valueStr = String(filter.value);
           searchParams[key] = {
-            id: filter.value.toString(),
-            name: filter.value.toString(),
+            id: valueStr,
+            name: valueStr,
           };
         }
       }
@@ -229,7 +232,7 @@ export function ImprovedSearchBuilder({
       return (
         <Input
           placeholder={filterOption?.placeholder}
-          value={filter.value || ""}
+          value={typeof filter.value === "string" ? filter.value : ""}
           onChange={(e) => updateFilter(filter.id, { value: e.target.value })}
           className="flex-1"
         />
@@ -243,9 +246,8 @@ export function ImprovedSearchBuilder({
             name={filter.type as AutoCompleteType}
             label=""
             multiple
-            defaultValue={filter.value}
+            defaultValue={Array.isArray(filter.value) ? filter.value : undefined}
             getOptions={getAutoCompleteTags}
-            onChange={(value) => updateFilter(filter.id, { value })}
           />
         </div>
       );
@@ -256,7 +258,11 @@ export function ImprovedSearchBuilder({
     if (options) {
       return (
         <Select
-          value={filter.value?.id || filter.value || ""}
+          value={
+            (filter.value && typeof filter.value === 'object' && 'id' in filter.value 
+              ? String(filter.value.id) 
+              : typeof filter.value === "string" ? filter.value : "")
+          }
           onValueChange={(value) => {
             const option = options.find((opt) => opt.id === value);
             updateFilter(filter.id, {

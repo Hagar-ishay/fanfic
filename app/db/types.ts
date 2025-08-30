@@ -32,10 +32,7 @@ export type NewSettings = typeof settings.$inferInsert;
 
 export type Credentials = typeof credentials.$inferSelect;
 
-const enumValues = {
-  ao3: "AO3",
-} as const;
-export type SessionType = (typeof enumValues)[keyof typeof enumValues];
+export type SessionType = "AO3";
 
 export type SavedSearch = typeof savedSearches.$inferSelect;
 
@@ -66,7 +63,7 @@ export type UserFanficIntegration = {
     id: number;
     name: string;
     type: string;
-    config: Record<string, any>;
+    config: Record<string, unknown>;
   };
 };
 

@@ -7,7 +7,7 @@ import { Section, UserFanfic } from "@/db/types";
 import { cn, getFont } from "@/lib/utils";
 import { FanficContextMenu } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficContextMenu";
 import { Draggable } from "@hello-pangea/dnd";
-import { BookUp, BookUp2, CircleCheck, Grip, Heart } from "lucide-react";
+import { BookUp2, CircleCheck, Grip, Heart } from "lucide-react";
 import Link from "next/link";
 import React, { useRef } from "react";
 import { useOptimistic, useTransition } from "react";

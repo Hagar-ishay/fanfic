@@ -11,13 +11,12 @@ import {
 } from "@/components/base/DrawerDialog";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
-import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 export type Option = {
   icon?: React.ReactNode;
   name: string;
-  action?: () => void;
+  action?: () => void | Promise<void>;
   disabled?: boolean;
   subItems?: Option[];
   destructive?: boolean;
@@ -41,7 +40,6 @@ export function ContextMenu({
   const [isOpen, setIsOpen] = useState(false);
   const [menuSlides, setMenuSlides] = useState<MenuSlide[]>([{ items: options }]);
   const [activeIndex, setActiveIndex] = useState(0);
-  const router = useRouter();
 
 
   function handleBack() {
@@ -54,7 +52,7 @@ export function ContextMenu({
       setMenuSlides((prev) => [...prev, { items: option.subItems!, parentName: option.name }]);
       setActiveIndex((prev) => prev + 1);
     } else if (option.action) {
-      option.action();
+      void option.action();
       setIsOpen(false);
     }
   }

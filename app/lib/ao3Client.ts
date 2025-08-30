@@ -169,7 +169,7 @@ class AO3Client {
       await this.setSessionCookies(cookies);
     } catch (error) {
       logger.info(error);
-      throw new Error(`Failed to login: ${error}`);
+      throw new Error(`Failed to login: ${String(error)}`);
     }
   }
 
@@ -242,7 +242,7 @@ class AO3Client {
 
     for (const [key, value] of Object.entries(params)) {
       if (value !== undefined && value !== null && value !== "") {
-        searchUrl.searchParams.append(`work_search[${key}]`, value.toString());
+        searchUrl.searchParams.append(`work_search[${key}]`, String(value));
       }
     }
 
@@ -257,7 +257,7 @@ class AO3Client {
     const lines = response.split("\n").slice(0, 10);
     logger.info("AO3 Response preview:", lines);
 
-    const results = this.parseSearchResults(response, params.page || 1);
+    const results = this.parseSearchResults(response, Number(params.page) || 1);
     logger.info(
       `Found ${results.results.length} results, total: ${results.totalResults}`
     );

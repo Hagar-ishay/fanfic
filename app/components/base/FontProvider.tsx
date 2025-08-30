@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import localFont from "next/font/local";
@@ -32,17 +33,42 @@ const bloklettersLight = localFont({
 
 export function FontProvider({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobile();
-  return (
-    <body
-      className={cn(
-        blokletters.variable,
-        bloklettersLight.variable,
-        wenKai.variable,
-        blokletters.className,
-        isMobile ? "text-sm" : "text-base"
-      )}
-    >
-      {children}
-    </body>
-  );
+
+  // Apply classes to body on client side to avoid hydration mismatch
+  React.useEffect(() => {
+    const body = document.body;
+    const classes = cn(
+      blokletters.variable,
+      bloklettersLight.variable,
+      wenKai.variable,
+      blokletters.className,
+      isMobile ? "text-sm" : "text-base"
+    );
+    
+    // Add font classes
+    classes.split(' ').forEach(cls => {
+      if (cls.trim()) {
+        body.classList.add(cls.trim());
+      }
+    });
+
+    return () => {
+      // Cleanup on unmount
+      classes.split(' ').forEach(cls => {
+        if (cls.trim()) {
+          body.classList.remove(cls.trim());
+        }
+      });
+    };
+  }, [isMobile]);
+
+  return <>{children}</>;
 }
+
+// Static font classes that can be used server-side
+export const fontClasses = cn(
+  blokletters.variable,
+  bloklettersLight.variable,
+  wenKai.variable,
+  blokletters.className
+);

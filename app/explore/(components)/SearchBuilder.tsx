@@ -122,7 +122,7 @@ export function SearchBuilder({
     <DrawerDialog>
       <DrawerDialogTrigger asChild>{trigger}</DrawerDialogTrigger>
       <DrawerDialogContent className={cn("flex flex-col", isMobile ? "h-[100dvh]" : "h-[85vh] max-h-[850px]")}>
-        <form onSubmit={handleSubmit} className="flex flex-col h-full">
+        <form onSubmit={(e) => { void handleSubmit(e); }} className="flex flex-col h-full">
           <DrawerDialogHeader className="flex flex-col gap-2 flex-shrink-0">
             <DrawerDialogTitle>
               <div className="flex flex-col gap-2">
@@ -224,18 +224,20 @@ export function SearchBuilder({
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={async (e) => {
-                    const form = e.currentTarget.closest("form") as HTMLFormElement;
-                    if (!form?.checkValidity()) {
-                      e.preventDefault();
-                      form?.reportValidity();
-                      return;
-                    }
-                    const fakeEvent = { 
-                      preventDefault: () => {}, 
-                      currentTarget: form 
-                    } as React.FormEvent<HTMLFormElement>;
-                    await handleSubmit(fakeEvent);
+                  onClick={(e) => {
+                    void (async () => {
+                      const form = e.currentTarget.closest("form") as HTMLFormElement;
+                      if (!form?.checkValidity()) {
+                        e.preventDefault();
+                        form?.reportValidity();
+                        return;
+                      }
+                      const fakeEvent = { 
+                        preventDefault: () => {}, 
+                        currentTarget: form 
+                      } as React.FormEvent<HTMLFormElement>;
+                      await handleSubmit(fakeEvent);
+                    })();
                   }}
                   className="flex-1"
                 >
@@ -247,18 +249,20 @@ export function SearchBuilder({
                 <DrawerDialogClose asChild>
                   <Button
                     type="button"
-                    onClick={async (e) => {
-                      const form = e.currentTarget.closest("form") as HTMLFormElement;
-                      if (!form?.checkValidity()) {
-                        e.preventDefault();
-                        form?.reportValidity();
-                        return;
-                      }
-                      const fakeEvent = { 
-                        preventDefault: () => {}, 
-                        currentTarget: form 
-                      } as React.FormEvent<HTMLFormElement>;
-                      await handleSearchAndSave(fakeEvent);
+                    onClick={(e) => {
+                      void (async () => {
+                        const form = e.currentTarget.closest("form") as HTMLFormElement;
+                        if (!form?.checkValidity()) {
+                          e.preventDefault();
+                          form?.reportValidity();
+                          return;
+                        }
+                        const fakeEvent = { 
+                          preventDefault: () => {}, 
+                          currentTarget: form 
+                        } as React.FormEvent<HTMLFormElement>;
+                        await handleSearchAndSave(fakeEvent);
+                      })();
                     }}
                     className="flex-1"
                   >

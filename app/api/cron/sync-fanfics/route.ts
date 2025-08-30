@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getFanficsNeedingSync } from "@/db/fanficIntegrations";
 import { syncToCloud } from "@/lib/cloudSync";
+import logger from "@/logger";
 
 export async function GET(request: NextRequest) {
   try {

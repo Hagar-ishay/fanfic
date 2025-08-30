@@ -48,13 +48,13 @@ export async function recommendFanfics({
     }))
     .slice(0, 10);
   const allFanficsWorkIds = allFanfics.map((fanfic) => fanfic.externalId);
-  const savedSearchQueriesString = savedSearchQueries.map((query) => query.search).join(", ");
+  const savedSearchQueriesString = savedSearchQueries.map((query) => JSON.stringify(query.search)).join(", ");
   try {
     const response = await model.generateContentStream(
       `${recommendFanficsPrompt}
         \nList of saved search queries: ${savedSearchQueriesString}
-        \nList of all fanfics work ids: ${allFanficsWorkIds}
-        \nList of liked fanfics and their details: ${likedFanfics}`
+        \nList of all fanfics work ids: ${allFanficsWorkIds.join(", ")}
+        \nList of liked fanfics and their details: ${JSON.stringify(likedFanfics)}`
     );
     let fanfics = "";
     for await (const chunk of response.stream) {
