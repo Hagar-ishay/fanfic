@@ -60,12 +60,7 @@ export async function GET(request: NextRequest) {
           message: syncResult.message,
         });
 
-        // Clean up temporary EPUB file
-        try {
-          await fs.unlink(epubPath);
-        } catch (error) {
-          console.warn(`Failed to delete temporary file ${epubPath}:`, error);
-        }
+      
       } catch (error) {
         console.error(`Failed to sync fanfic ${item.fanfic.title}:`, error);
         results.push({

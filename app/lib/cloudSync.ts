@@ -104,6 +104,9 @@ export async function syncToCloud({
       success: false,
       message: errorMessage,
     };
+  } finally {
+    const fs = await import("fs/promises");
+    await fs.unlink(epubPath);
   }
   return {
     success: false,
@@ -122,8 +125,9 @@ async function syncToGoogleDrive({
   epubPath: string;
   fileName: string;
 }): Promise<CloudSyncResult> {
-  let { accessToken, refreshToken, folderId } = fanficIntegration.integration.config;
-  
+  let { accessToken, refreshToken, folderId } =
+    fanficIntegration.integration.config;
+
   if (!accessToken) {
     return {
       success: false,
@@ -138,7 +142,10 @@ async function syncToGoogleDrive({
       if (refreshedTokens.accessToken) {
         accessToken = refreshedTokens.accessToken;
         // Update the integration with the new token
-        await updateIntegrationTokens(fanficIntegration.integration.id, refreshedTokens);
+        await updateIntegrationTokens(
+          fanficIntegration.integration.id,
+          refreshedTokens
+        );
       }
     } catch (error) {
       console.warn("Failed to refresh Google Drive token:", error);
@@ -604,18 +611,25 @@ async function testGoogleDriveConnection(
       });
     } catch (tokenError) {
       // If token expired, try to refresh
-      if (refreshToken && axios.isAxiosError(tokenError) && tokenError.response?.status === 401) {
+      if (
+        refreshToken &&
+        axios.isAxiosError(tokenError) &&
+        tokenError.response?.status === 401
+      ) {
         const refreshedTokens = await refreshGoogleDriveToken(refreshToken);
         accessToken = refreshedTokens.accessToken;
         await updateIntegrationTokens(integration.id, refreshedTokens);
-        
+
         // Retry with new token
-        await axios.get("https://www.googleapis.com/drive/v3/about?fields=user", {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-          timeout: 5000,
-        });
+        await axios.get(
+          "https://www.googleapis.com/drive/v3/about?fields=user",
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            timeout: 5000,
+          }
+        );
       } else {
         throw tokenError;
       }
@@ -662,17 +676,21 @@ async function testDropboxConnection(
 
 async function refreshGoogleDriveToken(refreshToken: string) {
   const url = "https://oauth2.googleapis.com/token";
-  
-  const response = await axios.post(url, new URLSearchParams({
-    client_id: process.env.GOOGLE_CLIENT_ID!,
-    client_secret: process.env.GOOGLE_CLIENT_SECRET!,
-    grant_type: "refresh_token",
-    refresh_token: refreshToken,
-  }), {
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-  });
+
+  const response = await axios.post(
+    url,
+    new URLSearchParams({
+      client_id: process.env.GOOGLE_CLIENT_ID!,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+    }),
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    }
+  );
 
   return {
     accessToken: response.data.access_token,
@@ -681,12 +699,15 @@ async function refreshGoogleDriveToken(refreshToken: string) {
   };
 }
 
-async function updateIntegrationTokens(integrationId: number, tokens: { accessToken: string; refreshToken: string; expiresAt: number }) {
+async function updateIntegrationTokens(
+  integrationId: number,
+  tokens: { accessToken: string; refreshToken: string; expiresAt: number }
+) {
   await updateIntegration(integrationId, {
     config: {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
       expiresAt: tokens.expiresAt,
-    }
+    },
   });
 }
