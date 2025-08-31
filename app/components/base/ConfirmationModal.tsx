@@ -21,13 +21,13 @@ export function ConfirmationModal({
   trigger,
 }: {
   header?: React.ReactNode;
-  onSubmit: Function;
+  onSubmit: () => void | Promise<void>;
   ref?: React.RefObject<HTMLDivElement>;
   trigger?: React.ReactNode;
   destructive?: boolean;
 }) {
-  async function handleSubmit() {
-    await onSubmit();
+  function handleSubmit() {
+    void onSubmit();
   }
 
   return (
@@ -47,7 +47,7 @@ export function ConfirmationModal({
             </DrawerDialogClose>
             <DrawerDialogClose asChild>
               <Button
-                onClick={handleSubmit}
+                onClick={() => void handleSubmit()}
                 variant={destructive ? "destructive" : "default"}
               >
                 {destructive ? "Delete" : "Submit"}

@@ -3,11 +3,9 @@ import { Section } from "@/library/(components)/Section";
 import { Metadata } from "next";
 import Link from "next/link";
 import { auth } from "@/auth";
-import { Header } from "@/components/base/Header";
-import { ListPlus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { SetTopbar } from "@/components/base/SetTopbar";
 import { AddNewSectionButton } from "@/library/(components)/AddNewSectionButton";
-import { Suspense } from "react";
+import { LibraryTopbarSearch } from "@/library/(components)/LibraryTopbarSearch";
 import { listUserFanfics } from "@/db/fanfics";
 
 export const metadata: Metadata = {
@@ -15,27 +13,32 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const session = await auth();
-
   const { user } = (await auth())!;
 
   const sections = await selectOrCreateSections(user.id);
   const topLevelSections = sections.filter((sec) => sec.parentId === null);
+  const userFanfics = await listUserFanfics(user.id);
 
   return (
     <>
-      <Header segments={[{ label: "Library", href: "/library" }]}>
+      <SetTopbar segments={[{ label: "Library", href: "/library" }]}>
+        <LibraryTopbarSearch userFanfics={userFanfics} />
         <AddNewSectionButton />
-      </Header>
-      <div className="flex flex-col">
-        {topLevelSections.map((section) => (
-          <Link key={section.id} href={`/library/sections/${section.id}`}>
-            <Section
-              section={section}
-              transferableSections={sections.filter((tranfser) => tranfser.id !== section.id)}
-            />
-          </Link>
-        ))}
+      </SetTopbar>
+      <div className="bg-gradient-to-br from-background via-muted/20 to-background">
+        <div className="container mx-auto px-4 pt-8 pb-6">
+          <div className="grid gap-4">
+            {topLevelSections.map((section) => (
+              <Link key={section.id} href={`/library/sections/${section.id}`}>
+                <div className="transform transition-all duration-200 hover:scale-[1.02] hover:shadow-lg">
+                  <Section
+                    section={section}
+                  />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
       </div>
     </>
   );

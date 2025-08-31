@@ -17,14 +17,31 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { saveSearch } from "@/db/savedSearches";
-import { SavedSearch } from "@/db/types";
+import { SavedSearch, SavedSearchSearch } from "@/db/types";
 import { autocomplete } from "@/explore/(server)/autocomplete";
+import { executeSearch, SearchResult } from "@/explore/(server)/search";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { AutoCompleteType } from "@/lib/ao3Client";
 import { cn } from "@/lib/utils";
 import React from "react";
 import { useSession } from "next-auth/react";
-export function SearchBuilder({ trigger, savedSearch }: { trigger: React.ReactNode; savedSearch?: SavedSearch }) {
+
+type SearchResults = {
+  results: SearchResult[];
+  totalPages: number;
+  currentPage: number;
+  totalResults: number;
+};
+
+export function SearchBuilder({ 
+  trigger, 
+  savedSearch,
+  onSearch
+}: { 
+  trigger: React.ReactNode; 
+  savedSearch?: SavedSearch;
+  onSearch?: (params: SavedSearchSearch, results: SearchResults) => void;
+}) {
   const isMobile = useIsMobile();
   const { data: session } = useSession({ required: true });
   const user = session?.user;
@@ -54,10 +71,39 @@ export function SearchBuilder({ trigger, savedSearch }: { trigger: React.ReactNo
 
     await saveSearch({
       ...(savedSearch?.id ? { id: savedSearch.id } : {}),
-      name: SearchName as string,
+      name: SearchName,
       search: formattedSearch,
-      userId: user!.id,
+      userId: user.id,
     });
+  };
+
+  const handleSearchAndSave = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const entries = Object.fromEntries(formData.entries()) as Record<string, string>;
+    const { SearchName, ...filters } = entries;
+
+    const formattedSearch = Object.entries(filters).reduce((acc, [key, value]) => {
+      const parsedValue = JSON.parse(value);
+      if (parsedValue && (!Array.isArray(parsedValue) || parsedValue.length > 0)) {
+        return { ...acc, [key]: parsedValue };
+      }
+      return acc;
+    }, {});
+
+    // Save the search first
+    await saveSearch({
+      ...(savedSearch?.id ? { id: savedSearch.id } : {}),
+      name: SearchName,
+      search: formattedSearch,
+      userId: user.id,
+    });
+
+    // Then execute the search if onSearch callback is provided
+    if (onSearch) {
+      const results = await executeSearch(formattedSearch);
+      onSearch(formattedSearch, results);
+    }
   };
 
   const getDefaultValue = (fieldName: string) => {
@@ -76,7 +122,7 @@ export function SearchBuilder({ trigger, savedSearch }: { trigger: React.ReactNo
     <DrawerDialog>
       <DrawerDialogTrigger asChild>{trigger}</DrawerDialogTrigger>
       <DrawerDialogContent className={cn("flex flex-col", isMobile ? "h-[100dvh]" : "h-[85vh] max-h-[850px]")}>
-        <form onSubmit={handleSubmit} className="flex flex-col h-full">
+        <form onSubmit={(e) => { void handleSubmit(e); }} className="flex flex-col h-full">
           <DrawerDialogHeader className="flex flex-col gap-2 flex-shrink-0">
             <DrawerDialogTitle>
               <div className="flex flex-col gap-2">
@@ -173,20 +219,58 @@ export function SearchBuilder({ trigger, savedSearch }: { trigger: React.ReactNo
             </div>
           </ScrollArea>
           <DrawerDialogFooter className="flex-shrink-0">
-            <DrawerDialogClose asChild>
-              <Button
-                type="submit"
-                onClick={(e) => {
-                  const form = e.currentTarget.closest("form");
-                  if (!form?.checkValidity()) {
-                    e.preventDefault();
-                    form?.reportValidity();
-                  }
-                }}
-              >
-                {savedSearch ? "Update" : "Create"}
-              </Button>
-            </DrawerDialogClose>
+            <div className="flex gap-2 w-full">
+              <DrawerDialogClose asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={(e) => {
+                    void (async () => {
+                      const form = e.currentTarget.closest("form") as HTMLFormElement;
+                      if (!form?.checkValidity()) {
+                        e.preventDefault();
+                        form?.reportValidity();
+                        return;
+                      }
+                      const fakeEvent = { 
+                        preventDefault: () => {}, 
+                        currentTarget: form 
+                      } as React.FormEvent<HTMLFormElement>;
+                      await handleSubmit(fakeEvent);
+                    })();
+                  }}
+                  className="flex-1"
+                >
+                  {savedSearch ? "Update" : "Save"}
+                </Button>
+              </DrawerDialogClose>
+              
+              {onSearch && (
+                <DrawerDialogClose asChild>
+                  <Button
+                    type="button"
+                    onClick={(e) => {
+                      void (async () => {
+                        const form = e.currentTarget.closest("form") as HTMLFormElement;
+                        if (!form?.checkValidity()) {
+                          e.preventDefault();
+                          form?.reportValidity();
+                          return;
+                        }
+                        const fakeEvent = { 
+                          preventDefault: () => {}, 
+                          currentTarget: form 
+                        } as React.FormEvent<HTMLFormElement>;
+                        await handleSearchAndSave(fakeEvent);
+                      })();
+                    }}
+                    className="flex-1"
+                  >
+                    Search & {savedSearch ? "Update" : "Save"}
+                  </Button>
+                </DrawerDialogClose>
+              )}
+            </div>
           </DrawerDialogFooter>
         </form>
       </DrawerDialogContent>

@@ -10,20 +10,13 @@ import {
   DrawerDialogTrigger,
 } from "@/components/base/DrawerDialog";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenuItem,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-} from "@/components/ui/dropdown-menu";
 import { ChevronRight } from "lucide-react";
-import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 export type Option = {
   icon?: React.ReactNode;
   name: string;
-  action?: () => void;
+  action?: () => void | Promise<void>;
   disabled?: boolean;
   subItems?: Option[];
   destructive?: boolean;
@@ -47,14 +40,7 @@ export function ContextMenu({
   const [isOpen, setIsOpen] = useState(false);
   const [menuSlides, setMenuSlides] = useState<MenuSlide[]>([{ items: options }]);
   const [activeIndex, setActiveIndex] = useState(0);
-  const router = useRouter();
 
-  function handleSelect(option: Option) {
-    if (option.action) {
-      option.action();
-    }
-    router.back();
-  }
 
   function handleBack() {
     setActiveIndex((prev) => prev - 1);
@@ -66,34 +52,11 @@ export function ContextMenu({
       setMenuSlides((prev) => [...prev, { items: option.subItems!, parentName: option.name }]);
       setActiveIndex((prev) => prev + 1);
     } else if (option.action) {
-      option.action();
+      void option.action();
       setIsOpen(false);
     }
   }
 
-  const renderDropdownMenuItems = (items: Option[]) => {
-    return items.map((option, index) => {
-      return option.subItems && !option.disabled ? (
-        <DropdownMenuSub key={index}>
-          <DropdownMenuSubTrigger disabled={option.disabled} className="gap-3 text-sm">
-            {option.icon}
-            {option.name}
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>{renderDropdownMenuItems(option.subItems)}</DropdownMenuSubContent>
-        </DropdownMenuSub>
-      ) : (
-        <DropdownMenuItem
-          key={index}
-          onSelect={() => handleSelect(option)}
-          disabled={option.disabled}
-          className="gap-3 text-sm"
-        >
-          {option.icon}
-          {option.name}
-        </DropdownMenuItem>
-      );
-    });
-  };
 
   return (
     <DrawerDialog open={isOpen} onOpenChange={setIsOpen}>

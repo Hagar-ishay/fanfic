@@ -7,11 +7,11 @@ import { CommandList, CommandSeparator } from "cmdk";
 import { MinusCircle, X } from "lucide-react";
 import * as React from "react";
 
-interface SelectedValue {
+export type SelectedValue = {
   id: string;
   name: string;
   excluded?: boolean;
-}
+};
 
 interface MultiSelectProps {
   name: string;

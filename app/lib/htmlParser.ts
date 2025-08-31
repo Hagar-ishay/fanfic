@@ -1,15 +1,14 @@
-"use server";
 import { NewFanfic, Tags } from "@/db/types";
 import * as cheerio from "cheerio";
 import { convert } from "html-to-text";
 import { DateTime } from "luxon";
 import * as consts from "../consts";
+import logger from "@/logger";
 
-export async function htmlParser(html: string, externalId: string | number) {
-  console.time("Total HTML parsing");
+export function htmlParser(html: string, externalId: string | number) {
   const extractor = new HtmlParser(html, externalId);
   const parsedFanfic = extractor.getObject();
-  console.timeEnd("Total HTML parsing");
+
   return parsedFanfic;
 }
 
@@ -18,13 +17,11 @@ class HtmlParser {
   private _externalId: number;
 
   constructor(html: string, externalId: string | number) {
-    console.time("Cheerio initialization");
     this.$ = cheerio.load(html, {
       xml: {
         decodeEntities: false,
       },
     });
-    console.timeEnd("Cheerio initialization");
 
     this.cleanHtml(html);
     this._externalId = +externalId;
@@ -36,10 +33,8 @@ class HtmlParser {
   }
 
   private parseToString(selector: cheerio.BasicAcceptedElems<any>): string {
-    console.time("String conversion");
     const element = this.$(selector).first();
     if (!element.length) {
-      console.timeEnd("String conversion");
       return "";
     }
 
@@ -64,7 +59,7 @@ class HtmlParser {
       preserveNewlines: true,
       wordwrap: false,
     });
-    console.timeEnd("String conversion");
+
     return result;
   }
 
@@ -77,7 +72,9 @@ class HtmlParser {
   }
 
   public get summary(): string {
-    return this.parseToString("#workskin div.summary.module blockquote.userstuff");
+    return this.parseToString(
+      "#workskin div.summary.module blockquote.userstuff"
+    );
   }
 
   public get downloadLink(): string {
@@ -94,16 +91,20 @@ class HtmlParser {
   }
 
   public get tags(): Tags {
-    console.time("Tags parsing");
     const tags: Tags = {};
     this.$("dl.work.meta.group > dt").each((_, el) => {
-      const category = this.parseToString(el).replace(/\s+/g, " ").replace(":", "").toUpperCase();
+      const category = this.parseToString(el)
+        .replace(/\s+/g, " ")
+        .replace(":", "")
+        .toUpperCase();
       const tagElements = this.$(el).next("dd").find("ul.commas > li > a.tag");
-      const tagList = tagElements.map((_, tagEl) => this.parseToString(tagEl)).get();
+      const tagList = tagElements
+        .map((_, tagEl) => this.parseToString(tagEl))
+        .get();
 
       tags[category] = tagList;
     });
-    console.timeEnd("Tags parsing");
+
     return tags;
   }
 
@@ -133,7 +134,9 @@ class HtmlParser {
   }
 
   public get completedAt(): Date | null {
-    return this.$("dt.status").text().startsWith("Completed") ? this.parseToDate("dd.status") : null;
+    return this.$("dt.status").text().startsWith("Completed")
+      ? this.parseToDate("dd.status")
+      : null;
   }
 
   public get createdAt(): Date {
@@ -146,7 +149,6 @@ class HtmlParser {
 
   public getObject(): NewFanfic | null {
     try {
-      console.time("Metadata extraction");
       const metadata = {
         externalId: this.externalId,
         summary: this.summary,
@@ -163,11 +165,10 @@ class HtmlParser {
         sourceUrl: this.sourceUrl,
         language: this.language,
       };
-      console.timeEnd("Metadata extraction");
+
       return metadata;
     } catch (error) {
-      console.timeEnd("Metadata extraction");
-      console.error("Error fetching or parsing AO3 metadata:", error);
+      logger.error(`Error fetching or parsing AO3 metadata: ${error instanceof Error ? error.message : String(error)}`);
       return null;
     }
   }

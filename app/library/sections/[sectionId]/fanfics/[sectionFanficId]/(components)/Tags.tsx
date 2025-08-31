@@ -10,7 +10,7 @@ export function Tags({ tags }: { tags: TagType }) {
         </h3>
         <div className="grid grid-cols-1 md:auto-cols-auto gap-3 sm:gap-4 auto-rows-min">
           {Object.entries(tags)
-            .filter(([_, values]) => values.length > 0)
+            .filter(([, values]) => values.length > 0)
             .sort(([keyA, valuesA], [keyB, valuesB]) => {
               if (keyA.toLowerCase().includes("additional")) return 1;
               if (keyB.toLowerCase().includes("additional")) return -1;

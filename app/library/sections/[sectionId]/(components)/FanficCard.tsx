@@ -7,7 +7,7 @@ import { Section, UserFanfic } from "@/db/types";
 import { cn, getFont } from "@/lib/utils";
 import { FanficContextMenu } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficContextMenu";
 import { Draggable } from "@hello-pangea/dnd";
-import { BookUp, BookUp2, CircleCheck, Grip, Heart } from "lucide-react";
+import { BookUp2, CircleCheck, Grip, Heart } from "lucide-react";
 import Link from "next/link";
 import React, { useRef } from "react";
 import { useOptimistic, useTransition } from "react";
@@ -18,10 +18,14 @@ export default function FanficCard({
   fanfic,
   index,
   transferableSections,
+  userIntegrations,
+  fanficIntegrations,
 }: {
   fanfic: UserFanfic;
   index: number;
   transferableSections: Section[];
+  userIntegrations: any[];
+  fanficIntegrations: any[];
 }) {
   const triggerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -61,6 +65,8 @@ export default function FanficCard({
           <FanficContextMenu
             sections={transferableSections}
             fanfic={fanfic}
+            userIntegrations={userIntegrations}
+            fanficIntegrations={fanficIntegrations}
             trigger={<div hidden ref={triggerRef} />}
           />
 
@@ -114,16 +120,10 @@ export default function FanficCard({
                     </Button>
                   </Tooltip>
 
-                  {fanfic.lastSent && fanfic.updatedAt > fanfic.lastSent && (
-                    <Tooltip description="New update">
-                      <BookUp size="18" />
-                    </Tooltip>
-                  )}
-                  {!fanfic.lastSent && (
-                    <Tooltip description="Not uploaded yet">
-                      <BookUp2 size="18" />
-                    </Tooltip>
-                  )}
+                  {/* TODO: Implement integration-based lastSent check */}
+                  <Tooltip description="Not uploaded yet">
+                    <BookUp2 size="18" />
+                  </Tooltip>
                   {fanfic.completedAt && (
                     <Tooltip description="Completed">
                       <CircleCheck size="16" />

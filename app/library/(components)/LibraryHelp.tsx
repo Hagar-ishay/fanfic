@@ -1,5 +1,5 @@
 import { Help } from "@/(top-bar)/(components)/Help";
-import { ClipboardPlus, Info, ListPlus, Search, SendHorizontal, Trash2 } from "lucide-react";
+import { ClipboardPlus, ListPlus, Search, SendHorizontal, Trash2 } from "lucide-react";
 
 const HELP_DESCRIPTION = "Add your fanfics to your library and organize them into sections.";
 

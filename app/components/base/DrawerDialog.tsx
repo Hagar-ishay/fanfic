@@ -1,6 +1,5 @@
 "use client";
 
-import { useMediaQuery } from "@/hooks/use-media-query";
 import {
   Dialog,
   DialogClose,
@@ -34,7 +33,7 @@ export function DrawerDialog(
 }
 
 export function DrawerDialogClose(
-  props: ComponentProps<typeof DialogClose> | ComponentProps<typeof DrawerClose>
+  props: ComponentProps<typeof DialogClose>  
 ) {
   const Component = isDesktop() ? DialogClose : DrawerClose;
   return <Component {...props} />;
@@ -52,7 +51,7 @@ export function DrawerDialogContent(
 export function DrawerDialogDescription(
   props:
     | ComponentProps<typeof DialogDescription>
-    | ComponentProps<typeof DrawerDescription>
+     
 ) {
   const Component = isDesktop() ? DialogDescription : DrawerDescription;
   return <Component {...props} />;
@@ -61,7 +60,7 @@ export function DrawerDialogDescription(
 export function DrawerDialogFooter(
   props:
     | ComponentProps<typeof DialogFooter>
-    | ComponentProps<typeof DrawerFooter>
+     
 ) {
   const Component = isDesktop() ? DialogFooter : DrawerFooter;
   return <Component {...props} />;
@@ -70,14 +69,14 @@ export function DrawerDialogFooter(
 export function DrawerDialogHeader(
   props:
     | ComponentProps<typeof DialogHeader>
-    | ComponentProps<typeof DrawerHeader>
+     
 ) {
   const Component = isDesktop() ? DialogHeader : DrawerHeader;
   return <Component {...props} />;
 }
 
 export function DrawerDialogTitle(
-  props: ComponentProps<typeof DialogTitle> | ComponentProps<typeof DrawerTitle>
+  props: ComponentProps<typeof DialogTitle>  
 ) {
   const Component = isDesktop() ? DialogTitle : DrawerTitle;
   return <Component {...props} />;
@@ -86,7 +85,7 @@ export function DrawerDialogTitle(
 export function DrawerDialogTrigger(
   props:
     | ComponentProps<typeof DialogTrigger>
-    | ComponentProps<typeof DrawerTrigger>
+     
 ) {
   const Component = isDesktop() ? DialogTrigger : DrawerTrigger;
   return <Component {...props} />;

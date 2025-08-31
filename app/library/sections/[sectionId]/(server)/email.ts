@@ -16,6 +16,11 @@ import { promisify } from "node:util";
 import nodemailer from "nodemailer";
 import { ENV } from "../../../../config";
 import { getSettings } from "@/db/settings";
+import {
+  getUserEmailAddress,
+  updateFanficIntegrationLastTriggered,
+} from "@/db/integrations";
+import logger from "@/logger";
 
 const unlinkAsync = promisify(fs.unlink);
 const statAsync = promisify(fs.stat);
@@ -25,7 +30,7 @@ interface Chapter {
   id: string;
 }
 
-export async function kindleSender({
+export async function emailSender({
   fanfic,
   sendLatestChapters,
   latestFinalChapter,
@@ -36,9 +41,9 @@ export async function kindleSender({
 }) {
   const settings = await getSettings(fanfic.userId);
   const translationLanguage = settings.languageCode;
-  const kindleEmail = settings.kindleEmail;
-  if (!kindleEmail) {
-    throw new Error("Kindle email not found");
+  const readerEmail = await getUserEmailAddress(fanfic.userId);
+  if (!readerEmail) {
+    throw new Error("No email integration configured");
   }
   const startingChapter = fanfic.latestStartingChapter
     ? fanfic.latestStartingChapter + 1
@@ -91,21 +96,22 @@ export async function kindleSender({
       throw new Error("Downloaded file is empty.");
     }
 
-    await sendToKindle(
-      kindleEmail,
+    await send(
+      readerEmail,
       title,
       downloadPath.replace("/tmp/", "").trim(),
       downloadPath
     );
-    console.log("Sent to Kindle:", title);
     await updateSectionFanfic(fanfic.sectionId, fanfic.id, {
-      lastSent: new Date(Date.now()),
       latestStartingChapter: latestFinalChapter,
     });
 
+    // Update the fanficIntegration lastTriggered
+    await updateFanficIntegrationLastTriggered(fanfic.id, fanfic.userId);
+
     return { success: true, message: "" };
   } catch (error) {
-    console.error("Error sending to Kindle:", error);
+    logger.error(`Error sending email: ${error instanceof Error ? error.message : String(error)}`);
     return { success: false, message: errorMessage(error) };
   } finally {
     if (fs.existsSync(downloadPath)) {
@@ -129,7 +135,8 @@ async function ParseFanfic(
   const chapters: { data: string; title: string }[] = [];
 
   return new Promise<{ data: string; title: string }[]>((resolve, reject) => {
-    epub.on("end", async () => {
+    epub.on("end", () => {
+      void (async () => {
       try {
         const startingSlice =
           sendLatestChapters && startingChapter ? startingChapter : 0;
@@ -150,8 +157,9 @@ async function ParseFanfic(
         }
         resolve(chapters);
       } catch (error) {
-        reject(error);
+        reject(new Error(String(error)));
       }
+      })();
     });
 
     epub.parse();
@@ -194,8 +202,8 @@ async function buildNewEpub(newEpub: EpubGen.Options, downloadPath: string) {
     });
 }
 
-export async function sendToKindle(
-  kindleEmail: string,
+export async function send(
+  readerEmail: string,
   title: string,
   fileName: string,
   downloadPath: string
@@ -210,7 +218,7 @@ export async function sendToKindle(
 
   const mailOptions = {
     from: ENV.GMAIL_EMAIL,
-    to: kindleEmail,
+    to: readerEmail,
     subject: title,
     text: "Please find the attached book.",
     attachments: [

@@ -5,12 +5,23 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { deleteSavedSearch } from "@/db/savedSearches";
 import { SavedSearch, SavedSearchSearch } from "@/db/types";
-import { TrashIcon } from "lucide-react";
+import { TrashIcon, EditIcon } from "lucide-react";
+import { SearchBuilder } from "./SearchBuilder";
+import { SearchResult } from "@/explore/(server)/search";
+
+type SearchResults = {
+  results: SearchResult[];
+  totalPages: number;
+  currentPage: number;
+  totalResults: number;
+};
 
 export function SavedSearches({
   savedSearches,
+  onSearch,
 }: {
   savedSearches: SavedSearch[];
+  onSearch?: (params: SavedSearchSearch, results: SearchResults) => void;
 }) {
   const parseSearch = (value: SavedSearchSearch[keyof SavedSearchSearch]) => {
     if (Array.isArray(value)) {
@@ -62,10 +73,19 @@ export function SavedSearches({
                 </ScrollArea>
               </div>
             </div>
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
+              <SearchBuilder
+                savedSearch={search}
+                onSearch={onSearch}
+                trigger={
+                  <Button variant="ghost" size="sm">
+                    <EditIcon className="h-4 w-4" />
+                  </Button>
+                }
+              />
               <ConfirmationModal
                 trigger={
-                  <Button variant="ghost" className="h-4 w-4">
+                  <Button variant="ghost" size="sm">
                     <TrashIcon className="h-4 w-4" />
                   </Button>
                 }

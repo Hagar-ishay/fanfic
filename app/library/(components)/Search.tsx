@@ -6,7 +6,6 @@ import {
   DrawerDialogTitle,
   DrawerDialogTrigger,
 } from "@/components/base/DrawerDialog";
-import { Button } from "@/components/ui/button";
 import { DrawerDescription } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { UserFanfic } from "@/db/types";

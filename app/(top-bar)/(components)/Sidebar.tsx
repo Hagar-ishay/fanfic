@@ -5,24 +5,23 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  useSidebar,
 } from "@/components/ui/sidebar";
-import { HelpCircleIcon, Home, Library, LogOut, SearchIcon, Settings } from "lucide-react";
-import { Search } from "@/library/(components)/Search";
+import { HelpCircleIcon, Home, Library, LogOut, Settings } from "lucide-react";
 import { MdOutlineExplore } from "react-icons/md";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
-import { UserFanfic } from "@/db/types";
 import { LibraryHelp } from "@/library/(components)/LibraryHelp";
-import { Help } from "@/(top-bar)/(components)/Help";
-import { redirect } from "next/navigation";
+import { useEffect, useState } from "react";
 
-const ITEMS = [
+const PLATFORM_ITEMS = [
   {
     title: "Home",
     url: "/home",
@@ -34,15 +33,13 @@ const ITEMS = [
     icon: MdOutlineExplore,
   },
   {
-    title: "Search",
-    component: Search,
-    icon: SearchIcon,
-  },
-  {
     title: "Library",
     url: "/library",
     icon: Library,
   },
+];
+
+const SETTINGS_ITEMS = [
   {
     title: "Settings",
     url: "/settings",
@@ -50,65 +47,104 @@ const ITEMS = [
   },
 ];
 
-export function AppSidebar({ userFanfics }: { userFanfics: UserFanfic[] }) {
-  const { data: session } = useSession();
-  const { isMobile } = useSidebar();
+export function AppSidebar() {
+  const [isMounted, setIsMounted] = useState(false);
+  const { data: session, status } = useSession();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Handle SSR and loading states
+  if (!isMounted || status === "loading") {
+    return null;
+  }
 
   if (!session) {
     return null;
   }
 
   return (
-    <Sidebar side="left" className="h-screen" collapsible="icon">
+    <Sidebar side="left" variant="inset" collapsible="icon">
       <SidebarContent>
-        <SidebarHeader>{isMobile && <HomeIcon />}</SidebarHeader>
+        <SidebarHeader>
+          <div className="flex items-center gap-2">
+            <div className="flex aspect-square size-12 items-center justify-center rounded-lg">
+              <span className="text-sm font-semibold">
+                <HomeIcon />
+              </span>
+            </div>
+            <div className="grid flex-1 text-left text-sm leading-tight">
+              <span className="truncate font-semibold">Fanfic Penio</span>
+            </div>
+          </div>
+        </SidebarHeader>
 
-        <SidebarMenu>
-          {ITEMS.map((item) =>
-            item.component ? (
-              <SidebarMenuItem key={item.title} className="flex items-center ml-2">
-                <item.component
-                  userFanfics={userFanfics}
-                  trigger={
-                    <SidebarMenuButton>
-                      {item.icon && <item.icon className="w-6 h-6 mr-2" />}
-                      {item.title}
-                    </SidebarMenuButton>
-                  }
-                />
-              </SidebarMenuItem>
-            ) : (
-              <Link key={item.url} href={item.url || ""}>
-                <SidebarMenuItem className="flex items-center ml-2">
-                  <SidebarMenuButton>
-                    {item.icon && <item.icon className="w-6 h-6 mr-2" />}
-                    {item.title}
+        <SidebarGroup>
+          <SidebarGroupLabel>Platform</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {PLATFORM_ITEMS.map((item) => (
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton asChild>
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-              </Link>
-            )
-          )}
-        </SidebarMenu>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Settings</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {SETTINGS_ITEMS.map((item) => (
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton asChild>
+                    <Link href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>
-          <SidebarMenuItem className="flex items-center">
+          <SidebarMenuItem>
             <LibraryHelp
               trigger={
                 <SidebarMenuButton>
                   <HelpCircleIcon />
-                  <p>Help</p>
+                  <span>Help</span>
                 </SidebarMenuButton>
               }
             />
           </SidebarMenuItem>
-          <SidebarMenuItem className="flex items-center">
+          <SidebarMenuItem>
             <SidebarMenuButton
-              onClick={() => signOut({ redirectTo: "/signin" })}
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              onClick={() => void signOut({ redirectTo: "/signin" })}
+              className="w-full"
             >
-              <LogOut className="w-6 h-6 mr-2" />
-              <p>Signed in as {session?.user?.name}</p>
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                <span className="text-xs font-semibold">
+                  {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
+                </span>
+              </div>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-semibold">
+                  {session?.user?.name || "User"}
+                </span>
+                <span className="truncate text-xs">{session?.user?.email}</span>
+              </div>
+              <LogOut className="ml-auto size-4" />
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
