@@ -7,7 +7,7 @@ import React from "react";
 
 export function HomeIcon() {
   const { toggleSidebar, isMobile } = useSidebar();
-  const width = isMobile ? 20 : 50;
+  const width = isMobile ? 44 : 50;
 
   return (
     <div className="flex flex-row items-center gap-2">

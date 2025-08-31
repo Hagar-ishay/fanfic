@@ -41,7 +41,9 @@ export default function RootLayout({
                     </Suspense>
                     <SidebarInset className="flex flex-col h-screen">
                       <TopbarWrapper />
-                      <main className="flex-1 overflow-y-auto">{children}</main>
+                      <main className="flex-1 overflow-y-auto overflow-x-hidden min-w-0">
+                        {children}
+                      </main>
                       <Toaster />
                     </SidebarInset>
                   </>

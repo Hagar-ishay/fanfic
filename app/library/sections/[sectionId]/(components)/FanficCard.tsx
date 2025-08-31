@@ -77,7 +77,7 @@ export default function FanficCard({
             )}
           >
             <CardContent
-              className="p-5"
+              className="p-3 sm:p-5"
               onContextMenu={(e) => {
                 e.preventDefault();
                 triggerRef.current?.click();

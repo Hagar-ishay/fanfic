@@ -21,8 +21,8 @@ export function Section({
           triggerRef.current?.click();
         }}
       >
-        <CardContent className="flex items-center py-5 px-6 justify-between">
-          <div className="flex items-center">
+        <CardContent className="flex items-center py-5 px-4 sm:px-6 justify-between min-w-0">
+          <div className="flex items-center min-w-0 flex-1">
             <div
               onClick={(e) => {
                 e.preventDefault();
@@ -33,11 +33,11 @@ export function Section({
                 trigger={<div hidden ref={triggerRef} />}
               />
             </div>
-            <span className="pl-2 text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
+            <span className="pl-2 text-lg font-semibold text-foreground group-hover:text-primary transition-colors truncate">
               {section.name}
             </span>
           </div>
-          <ChevronRight className="ml-2 h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+          <ChevronRight className="ml-2 h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
         </CardContent>
       </Card>
     </>

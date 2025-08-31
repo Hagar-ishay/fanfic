@@ -25,15 +25,13 @@ export default async function Page() {
         <LibraryTopbarSearch userFanfics={userFanfics} />
         <AddNewSectionButton />
       </SetTopbar>
-      <div className="bg-gradient-to-br from-background via-muted/20 to-background">
-        <div className="container mx-auto px-4 pt-8 pb-6">
-          <div className="grid gap-4">
+      <div className="bg-gradient-to-br from-background via-muted/20 to-background w-full min-h-full overflow-x-hidden">
+        <div className="w-full px-3 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-6 max-w-full sm:max-w-7xl sm:mx-auto">
+          <div className="grid gap-4 w-full max-w-full">
             {topLevelSections.map((section) => (
               <Link key={section.id} href={`/library/sections/${section.id}`}>
                 <div className="transform transition-all duration-200 hover:scale-[1.02] hover:shadow-lg">
-                  <Section
-                    section={section}
-                  />
+                  <Section section={section} />
                 </div>
               </Link>
             ))}

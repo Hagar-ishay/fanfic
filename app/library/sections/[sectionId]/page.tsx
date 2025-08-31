@@ -84,13 +84,12 @@ export default async function Page({ params }: Props) {
 
   return (
     <>
-      <SetTopbar segments={segments} />
-      <div className="bg-gradient-to-br from-background via-muted/20 to-background">
-        <div className="container mx-auto px-4 pt-8 pb-12">
-          <div className="mb-4 flex justify-end">
-            <AddFanfic sectionId={sectionId} userId={user.id} />
-          </div>
-          <div className="space-y-4">
+      <SetTopbar segments={segments}>
+        <AddFanfic sectionId={sectionId} userId={user.id} />
+      </SetTopbar>
+      <div className="bg-gradient-to-br from-background via-muted/20 to-background w-full min-h-full overflow-x-hidden">
+        <div className="w-full px-4 sm:px-6 lg:px-8 pt-8 pb-12 max-w-full sm:max-w-7xl sm:mx-auto">
+          <div className="space-y-4 w-full max-w-full">
             {childSections.map((child) => (
               <Link key={child.id} href={`/library/sections/${child.id}`}>
                 <div className="transform transition-all duration-200 hover:scale-[1.02] hover:shadow-lg">

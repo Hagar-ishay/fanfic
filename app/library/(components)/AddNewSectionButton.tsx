@@ -48,22 +48,26 @@ export function AddNewSectionButton() {
         <Button
           size="default"
           variant="default"
-          className="h-9 px-3 shadow-sm hover:shadow-md transition-all duration-200 bg-primary hover:bg-primary/90"
+          className="h-8 sm:h-9 px-2 sm:px-3 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden gap-0"
         >
-          <ListPlus className="h-4 w-4 mr-2" />
-          <span className="text-sm font-medium">New Section</span>
+          <ListPlus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2 shrink-0" />
+          <span className="whitespace-nowrap">
+            <span className="sm:inline text-[10px]">New Section</span>
+          </span>
         </Button>
       </DrawerDialogTrigger>
       <DrawerDialogContent>
         <DrawerDialogHeader>
           <DrawerDialogTitle>Add New Section</DrawerDialogTitle>
         </DrawerDialogHeader>
-        <form onSubmit={(e) => { 
-          e.preventDefault();
-          const formData = new FormData(e.currentTarget);
-          const data = { name: formData.get('name') as string };
-          onSubmit(data).catch(console.error);
-        }}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            const data = { name: formData.get("name") as string };
+            onSubmit(data).catch(console.error);
+          }}
+        >
           <div className="p-6 flex flex-col gap-3">
             <Label htmlFor="name">Name</Label>
             <Input

@@ -383,7 +383,7 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
                       {integrations.map((integration) => (
                         <div
                           key={integration.id}
-                          className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-border/50 rounded-lg bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-200 gap-3"
+                          className="flex items-center justify-between p-4 border border-border/50 rounded-lg bg-card/80 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-200 gap-3"
                         >
                           <div className="flex items-center space-x-3 min-w-0 flex-1">
                             <SettingsIcon className="h-4 w-4 text-muted-foreground flex-shrink-0" />
@@ -406,7 +406,7 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
                                 integration.name
                               );
                             }}
-                            className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground flex-shrink-0 self-start sm:self-center"
+                            className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground flex-shrink-0"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
