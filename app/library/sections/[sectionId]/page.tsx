@@ -96,7 +96,6 @@ export default async function Page({ params }: Props) {
                 <div className="transform transition-all duration-200 hover:scale-[1.02] hover:shadow-lg">
                   <Section
                     section={child}
-                    transferableSections={transferableSections}
                   />
                 </div>
               </Link>
@@ -110,7 +109,6 @@ export default async function Page({ params }: Props) {
                 fanfics={fanfics}
                 sectionId={sectionId}
                 transferableSections={transferableSections}
-                userId={user.id}
                 userIntegrations={userIntegrations}
                 fanficIntegrationsMap={serializedFanficIntegrationsMap}
               />

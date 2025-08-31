@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
           message: syncResult.message,
         });
       } catch (error) {
-        logger.error(`Failed to sync fanfic ${item.fanfic.title}:`, error);
+        logger.error(`Failed to sync fanfic ${item.fanfic.title}: ${error instanceof Error ? error.message : String(error)}`);
         results.push({
           fanficId: item.fanfic.id,
           fanficTitle: item.fanfic.title,
@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
       results: results,
     });
   } catch (error) {
-    logger.error("Fanfic sync cronjob error:", error);
+    logger.error(`Fanfic sync cronjob error: ${error instanceof Error ? error.message : String(error)}`);
     return NextResponse.json(
       {
         error: "Internal server error",

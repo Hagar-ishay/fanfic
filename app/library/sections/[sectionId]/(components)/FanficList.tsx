@@ -10,7 +10,6 @@ type FanficListProps = {
   fanfics: UserFanfic[];
   sectionId: number;
   transferableSections: Section[];
-  userId: string;
   userIntegrations: any[];
   fanficIntegrationsMap: Record<number, any[]>;
 };
@@ -19,7 +18,6 @@ export default function FanficList({
   fanfics,
   sectionId,
   transferableSections,
-  userId,
   userIntegrations,
   fanficIntegrationsMap,
 }: FanficListProps) {
@@ -58,7 +56,6 @@ export default function FanficList({
                 key={fanfic.id}
                 fanfic={fanfic}
                 index={index}
-                userId={userId}
                 userIntegrations={userIntegrations}
                 fanficIntegrations={fanficIntegrationsMap[fanfic.id] || []}
               />

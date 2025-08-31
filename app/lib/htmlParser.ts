@@ -168,7 +168,7 @@ class HtmlParser {
 
       return metadata;
     } catch (error) {
-      logger.error("Error fetching or parsing AO3 metadata:", error);
+      logger.error(`Error fetching or parsing AO3 metadata: ${error instanceof Error ? error.message : String(error)}`);
       return null;
     }
   }

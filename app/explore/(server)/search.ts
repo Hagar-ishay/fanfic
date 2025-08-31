@@ -1,6 +1,7 @@
 "use server";
 import { getAo3Client } from "@/lib/ao3Client";
 import { SavedSearchSearch } from "@/db/types";
+import logger from "@/logger";
 
 export interface SearchResult {
   workId: string;
@@ -87,7 +88,7 @@ export async function executeSearch(
     const searchResults = await ao3Client.search(ao3SearchParams);
     return searchResults;
   } catch (error) {
-    logger.error("Search error:", error);
+    logger.error(`Search error: ${error instanceof Error ? error.message : String(error)}`);
     throw new Error("Failed to execute search. Please try again.");
   }
 }

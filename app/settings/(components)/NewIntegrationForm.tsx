@@ -79,7 +79,7 @@ export function NewIntegrationForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    logger.info("Form submit:", { type, selectedType, config });
+    logger.info(`Form submit: type=${type}, selectedType=${selectedType?.value}, config=${JSON.stringify(config)}`);
 
     if (!type || !selectedType) {
       logger.error("Missing type or selectedType");
@@ -154,7 +154,7 @@ export function NewIntegrationForm({
         alert(result.error || "Failed to create Google Drive integration");
       }
     } catch (error) {
-      logger.error("Google Drive integration error:", error);
+      logger.error(`Google Drive integration error: ${error instanceof Error ? error.message : String(error)}`);
       alert("Failed to create Google Drive integration");
     } finally {
       setIsCreatingGoogleDrive(false);

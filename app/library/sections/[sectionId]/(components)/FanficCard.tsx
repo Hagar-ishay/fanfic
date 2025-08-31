@@ -18,14 +18,12 @@ export default function FanficCard({
   fanfic,
   index,
   transferableSections,
-  userId,
   userIntegrations,
   fanficIntegrations,
 }: {
   fanfic: UserFanfic;
   index: number;
   transferableSections: Section[];
-  userId: string;
   userIntegrations: any[];
   fanficIntegrations: any[];
 }) {
@@ -67,7 +65,6 @@ export default function FanficCard({
           <FanficContextMenu
             sections={transferableSections}
             fanfic={fanfic}
-            userId={userId}
             userIntegrations={userIntegrations}
             fanficIntegrations={fanficIntegrations}
             trigger={<div hidden ref={triggerRef} />}

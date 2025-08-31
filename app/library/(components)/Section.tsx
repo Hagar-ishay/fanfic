@@ -7,10 +7,8 @@ import { useRef } from "react";
 
 export function Section({
   section,
-  transferableSections,
 }: {
   section: DbSection;
-  transferableSections: DbSection[];
 }) {
   const triggerRef = useRef<HTMLDivElement>(null);
 
@@ -32,7 +30,6 @@ export function Section({
             >
               <SectionContextMenu
                 section={section}
-                transferableSections={transferableSections}
                 trigger={<div hidden ref={triggerRef} />}
               />
             </div>

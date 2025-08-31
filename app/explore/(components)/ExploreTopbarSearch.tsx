@@ -23,7 +23,7 @@ export function ExploreTopbarSearch({ onSearch }: ExploreTopbarSearchProps) {
   const { toast } = useToast();
 
   const handleExploreSearch = (query: string, closeDrawer?: () => void) => {
-    logger.info("handleExploreSearch called with query:", query);
+    logger.info("handleExploreSearch called with query: " + query);
     if (!query.trim()) {
       logger.info("Query is empty, returning");
       return;
@@ -31,9 +31,9 @@ export function ExploreTopbarSearch({ onSearch }: ExploreTopbarSearchProps) {
 
     startTransition(async () => {
       try {
-        logger.info("Starting search for:", query.trim());
+        logger.info("Starting search for: " + query.trim());
         const results = await executeQuickSearch(query.trim(), 1);
-        logger.info("Search results:", results);
+        logger.info("Search results: " + JSON.stringify(results));
         onSearch(results);
         closeDrawer?.();
 
@@ -42,7 +42,7 @@ export function ExploreTopbarSearch({ onSearch }: ExploreTopbarSearchProps) {
           window.location.href = "/explore";
         }
       } catch (error) {
-        logger.error("Search error:", error);
+        logger.error(`Search error: ${error instanceof Error ? error.message : String(error)}`);
         toast({
           title: "Search Error",
           description: "Failed to execute search. Please try again.",

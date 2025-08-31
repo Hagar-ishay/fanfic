@@ -111,7 +111,7 @@ export async function emailSender({
 
     return { success: true, message: "" };
   } catch (error) {
-    logger.error("Error sending email:", error);
+    logger.error(`Error sending email: ${error instanceof Error ? error.message : String(error)}`);
     return { success: false, message: errorMessage(error) };
   } finally {
     if (fs.existsSync(downloadPath)) {

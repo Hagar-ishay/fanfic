@@ -93,7 +93,7 @@ export async function syncToCloud({
       };
     }
   } catch (error) {
-    logger.error("Cloud sync error:", error);
+    logger.error(`Cloud sync error: ${error instanceof Error ? error.message : String(error)}`);
     const errorMessage =
       error instanceof Error ? error.message : "Unknown cloud sync error";
     await updateSyncStatus(
@@ -126,8 +126,11 @@ async function syncToGoogleDrive({
   epubPath: string;
   fileName: string;
 }): Promise<CloudSyncResult> {
-  let { accessToken, refreshToken, folderId } =
-    fanficIntegration.integration.config;
+  let { accessToken, refreshToken, folderId } = fanficIntegration.integration.config as {
+    accessToken?: string;
+    refreshToken?: string;
+    folderId?: string;
+  };
 
   if (!accessToken) {
     return {
@@ -170,7 +173,7 @@ async function syncToGoogleDrive({
         };
       }
     } catch (error) {
-      logger.warn("Failed to refresh Google Drive token:", error);
+      logger.warn(`Failed to refresh Google Drive token: ${error instanceof Error ? error.message : String(error)}`);
       // If refresh token is invalid, we should return an error indicating re-authentication is needed
       if (
         axios.isAxiosError(error) &&
@@ -237,8 +240,6 @@ async function syncToGoogleDrive({
       parents: [finalFolderId],
     };
 
-    let response;
-
     if (existingFileId) {
       await axios.patch(uploadUrl, epubBuffer, {
         headers: {
@@ -284,7 +285,7 @@ async function syncToGoogleDrive({
       cloudPath: `/${folderName}/${fileName}`,
     };
   } catch (error) {
-    logger.error("Google Drive sync error:", error);
+    logger.error(`Google Drive sync error: ${error instanceof Error ? error.message : String(error)}`);
     return {
       success: false,
       message: `Google Drive sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -303,9 +304,13 @@ async function syncToWebDAV({
   epubPath: string;
   fileName: string;
 }): Promise<CloudSyncResult> {
-  const { url, username, password } = fanficIntegration.integration.config;
-  logger.info("WebDAV config:", { url, username, password });
-  if (!url || !username) {
+  const { url, username, password } = fanficIntegration.integration.config as {
+    url?: string;
+    username?: string;
+    password?: string;
+  };
+  logger.info(`WebDAV config: url=${url}, username=${username}, password=${password ? '***' : 'undefined'}`);
+  if (!url || !username || !password) {
     return { success: false, message: "WebDAV credentials not configured" };
   }
 
@@ -323,8 +328,8 @@ async function syncToWebDAV({
 
     await axios.put(uploadUrl, epubBuffer, {
       auth: {
-        username: username,
-        password: password,
+        username,
+        password,
       },
       headers: {
         "Content-Type": "application/epub+zip",
@@ -339,7 +344,7 @@ async function syncToWebDAV({
       cloudPath: cloudPath,
     };
   } catch (error) {
-    logger.error("WebDAV sync error:", error);
+    logger.error(`WebDAV sync error: ${error instanceof Error ? error.message : String(error)}`);
     return {
       success: false,
       message: `WebDAV sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -473,8 +478,7 @@ async function createWebDAVDirectory(
         // Directory doesn't exist (404), try to create it
         if (!axios.isAxiosError(error) || error.response?.status !== 404) {
           logger.warn(
-            `Could not check WebDAV directory ${currentPath}:`,
-            error
+            `Could not check WebDAV directory ${currentPath}: ${error instanceof Error ? error.message : String(error)}`
           );
           continue;
         }
@@ -499,11 +503,11 @@ async function createWebDAVDirectory(
         ) {
           continue;
         }
-        logger.warn(`Could not create WebDAV directory ${currentPath}:`, error);
+        logger.warn(`Could not create WebDAV directory ${currentPath}: ${error instanceof Error ? error.message : String(error)}`);
       }
     }
   } catch (error) {
-    logger.warn("Could not create WebDAV directory structure:", error);
+    logger.warn(`Could not create WebDAV directory structure: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
@@ -555,7 +559,7 @@ async function syncToDropbox({
       cloudPath: cloudPath,
     };
   } catch (error) {
-    logger.error("Dropbox sync error:", error);
+    logger.error(`Dropbox sync error: ${error instanceof Error ? error.message : String(error)}`);
     return {
       success: false,
       message: `Dropbox sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -743,7 +747,7 @@ async function updateIntegrationTokens(
       ...existingConfig,
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
-      expiresAt: tokens.expiresAt,
+      expiresAt: tokens.expiresAt.toString(),
     },
   });
 }

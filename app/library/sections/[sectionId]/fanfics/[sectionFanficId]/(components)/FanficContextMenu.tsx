@@ -6,7 +6,6 @@ import type {
   Integration,
   Section,
   UserFanfic,
-  UserFanficIntegration,
 } from "@/db/types";
 import logger from "@/logger";
 
@@ -38,7 +37,7 @@ export function FanficContextMenu({
   fanfic: UserFanfic;
   sections: Section[];
   userIntegrations: Integration[];
-  fanficIntegrations: UserFanficIntegration[];
+  fanficIntegrations: any[];
   trigger?: React.ReactNode;
 }) {
   const { toast } = useToast();

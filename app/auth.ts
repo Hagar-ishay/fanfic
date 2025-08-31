@@ -32,7 +32,7 @@ async function refreshAccessToken(token: TokenWithRefresh) {
         client_id: process.env.GOOGLE_CLIENT_ID!,
         client_secret: process.env.GOOGLE_CLIENT_SECRET!,
         grant_type: "refresh_token",
-        refresh_token: token.refreshToken,
+        refresh_token: token.refreshToken!,
       }),
     });
 
@@ -104,23 +104,15 @@ export const { handlers, auth } = NextAuth({
       return session;
     },
     async jwt({ token, user, account }) {
-      logger.info("JWT callback called", {
-        hasUser: !!user,
-        hasAccount: !!account,
-        hasToken: !!token,
-      });
+      logger.info("JWT callback called - hasUser: " + !!user + ", hasAccount: " + !!account + ", hasToken: " + !!token);
 
       if (user) {
-        logger.info("Setting user ID:", user.id);
+        logger.info("Setting user ID: " + user.id);
         token.sub = user.id;
       }
 
       if (account) {
-        logger.info("Setting tokens from account", {
-          hasAccessToken: !!account.access_token,
-          hasRefreshToken: !!account.refresh_token,
-          expiresAt: account.expires_at,
-        });
+        logger.info("Setting tokens from account - hasAccessToken: " + !!account.access_token + ", hasRefreshToken: " + !!account.refresh_token + ", expiresAt: " + account.expires_at);
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
         token.expiresAt = account.expires_at;

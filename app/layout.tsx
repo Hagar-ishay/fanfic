@@ -21,10 +21,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AuthProvider>
-      <html suppressHydrationWarning>
-        <FontProvider>
-          <body className={`h-screen overflow-hidden ${fontClasses}`}>
+    <html suppressHydrationWarning>
+      <FontProvider>
+        <body className={`h-screen overflow-hidden ${fontClasses}`}>
+          <AuthProvider>
             <ThemeProvider
               attribute="class"
               defaultTheme="system"
@@ -48,9 +48,9 @@ export default function RootLayout({
                 </TopbarProvider>
               </SidebarProvider>
             </ThemeProvider>
-          </body>
-        </FontProvider>
-      </html>
-    </AuthProvider>
+          </AuthProvider>
+        </body>
+      </FontProvider>
+    </html>
   );
 }

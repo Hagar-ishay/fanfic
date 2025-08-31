@@ -101,9 +101,10 @@ export async function updateSyncStatus(
   cloudPath?: string
 ) {
   const updateData: {
-    syncStatus: string;
+    syncStatus: "pending" | "syncing" | "success" | "error";
     lastError: string | null;
     cloudPath?: string;
+    lastTriggered?: Date;
   } = {
     syncStatus: status,
     lastError: error || null,

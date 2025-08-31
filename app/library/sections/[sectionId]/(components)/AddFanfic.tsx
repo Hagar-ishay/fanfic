@@ -33,7 +33,7 @@ export function AddFanfic({
           });
         }
       } catch (error) {
-        logger.error("Error adding fanfic:", error);
+        logger.error(`Error adding fanfic: ${error instanceof Error ? error.message : String(error)}`);
         toast({
           title,
           description:
@@ -44,7 +44,7 @@ export function AddFanfic({
         });
       }
     } catch (error) {
-      logger.error("Clipboard error:", error);
+      logger.error(`Clipboard error: ${error instanceof Error ? error.message : String(error)}`);
       toast({
         title,
         description: "Failed to read clipboard",

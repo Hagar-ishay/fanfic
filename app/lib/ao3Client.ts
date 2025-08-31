@@ -102,8 +102,7 @@ class AO3Client {
     config.headers = { ...this.defaultHeaders, ...config.headers };
     const cookies = await this.cookieJar.store.getAllCookies();
     logger.info(
-      "Using cookies:",
-      cookies.map((c) => c.key)
+      "Using cookies: " + cookies.map((c) => c.key).join(", ")
     );
     config.headers.Cookie = cookies
       .map((cookie) => cookie.cookieString())
@@ -119,7 +118,7 @@ class AO3Client {
       }
       return response.data;
     } catch (error) {
-      logger.error("Request failed:", error);
+      logger.error(`Request failed: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }
@@ -130,7 +129,7 @@ class AO3Client {
       const response = await this.axiosInstance.get(tokenUrl);
       return response.data.token;
     } catch (error) {
-      logger.error("Failed to get token:", error);
+      logger.error(`Failed to get token: ${error instanceof Error ? error.message : String(error)}`);
       throw error;
     }
   }
@@ -255,7 +254,7 @@ class AO3Client {
 
     // Debug: Log first few lines of response to check if filtering is working
     const lines = response.split("\n").slice(0, 10);
-    logger.info("AO3 Response preview:", lines);
+    logger.info("AO3 Response preview: " + lines.join("\\n"));
 
     const results = this.parseSearchResults(response, Number(params.page) || 1);
     logger.info(

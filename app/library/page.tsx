@@ -33,9 +33,6 @@ export default async function Page() {
                 <div className="transform transition-all duration-200 hover:scale-[1.02] hover:shadow-lg">
                   <Section
                     section={section}
-                    transferableSections={sections.filter(
-                      (tranfser) => tranfser.id !== section.id
-                    )}
                   />
                 </div>
               </Link>

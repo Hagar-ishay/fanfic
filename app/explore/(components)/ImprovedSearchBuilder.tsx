@@ -179,8 +179,8 @@ export function ImprovedSearchBuilder({
 
         if (Array.isArray(filter.value)) {
           searchParams[key] = filter.value;
-        } else if (typeof filter.value === "object" && filter.value !== null) {
-          searchParams[key] = filter.value;
+        } else if (typeof filter.value === "object" && filter.value !== null && 'id' in filter.value && 'name' in filter.value) {
+          searchParams[key] = filter.value as { id: string; name: string; excluded?: boolean };
         } else if (typeof filter.value === "string" || typeof filter.value === "number") {
           const valueStr = String(filter.value);
           searchParams[key] = {
@@ -208,8 +208,8 @@ export function ImprovedSearchBuilder({
 
         if (Array.isArray(filter.value)) {
           searchParams[key] = filter.value;
-        } else if (typeof filter.value === "object" && filter.value !== null) {
-          searchParams[key] = filter.value;
+        } else if (typeof filter.value === "object" && filter.value !== null && 'id' in filter.value && 'name' in filter.value) {
+          searchParams[key] = filter.value as { id: string; name: string; excluded?: boolean };
         } else if (typeof filter.value === "string" || typeof filter.value === "number") {
           const valueStr = String(filter.value);
           searchParams[key] = {

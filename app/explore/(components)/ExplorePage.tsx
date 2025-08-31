@@ -64,7 +64,7 @@ export function ExplorePage({
         setLastSearchParams(searchParams);
         setActiveTab("results");
       } catch (error) {
-        logger.error("Search error:", error);
+        logger.error(`Search error: ${error instanceof Error ? error.message : String(error)}`);
         toast({
           title: "Search Error",
           description: "Failed to execute search. Please try again.",
@@ -89,7 +89,7 @@ export function ExplorePage({
         description: "Your search has been saved successfully.",
       });
     } catch (error) {
-      logger.error("Save error:", error);
+      logger.error(`Save error: ${error instanceof Error ? error.message : String(error)}`);
       toast({
         title: "Save Error",
         description: "Failed to save search. Please try again.",
@@ -107,7 +107,7 @@ export function ExplorePage({
         setSearchResults(results);
         setCurrentPage(page);
       } catch (error) {
-        logger.error("Page change error:", error);
+        logger.error(`Page change error: ${error instanceof Error ? error.message : String(error)}`);
         toast({
           title: "Page Error",
           description: "Failed to load page. Please try again.",
