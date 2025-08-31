@@ -5,10 +5,9 @@ import logger from "@/logger";
 
 export async function GET(request: NextRequest) {
   try {
-    // Verify this is a cron request
     const authHeader = request.headers.get("authorization");
     if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return new NextResponse("Unauthorized", { status: 401 });
     }
 
     logger.info("Starting fanfic sync cronjob...");
@@ -57,7 +56,9 @@ export async function GET(request: NextRequest) {
           message: syncResult.message,
         });
       } catch (error) {
-        logger.error(`Failed to sync fanfic ${item.fanfic.title}: ${error instanceof Error ? error.message : String(error)}`);
+        logger.error(
+          `Failed to sync fanfic ${item.fanfic.title}: ${error instanceof Error ? error.message : String(error)}`
+        );
         results.push({
           fanficId: item.fanfic.id,
           fanficTitle: item.fanfic.title,
@@ -83,7 +84,9 @@ export async function GET(request: NextRequest) {
       results: results,
     });
   } catch (error) {
-    logger.error(`Fanfic sync cronjob error: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(
+      `Fanfic sync cronjob error: ${error instanceof Error ? error.message : String(error)}`
+    );
     return NextResponse.json(
       {
         error: "Internal server error",
