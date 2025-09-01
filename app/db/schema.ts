@@ -293,6 +293,9 @@ export const settings = schema.table("settings", {
   activeIntegrationId: integer("active_integration_id").references(
     () => integrations.id
   ),
+  defaultSectionId: integer("default_section_id").references(
+    () => sections.id
+  ),
   languageCode: varchar("language_code").notNull().default("en"),
   enableTranslation: boolean("enable_translation").notNull().default(false),
   creationTime: timestamp("creation_time").notNull().defaultNow(),

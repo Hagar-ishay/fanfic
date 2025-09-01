@@ -50,6 +50,7 @@ interface SettingsProps {
   settings: {
     id?: number;
     activeIntegrationId: number | null;
+    defaultSectionId: number | null;
     languageCode: string;
     enableTranslation: boolean;
   };
@@ -60,20 +61,27 @@ interface SettingsProps {
     config: Record<string, unknown>;
     isActive: boolean;
   }>;
+  sections: Array<{
+    id: number;
+    name: string;
+    parentId: number | null;
+  }>;
   userId: string;
 }
 
-export function Settings({ settings, integrations, userId }: SettingsProps) {
+export function Settings({ settings, integrations, sections, userId }: SettingsProps) {
   const { theme, systemTheme, setTheme } = useTheme();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const { watch, handleSubmit, setValue, reset } = useForm<{
     activeIntegrationId: number | null;
+    defaultSectionId: number | null;
     languageCode: string;
     enableTranslation: boolean;
   }>({
     defaultValues: {
       activeIntegrationId: null,
+      defaultSectionId: null,
       languageCode: "en",
       enableTranslation: false,
     },
@@ -87,6 +95,7 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
     setMounted(true);
     reset({
       activeIntegrationId: settings?.activeIntegrationId ?? null,
+      defaultSectionId: settings?.defaultSectionId ?? null,
       languageCode: settings?.languageCode ?? "en",
       enableTranslation: settings?.enableTranslation ?? false,
     });
@@ -116,6 +125,7 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
 
   function onSubmit(data: {
     activeIntegrationId: number | null;
+    defaultSectionId: number | null;
     languageCode: string;
     enableTranslation: boolean;
   }) {
@@ -125,6 +135,7 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
           id: settings?.id,
           userId,
           activeIntegrationId: data.activeIntegrationId,
+          defaultSectionId: data.defaultSectionId,
           languageCode: data.languageCode,
           enableTranslation: data.enableTranslation,
         });
@@ -225,6 +236,34 @@ export function Settings({ settings, integrations, userId }: SettingsProps) {
               <Moon className="block dark:hidden" />
               <span className="sr-only">Toggle theme</span>
             </Button>
+          ),
+        },
+      ],
+    },
+    {
+      label: "Library Settings",
+      description: "Configure your personal library preferences",
+      fields: [
+        {
+          label: "Default Section",
+          description: "Choose which section new fanfics are added to by default",
+          component: (
+            <Select
+              defaultValue={settings?.defaultSectionId?.toString() || "none"}
+              onValueChange={(value) => setValue("defaultSectionId", value === "none" ? null : parseInt(value))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select default section" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No default section</SelectItem>
+                {sections.map((section) => (
+                  <SelectItem key={section.id} value={section.id.toString()}>
+                    {section.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           ),
         },
       ],

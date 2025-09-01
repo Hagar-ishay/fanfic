@@ -10,9 +10,26 @@ import { PlusIcon } from "lucide-react";
 import { SavedSearch } from "@/db/types";
 import { SearchResult } from "../(server)/search";
 
+interface Section {
+  id: number;
+  name: string;
+  parentId: number | null;
+}
+
+interface UserSettings {
+  id?: number;
+  activeIntegrationId: number | null;
+  defaultSectionId: number | null;
+  languageCode: string;
+  enableTranslation: boolean;
+}
+
 interface ExploreClientWrapperProps {
   savedSearches: SavedSearch[];
   userId: string;
+  sections: Section[];
+  userSettings: UserSettings;
+  userFanficIds: Set<string>;
 }
 
 type SearchResults = {
@@ -25,6 +42,9 @@ type SearchResults = {
 export function ExploreClientWrapper({
   savedSearches,
   userId,
+  sections,
+  userSettings,
+  userFanficIds,
 }: ExploreClientWrapperProps) {
   const [searchResultsCallback, setSearchResultsCallback] = useState<
     ((results: SearchResults) => void) | null
@@ -64,6 +84,9 @@ export function ExploreClientWrapper({
         <ExplorePage
           savedSearches={savedSearches}
           userId={userId}
+          sections={sections}
+          userSettings={userSettings}
+          userFanficIds={userFanficIds}
           onSearchResults={registerCallback}
         />
       </div>

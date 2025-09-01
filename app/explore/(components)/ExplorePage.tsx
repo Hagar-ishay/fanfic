@@ -14,9 +14,26 @@ import { useToast } from "@/hooks/use-toast";
 import { Plus, BookOpen, History } from "lucide-react";
 import logger from "@/logger";
 
+interface Section {
+  id: number;
+  name: string;
+  parentId: number | null;
+}
+
+interface UserSettings {
+  id?: number;
+  activeIntegrationId: number | null;
+  defaultSectionId: number | null;
+  languageCode: string;
+  enableTranslation: boolean;
+}
+
 interface ExplorePageProps {
   savedSearches: SavedSearch[];
   userId: string;
+  sections: Section[];
+  userSettings: UserSettings;
+  userFanficIds: Set<string>;
   onSearchResults?: (callback: (results: SearchResults) => void) => void;
 }
 
@@ -30,6 +47,9 @@ type SearchResults = {
 export function ExplorePage({
   savedSearches,
   userId,
+  sections,
+  userSettings,
+  userFanficIds,
   onSearchResults,
 }: ExplorePageProps) {
   const [searchResults, setSearchResults] = useState<SearchResults | null>(
@@ -249,6 +269,10 @@ export function ExplorePage({
                 totalResults={searchResults.totalResults}
                 onPageChange={handlePageChange}
                 isLoading={isPending}
+                sections={sections}
+                userId={userId}
+                userSettings={userSettings}
+                userFanficIds={userFanficIds}
               />
             </TabsContent>
           )}

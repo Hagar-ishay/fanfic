@@ -1,4 +1,5 @@
 import { getSettings } from "@/db/settings";
+import { listUserSections } from "@/db/sections";
 import { Metadata } from "next";
 import { Settings } from "./(components)/Settings";
 import { auth } from "@/auth";
@@ -11,8 +12,11 @@ export const metadata: Metadata = {
 export default async function Page() {
   const { user } = (await auth())!;
 
-  const settings = await getSettings(user.id);
-  const integrations = await getIntegrations(user.id);
+  const [settings, integrations, sections] = await Promise.all([
+    getSettings(user.id),
+    getIntegrations(user.id),
+    listUserSections(user.id),
+  ]);
 
   return (
     <>
@@ -20,6 +24,7 @@ export default async function Page() {
       <Settings
         settings={settings}
         integrations={integrations}
+        sections={sections}
         userId={user.id}
       />
     </>

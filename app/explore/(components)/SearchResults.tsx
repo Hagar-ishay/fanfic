@@ -9,6 +9,21 @@ import { SearchResult } from "../(server)/search";
 import { BookOpen, User, Clock, Heart, MessageCircle, Bookmark, Eye } from "lucide-react";
 import { useState } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { AddToLibraryButton } from "@/components/base/AddToLibraryButton";
+
+interface Section {
+  id: number;
+  name: string;
+  parentId: number | null;
+}
+
+interface UserSettings {
+  id?: number;
+  activeIntegrationId: number | null;
+  defaultSectionId: number | null;
+  languageCode: string;
+  enableTranslation: boolean;
+}
 
 interface SearchResultsProps {
   results: SearchResult[];
@@ -17,6 +32,10 @@ interface SearchResultsProps {
   totalResults: number;
   onPageChange: (page: number) => void;
   isLoading?: boolean;
+  sections: Section[];
+  userId: string;
+  userSettings: UserSettings;
+  userFanficIds: Set<string>;
 }
 
 export function SearchResults({ 
@@ -25,7 +44,11 @@ export function SearchResults({
   currentPage, 
   totalResults, 
   onPageChange, 
-  isLoading = false 
+  isLoading = false,
+  sections,
+  userId,
+  userSettings,
+  userFanficIds
 }: SearchResultsProps) {
   const isMobile = useIsMobile();
   
@@ -61,7 +84,14 @@ export function SearchResults({
       <ScrollArea className="h-[400px] sm:h-[600px]">
         <div className="space-y-3 sm:space-y-4 pr-2 sm:pr-4">
           {results.map((result) => (
-            <SearchResultCard key={result.workId} result={result} />
+            <SearchResultCard 
+              key={result.workId} 
+              result={result}
+              sections={sections}
+              userId={userId}
+              userSettings={userSettings}
+              userFanficIds={userFanficIds}
+            />
           ))}
         </div>
       </ScrollArea>
@@ -127,25 +157,45 @@ export function SearchResults({
   );
 }
 
-function SearchResultCard({ result }: { result: SearchResult }) {
+function SearchResultCard({ 
+  result, 
+  sections, 
+  userId, 
+  userSettings,
+  userFanficIds 
+}: { 
+  result: SearchResult;
+  sections: Section[];
+  userId: string;
+  userSettings: UserSettings;
+  userFanficIds: Set<string>;
+}) {
   const [isExpanded, setIsExpanded] = useState(false);
   const isMobile = useIsMobile();
+  const isInLibrary = userFanficIds.has(result.workId);
 
   return (
     <Card className="p-3 sm:p-4">
       <div className="space-y-2 sm:space-y-3">
         {/* Title and Author */}
         <div className="space-y-1">
-          <h3 className="font-semibold text-base sm:text-lg leading-tight">
-            <a 
-              href={result.sourceUrl} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="hover:text-primary transition-colors"
-            >
-              {result.title}
-            </a>
-          </h3>
+          <div className="flex items-start gap-2">
+            <h3 className="font-semibold text-base sm:text-lg leading-tight flex-1">
+              <a 
+                href={result.sourceUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-primary transition-colors"
+              >
+                {result.title}
+              </a>
+            </h3>
+            {isInLibrary && (
+              <Badge variant="secondary" className="text-xs bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100">
+                In Library
+              </Badge>
+            )}
+          </div>
           <p className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1">
             <User className="h-3 w-3" />
             <a 
@@ -243,6 +293,24 @@ function SearchResultCard({ result }: { result: SearchResult }) {
             <Badge variant="outline" className="text-xs">
               Updated: {new Date(result.updated).toLocaleDateString()}
             </Badge>
+          )}
+        </div>
+
+        {/* Add to Library Button */}
+        <div className="flex justify-end pt-2">
+          {!isInLibrary ? (
+            <AddToLibraryButton
+              searchResult={result}
+              sections={sections}
+              userId={userId}
+              defaultSectionId={userSettings.defaultSectionId}
+              userSettingsId={userSettings.id}
+            />
+          ) : (
+            <div className="text-xs text-muted-foreground flex items-center gap-1">
+              <BookOpen className="h-3 w-3" />
+              Already in your library
+            </div>
           )}
         </div>
       </div>

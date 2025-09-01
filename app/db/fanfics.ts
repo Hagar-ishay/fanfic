@@ -68,6 +68,17 @@ export const listUserFanfics = async (userId: string): Promise<UserFanfic[]> => 
   }));
 };
 
+export const getUserFanficExternalIds = async (userId: string): Promise<Set<string>> => {
+  "use cache";
+  cacheLife("default");
+  const result = await db
+    .select({ externalId: fanfics.externalId })
+    .from(fanfics)
+    .innerJoin(sectionFanfics, drizzle.eq(fanfics.id, sectionFanfics.fanficId))
+    .where(drizzle.eq(sectionFanfics.userId, userId));
+  return new Set(result.map(row => row.externalId.toString()));
+};
+
 export const getFanficById = async (sectionFanficId: number) => {
   "use cache";
   cacheLife("default");
