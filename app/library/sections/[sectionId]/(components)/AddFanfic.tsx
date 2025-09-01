@@ -33,7 +33,9 @@ export function AddFanfic({
           });
         }
       } catch (error) {
-        logger.error(`Error adding fanfic: ${error instanceof Error ? error.message : String(error)}`);
+        logger.error(
+          `Error adding fanfic: ${error instanceof Error ? error.message : String(error)}`
+        );
         toast({
           title,
           description:
@@ -44,7 +46,9 @@ export function AddFanfic({
         });
       }
     } catch (error) {
-      logger.error(`Clipboard error: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        `Clipboard error: ${error instanceof Error ? error.message : String(error)}`
+      );
       toast({
         title,
         description: "Failed to read clipboard",
@@ -54,9 +58,14 @@ export function AddFanfic({
   };
 
   return (
-    <Button variant="default" onClick={() => { void handleAddFanficFromClipboard(); }}>
+    <Button
+      variant="default"
+      onClick={() => {
+        void handleAddFanficFromClipboard();
+      }}
+    >
       <ClipboardPlus />
-      <p className="mt-1 text-[10px]">Add Fanfic</p>
+      <p className="text-[10px]">Add Fanfic</p>
     </Button>
   );
 }

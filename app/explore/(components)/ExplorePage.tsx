@@ -122,14 +122,14 @@ export function ExplorePage({
   };
 
   return (
-    <div className="container mx-auto p-2 sm:p-4 max-w-7xl">
+    <div className="container mx-auto p-4 sm:p-6 max-w-7xl">
       <div className="space-y-4 sm:space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-2 sm:px-0">
           <div>
-            <h1 className="text-2xl sm:text-3xl pt-5 font-bold">
+            <h1 className="text-2xl sm:text-3xl pt-6 sm:pt-5 font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
               Explore Fanfiction
             </h1>
-            <p className="text-sm sm:text-base text-muted-foreground">
+            <p className="text-sm sm:text-base text-muted-foreground mt-2">
               Search and discover new stories from Archive of Our Own
             </p>
           </div>

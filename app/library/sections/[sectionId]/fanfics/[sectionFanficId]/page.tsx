@@ -77,9 +77,7 @@ export default async function Page({
       </SetTopbar>
       <div className="min-h-screen bg-gradient-to-br from-background via-muted/10 to-background">
         <div className="container mx-auto px-4 pt-8 pb-6">
-          <div className="bg-card/80 backdrop-blur-sm border border-border/50 rounded-lg shadow-lg">
-            <Fanfic fanfic={fanfic} />
-          </div>
+          <Fanfic fanfic={fanfic} />
         </div>
       </div>
     </>

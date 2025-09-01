@@ -69,12 +69,12 @@ export function AppSidebar() {
       <SidebarContent>
         <SidebarHeader>
           <div className="flex items-center gap-2">
-            <div className="flex aspect-square size-12 items-center justify-center rounded-lg">
+            <div className="flex aspect-square size-14 sm:size-12 items-center justify-center rounded-lg">
               <span className="text-sm font-semibold">
                 <HomeIcon />
               </span>
             </div>
-            <div className="grid flex-1 text-left text-sm leading-tight">
+            <div className="grid flex-1 text-left text-sm leading-normal">
               <span className="truncate font-semibold">Fanfic Penio</span>
             </div>
           </div>
@@ -138,11 +138,11 @@ export function AppSidebar() {
                   {session?.user?.name?.charAt(0)?.toUpperCase() || "U"}
                 </span>
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
+              <div className="grid flex-1 text-left text-sm leading-normal">
                 <span className="truncate font-semibold">
                   {session?.user?.name || "User"}
                 </span>
-                <span className="truncate text-xs">{session?.user?.email}</span>
+                <span className="truncate text-xs leading-normal">{session?.user?.email}</span>
               </div>
               <LogOut className="ml-auto size-4" />
             </SidebarMenuButton>
