@@ -33,7 +33,7 @@ export function DrawerDialog(
 }
 
 export function DrawerDialogClose(
-  props: ComponentProps<typeof DialogClose>  
+  props: ComponentProps<typeof DialogClose>
 ) {
   const Component = isDesktop() ? DialogClose : DrawerClose;
   return <Component {...props} />;
@@ -49,43 +49,35 @@ export function DrawerDialogContent(
 }
 
 export function DrawerDialogDescription(
-  props:
-    | ComponentProps<typeof DialogDescription>
-     
+  props: ComponentProps<typeof DialogDescription>
 ) {
   const Component = isDesktop() ? DialogDescription : DrawerDescription;
   return <Component {...props} />;
 }
 
 export function DrawerDialogFooter(
-  props:
-    | ComponentProps<typeof DialogFooter>
-     
+  props: ComponentProps<typeof DialogFooter>
 ) {
   const Component = isDesktop() ? DialogFooter : DrawerFooter;
   return <Component {...props} />;
 }
 
 export function DrawerDialogHeader(
-  props:
-    | ComponentProps<typeof DialogHeader>
-     
+  props: ComponentProps<typeof DialogHeader>
 ) {
   const Component = isDesktop() ? DialogHeader : DrawerHeader;
   return <Component {...props} />;
 }
 
 export function DrawerDialogTitle(
-  props: ComponentProps<typeof DialogTitle>  
+  props: ComponentProps<typeof DialogTitle>
 ) {
   const Component = isDesktop() ? DialogTitle : DrawerTitle;
   return <Component {...props} />;
 }
 
 export function DrawerDialogTrigger(
-  props:
-    | ComponentProps<typeof DialogTrigger>
-     
+  props: ComponentProps<typeof DialogTrigger>
 ) {
   const Component = isDesktop() ? DialogTrigger : DrawerTrigger;
   return <Component {...props} />;

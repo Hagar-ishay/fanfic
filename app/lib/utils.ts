@@ -1,6 +1,5 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { DateTime } from "luxon";
 import { AxiosError } from "axios";
 
@@ -32,7 +31,10 @@ export const errorMessage = (error: unknown): string => {
   return "";
 };
 
-export const getIsDesktop = () => useMediaQuery("(min-width: 768px)");
+export const getIsDesktop = () => {
+  if (typeof window === "undefined") return true; // SSR fallback
+  return window.matchMedia("(min-width: 768px)").matches;
+};
 
 export function capitalize(word: string) {
   return word[0].toUpperCase() + word.slice(1).toLowerCase();
