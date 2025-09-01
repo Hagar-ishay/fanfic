@@ -72,25 +72,25 @@ export default function FanficCard({
 
           <Card
             className={cn(
-              "pt-3 pb-3 border-none border-0 shadow-none hover:bg-accent/30",
-              snapshot.isDragging && "opacity-50"
+              "bg-card/50 border border-border/40 shadow-sm hover:shadow-md hover:bg-card/80 transition-all duration-200 mb-2",
+              snapshot.isDragging && "opacity-50 shadow-lg"
             )}
           >
             <CardContent
-              className="p-3 sm:p-5"
+              className="p-4 sm:p-5"
               onContextMenu={(e) => {
                 e.preventDefault();
                 triggerRef.current?.click();
               }}
             >
               <div className="flex flex-row items-center justify-between w-full">
-                <div className="flex-grow min-w-0 flex flex-row items-center gap-3">
-                  <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing flex-shrink-0">
+                <div className="flex-grow min-w-0 flex flex-row items-center gap-4">
+                  <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing flex-shrink-0 text-muted-foreground/60 hover:text-muted-foreground transition-colors">
                     <Grip className="h-4 w-4" />
                   </div>
                   <Link
                     href={`/library/sections/${fanfic.sectionId}/fanfics/${fanfic.id}`}
-                    className="min-w-0 flex-1"
+                    className="min-w-0 flex-1 group"
                     onClick={(e) => {
                       if (snapshot.isDragging) {
                         e.preventDefault();
@@ -98,22 +98,22 @@ export default function FanficCard({
                     }}
                   >
                     <div className="min-w-0 flex-1">
-                      <div className={cn("text-md font-semibold truncate", getFont(fanfic.language))}>
+                      <div className={cn("text-base font-semibold truncate group-hover:text-primary transition-colors", getFont(fanfic.language))}>
                         {fanfic.title}
                       </div>
-                      <div className={"text-xs text-muted-foreground truncate font-blokletters-light"}>
+                      <div className="text-sm text-muted-foreground/80 truncate font-blokletters-light mt-1">
                         {fanfic.author}
                       </div>
                     </div>
                   </Link>
                 </div>
-                <div className="flex flex-row gap-2 flex-shrink-0 items-center">
+                <div className="flex flex-row gap-3 flex-shrink-0 items-center">
                   <Tooltip description={optimisticKudos ? "Remove kudos" : "Send kudos"}>
                     <Button
                       variant="ghost"
                       size="sm"
                       disabled={isPending}
-                      className="text-muted-foreground hover:text-primary transition-colors p-0 h-auto min-w-0"
+                      className="text-muted-foreground hover:text-primary transition-colors p-1.5 h-auto min-w-0 rounded-md"
                       onClick={handleKudos}
                     >
                       <Heart className={cn("h-4 w-4", optimisticKudos && "fill-primary text-primary")} />
@@ -122,11 +122,15 @@ export default function FanficCard({
 
                   {/* TODO: Implement integration-based lastSent check */}
                   <Tooltip description="Not uploaded yet">
-                    <BookUp2 size="18" />
+                    <div className="text-muted-foreground/60">
+                      <BookUp2 size="16" />
+                    </div>
                   </Tooltip>
                   {fanfic.completedAt && (
                     <Tooltip description="Completed">
-                      <CircleCheck size="16" />
+                      <div className="text-green-600">
+                        <CircleCheck size="16" />
+                      </div>
                     </Tooltip>
                   )}
                 </div>
