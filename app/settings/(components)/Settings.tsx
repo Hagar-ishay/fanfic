@@ -69,7 +69,12 @@ interface SettingsProps {
   userId: string;
 }
 
-export function Settings({ settings, integrations, sections, userId }: SettingsProps) {
+export function Settings({
+  settings,
+  integrations,
+  sections,
+  userId,
+}: SettingsProps) {
   const { theme, systemTheme, setTheme } = useTheme();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -246,11 +251,17 @@ export function Settings({ settings, integrations, sections, userId }: SettingsP
       fields: [
         {
           label: "Default Section",
-          description: "Choose which section new fanfics are added to by default",
+          description:
+            "Choose which section new fanfics are added to by default",
           component: (
             <Select
               defaultValue={settings?.defaultSectionId?.toString() || "none"}
-              onValueChange={(value) => setValue("defaultSectionId", value === "none" ? null : parseInt(value))}
+              onValueChange={(value) =>
+                setValue(
+                  "defaultSectionId",
+                  value === "none" ? null : parseInt(value)
+                )
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select default section" />
@@ -317,7 +328,7 @@ export function Settings({ settings, integrations, sections, userId }: SettingsP
       <div className="container mx-auto px-4 pt-8 pb-6 max-w-4xl">
         <div className="space-y-8">
           <div className="text-center md:text-left">
-            <h2 className="text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent md:leading-normal">
               Settings
             </h2>
             <p className="text-base text-muted-foreground mt-2">

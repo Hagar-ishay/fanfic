@@ -51,9 +51,9 @@ export function FontProvider({ children }: { children: React.ReactNode }) {
       blokletters.className,
       isMobile ? "text-sm" : "text-base"
     );
-    
+
     // Add font classes
-    classes.split(' ').forEach(cls => {
+    classes.split(" ").forEach((cls) => {
       if (cls.trim()) {
         body.classList.add(cls.trim());
       }
@@ -61,7 +61,7 @@ export function FontProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       // Cleanup on unmount
-      classes.split(' ').forEach(cls => {
+      classes.split(" ").forEach((cls) => {
         if (cls.trim()) {
           body.classList.remove(cls.trim());
         }

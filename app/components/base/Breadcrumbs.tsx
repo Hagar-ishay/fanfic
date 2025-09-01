@@ -29,10 +29,10 @@ export function Breadcrumbs({
   const GetBreadcrumb = (segment: { label: string; href: string }) => {
     return (
       <BreadcrumbItem
-        className="font-semibold text-foreground/90 hover:text-primary transition-colors"
+        className="font-semibold text-foreground/90 hover:text-primary transition-colors text-xs md:text-lg"
         key={segment.href}
       >
-        <BreadcrumbLink 
+        <BreadcrumbLink
           href={segment.href}
           className="hover:text-primary transition-colors"
         >
