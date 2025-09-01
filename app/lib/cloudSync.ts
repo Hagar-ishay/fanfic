@@ -25,7 +25,7 @@ type CloudIntegrations = Record<
   string,
   (params: {
     fanficIntegration: UserFanficIntegration;
-    sectionName: string;
+    sectionName?: string;
     epubPath: string;
     fileName: string;
   }) => Promise<CloudSyncResult>
@@ -93,7 +93,9 @@ export async function syncToCloud({
       };
     }
   } catch (error) {
-    logger.error(`Cloud sync error: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(
+      `Cloud sync error: ${error instanceof Error ? error.message : String(error)}`
+    );
     const errorMessage =
       error instanceof Error ? error.message : "Unknown cloud sync error";
     await updateSyncStatus(
@@ -117,16 +119,15 @@ export async function syncToCloud({
 
 async function syncToGoogleDrive({
   fanficIntegration,
-  sectionName,
   epubPath,
   fileName,
 }: {
   fanficIntegration: UserFanficIntegration;
-  sectionName: string;
   epubPath: string;
   fileName: string;
 }): Promise<CloudSyncResult> {
-  let { accessToken, refreshToken, folderId } = fanficIntegration.integration.config as {
+  let { accessToken, refreshToken, folderId } = fanficIntegration.integration
+    .config as {
     accessToken?: string;
     refreshToken?: string;
     folderId?: string;
@@ -173,7 +174,9 @@ async function syncToGoogleDrive({
         };
       }
     } catch (error) {
-      logger.warn(`Failed to refresh Google Drive token: ${error instanceof Error ? error.message : String(error)}`);
+      logger.warn(
+        `Failed to refresh Google Drive token: ${error instanceof Error ? error.message : String(error)}`
+      );
       // If refresh token is invalid, we should return an error indicating re-authentication is needed
       if (
         axios.isAxiosError(error) &&
@@ -189,41 +192,40 @@ async function syncToGoogleDrive({
   }
 
   try {
-    // Build cloud path using section name as folder
-    const folderName = sectionName;
-
     // Read EPUB file
     const fs = await import("fs/promises");
     const epubBuffer = await fs.readFile(epubPath);
 
-    // Resolve parent folder ID (convert folder name to ID if needed)
-    let parentFolderId = folderId;
-    if (folderId && folderId !== "root" && !folderId.includes("-")) {
-      // This looks like a folder name, not an ID - try to find it
-      const foundFolderId = await findGoogleDriveFile(
-        updatedIntegration,
-        folderId,
-        "root",
-        true
-      );
-      if (foundFolderId) {
-        parentFolderId = foundFolderId;
+    // Determine final folder based on folderId configuration
+    let finalFolderId = "root";
+
+
+    if (folderId) {
+      if (folderId === "root") {
+        finalFolderId = "root";
+      } else if (folderId.includes("-") && folderId.length > 10) {
+        // This looks like a Google Drive folder ID
+        finalFolderId = folderId;
       } else {
-        // Folder doesn't exist, create it
-        parentFolderId = await createGoogleDriveFolder(
+        // This is a folder name - find or create it
+        const foundFolderId = await findGoogleDriveFile(
           updatedIntegration,
           folderId,
-          "root"
+          "root",
+          true
         );
+        if (foundFolderId) {
+          finalFolderId = foundFolderId;
+        } else {
+          // Folder doesn't exist, create it
+          finalFolderId = await createGoogleDriveFolder(
+            updatedIntegration,
+            folderId,
+            "root"
+          );
+        }
       }
     }
-
-    // Find or create folder structure
-    const finalFolderId = await createGoogleDriveFolder(
-      updatedIntegration,
-      folderName,
-      parentFolderId
-    );
 
     // Check if file already exists and get its ID
     const existingFileId =
@@ -277,15 +279,22 @@ async function syncToGoogleDrive({
       );
     }
 
+    const cloudPath =
+      folderId && folderId !== "root"
+        ? `/${folderId}/${fileName}`
+        : `/${fileName}`;
+
     return {
       success: true,
       message: existingFileId
         ? "Successfully updated file in Google Drive"
         : "Successfully uploaded to Google Drive",
-      cloudPath: `/${folderName}/${fileName}`,
+      cloudPath: cloudPath,
     };
   } catch (error) {
-    logger.error(`Google Drive sync error: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(
+      `Google Drive sync error: ${error instanceof Error ? error.message : String(error)}`
+    );
     return {
       success: false,
       message: `Google Drive sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -295,12 +304,10 @@ async function syncToGoogleDrive({
 
 async function syncToWebDAV({
   fanficIntegration,
-  sectionName,
   epubPath,
   fileName,
 }: {
   fanficIntegration: UserFanficIntegration;
-  sectionName: string;
   epubPath: string;
   fileName: string;
 }): Promise<CloudSyncResult> {
@@ -309,13 +316,24 @@ async function syncToWebDAV({
     username?: string;
     password?: string;
   };
-  logger.info(`WebDAV config: url=${url}, username=${username}, password=${password ? '***' : 'undefined'}`);
+  logger.info(
+    `WebDAV config: url=${url}, username=${username}, password=${password ? "***" : "undefined"}`
+  );
   if (!url || !username || !password) {
     return { success: false, message: "WebDAV credentials not configured" };
   }
 
   try {
-    const cloudPath = path.posix.join("/PenioFanfic", sectionName, fileName);
+    // Get folder config to determine if subdirectories should be created
+    const { folderName } = fanficIntegration.integration.config as {
+      folderName?: string;
+    };
+
+    // Create cloud path - only use subdirectories if folderName contains '/'
+    const cloudPath =
+      folderName && folderName.includes("/")
+        ? path.posix.join("/PenioFanfic", folderName, fileName)
+        : path.posix.join("/PenioFanfic", fileName);
 
     logger.info({ cloudPath });
     const fs = await import("fs/promises");
@@ -344,7 +362,9 @@ async function syncToWebDAV({
       cloudPath: cloudPath,
     };
   } catch (error) {
-    logger.error(`WebDAV sync error: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(
+      `WebDAV sync error: ${error instanceof Error ? error.message : String(error)}`
+    );
     return {
       success: false,
       message: `WebDAV sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,
@@ -383,7 +403,7 @@ async function createGoogleDriveFolder(
           currentParentId,
           true
         );
-        
+
         if (doubleCheckFolder) {
           currentParentId = doubleCheckFolder;
         } else {
@@ -416,6 +436,7 @@ async function createGoogleDriveFolder(
   }
 }
 
+
 async function findGoogleDriveFile(
   integration: IntegrationConfig,
   fileName: string,
@@ -433,8 +454,6 @@ async function findGoogleDriveFile(
     const escapedFileName = fileName.replace(/'/g, "\\'");
     const query = `name='${escapedFileName}' and '${parentFolderId}' in parents and ${mimeTypeQuery} and trashed=false`;
 
-    logger.info(`Searching Google Drive with query: ${query}`);
-
     const response = await axios.get(
       "https://www.googleapis.com/drive/v3/files",
       {
@@ -450,18 +469,12 @@ async function findGoogleDriveFile(
     );
 
     const files = response.data.files || [];
-    logger.info(`Found ${files.length} matching files/folders`);
-    
-    if (files.length > 0) {
-      logger.info(`Using first match: ${files[0].name} (${files[0].id})`);
-    }
-    
     return files.length > 0 ? files[0].id : null;
   } catch (error) {
     logger.error(
       `Error finding Google Drive file '${fileName}' in parent '${parentFolderId}': ${error instanceof Error ? error.message : "Unknown error"}`
     );
-    
+
     // For authentication errors, we should let the parent function handle the token refresh
     // Rather than throwing here, return null and let the caller decide
     return null;
@@ -528,22 +541,24 @@ async function createWebDAVDirectory(
         ) {
           continue;
         }
-        logger.warn(`Could not create WebDAV directory ${currentPath}: ${error instanceof Error ? error.message : String(error)}`);
+        logger.warn(
+          `Could not create WebDAV directory ${currentPath}: ${error instanceof Error ? error.message : String(error)}`
+        );
       }
     }
   } catch (error) {
-    logger.warn(`Could not create WebDAV directory structure: ${error instanceof Error ? error.message : String(error)}`);
+    logger.warn(
+      `Could not create WebDAV directory structure: ${error instanceof Error ? error.message : String(error)}`
+    );
   }
 }
 
 async function syncToDropbox({
   fanficIntegration,
-  sectionName,
   epubPath,
   fileName,
 }: {
   fanficIntegration: UserFanficIntegration;
-  sectionName: string;
   epubPath: string;
   fileName: string;
 }): Promise<CloudSyncResult> {
@@ -553,8 +568,16 @@ async function syncToDropbox({
   }
 
   try {
-    // Build cloud path: /PenioFanfic/SectionName/filename.epub
-    const cloudPath = path.posix.join("/PenioFanfic", sectionName, fileName);
+    // Get folder config to determine if subdirectories should be created
+    const { folderName } = fanficIntegration.integration.config as {
+      folderName?: string;
+    };
+
+    // Build cloud path - only use subdirectories if folderName contains '/'
+    const cloudPath =
+      folderName && folderName.includes("/")
+        ? path.posix.join("/PenioFanfic", folderName, fileName)
+        : path.posix.join("/PenioFanfic", fileName);
 
     // Read EPUB file
     const fs = await import("fs/promises");
@@ -584,7 +607,9 @@ async function syncToDropbox({
       cloudPath: cloudPath,
     };
   } catch (error) {
-    logger.error(`Dropbox sync error: ${error instanceof Error ? error.message : String(error)}`);
+    logger.error(
+      `Dropbox sync error: ${error instanceof Error ? error.message : String(error)}`
+    );
     return {
       success: false,
       message: `Dropbox sync failed: ${error instanceof Error ? error.message : "Unknown error"}`,

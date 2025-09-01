@@ -2,11 +2,7 @@
 
 import { ContextMenu, Option } from "@/components/base/ContextMenu";
 import { deleteSectionFanfic, tranferSectionFanfic } from "@/db/fanfics";
-import type {
-  Integration,
-  Section,
-  UserFanfic,
-} from "@/db/types";
+import type { Integration, Section, UserFanfic } from "@/db/types";
 import logger from "@/logger";
 
 import { useToast } from "@/hooks/use-toast";
@@ -21,11 +17,7 @@ import {
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { checkAndUpdateFanfic } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(server)/updateFanfic";
-import {
-  enableFanficSync,
-  disableFanficSync,
-  createFanficIntegration,
-} from "@/db/fanficIntegrations";
+import { createFanficIntegration } from "@/db/fanficIntegrations";
 import { syncToCloud } from "@/lib/cloudSync";
 export function FanficContextMenu({
   fanfic,
@@ -61,36 +53,6 @@ export function FanficContextMenu({
       toast({
         title: "Send to Email",
         description: `Failed to send ${fanfic.title}: ${result.message}`,
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleToggleSync = async (
-    integration: Integration,
-    currentlyEnabled: boolean
-  ) => {
-    try {
-      if (currentlyEnabled) {
-        await disableFanficSync(fanfic.id, integration.id);
-        toast({
-          title: "Auto Sync Disabled",
-          description: `Disabled auto sync for ${integration.name}`,
-        });
-      } else {
-        await enableFanficSync(fanfic.id, integration.id);
-        toast({
-          title: "Auto Sync Enabled",
-          description: `Enabled daily auto sync for ${integration.name}`,
-        });
-      }
-
-      // Refresh the page to show updated state
-      router.refresh();
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: `Failed to update sync settings: ${error instanceof Error ? error.message : "Unknown error"}`,
         variant: "destructive",
       });
     }
@@ -209,28 +171,10 @@ export function FanficContextMenu({
       (i) => i.category === "cloud_storage"
     );
     for (const integration of cloudIntegrations) {
-      const currentFanficIntegration = fanficIntegrations.find(
-        (fi) => fi.integrationId === integration.id
-      );
-      const isEnabled = currentFanficIntegration?.enabled || false;
-
-      const cloudSubItems = [
-        {
-          name: isEnabled
-            ? "Disable auto sync (Daily)"
-            : "Enable auto sync (Daily)",
-          action: () => handleToggleSync(integration, isEnabled),
-        },
-        {
-          name: "Send now",
-          action: () => handleImmediateSync(fanfic, integration),
-        },
-      ];
-
       options.push({
         icon: <Cloud size={17} />,
         name: `Cloud Sync (${integration.name})`,
-        subItems: cloudSubItems,
+        action: () => handleImmediateSync(fanfic, integration),
       });
     }
 
