@@ -30,7 +30,7 @@ export default async function Page() {
           <div className="grid gap-4 w-full max-w-full">
             {topLevelSections.map((section) => (
               <Link key={section.id} href={`/library/sections/${section.id}`}>
-                <div className="transform transition-all duration-200 hover:scale-[1.02] hover:shadow-lg">
+                <div className="transform transition-all duration-200  hover:shadow-lg">
                   <Section section={section} />
                 </div>
               </Link>
