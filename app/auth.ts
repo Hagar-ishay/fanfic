@@ -45,7 +45,11 @@ async function refreshAccessToken(token: TokenWithRefresh) {
 
     if (!response.ok) {
       logger.error(`Token refresh failed: ${JSON.stringify(refreshedTokens)}`);
-      throw new Error(refreshedTokens.error || "Token refresh failed");
+      // Don't throw here, let the catch block handle it
+      return {
+        ...token,
+        error: "RefreshAccessTokenError",
+      };
     }
 
     logger.info("Token refresh successful");
@@ -58,7 +62,8 @@ async function refreshAccessToken(token: TokenWithRefresh) {
       refreshToken: refreshedTokens.refresh_token ?? token.refreshToken,
     };
   } catch (error) {
-    logger.error(`Error refreshing access token: ${errorMessage(error)}`);
+    // Use console.error instead of logger to avoid potential NextAuth caching issues
+    console.error(`Error refreshing access token: ${errorMessage(error)}`);
 
     return {
       ...token,
@@ -68,7 +73,6 @@ async function refreshAccessToken(token: TokenWithRefresh) {
 }
 
 export const { handlers, auth } = NextAuth({
-  debug: true,
   adapter: DrizzleAdapter(db, {
     usersTable: users,
     accountsTable: accounts,
@@ -104,15 +108,11 @@ export const { handlers, auth } = NextAuth({
       return session;
     },
     async jwt({ token, user, account }) {
-      logger.info("JWT callback called - hasUser: " + !!user + ", hasAccount: " + !!account + ", hasToken: " + !!token);
-
       if (user) {
-        logger.info("Setting user ID: " + user.id);
         token.sub = user.id;
       }
 
       if (account) {
-        logger.info("Setting tokens from account - hasAccessToken: " + !!account.access_token + ", hasRefreshToken: " + !!account.refresh_token + ", expiresAt: " + account.expires_at);
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
         token.expiresAt = account.expires_at;
@@ -120,13 +120,11 @@ export const { handlers, auth } = NextAuth({
 
       // Return token immediately if this is a new login (account exists)
       if (account) {
-        logger.info("New login, returning token");
         return token;
       }
 
       // Return previous token if the access token has not expired yet
       if (token.expiresAt && Date.now() < (token.expiresAt as number) * 1000) {
-        logger.info("Token still valid, returning existing token");
         return token;
       }
 
@@ -136,11 +134,9 @@ export const { handlers, auth } = NextAuth({
         token.expiresAt &&
         Date.now() >= (token.expiresAt as number) * 1000
       ) {
-        logger.info("Token expired, attempting refresh");
         return refreshAccessToken(token);
       }
 
-      logger.info("Returning token as-is");
       return token;
     },
   },

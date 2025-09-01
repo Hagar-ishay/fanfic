@@ -376,23 +376,35 @@ async function createGoogleDriveFolder(
       if (existingFolder) {
         currentParentId = existingFolder;
       } else {
-        // Create new folder
-        const response = await axios.post(
-          "https://www.googleapis.com/drive/v3/files",
-          {
-            name: folderPart,
-            mimeType: "application/vnd.google-apps.folder",
-            parents: [currentParentId],
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              "Content-Type": "application/json",
-            },
-            timeout: 10000,
-          }
+        // Double-check that folder doesn't exist before creating (race condition protection)
+        const doubleCheckFolder = await findGoogleDriveFile(
+          integration,
+          folderPart,
+          currentParentId,
+          true
         );
-        currentParentId = response.data.id;
+        
+        if (doubleCheckFolder) {
+          currentParentId = doubleCheckFolder;
+        } else {
+          // Create new folder
+          const response = await axios.post(
+            "https://www.googleapis.com/drive/v3/files",
+            {
+              name: folderPart,
+              mimeType: "application/vnd.google-apps.folder",
+              parents: [currentParentId],
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json",
+              },
+              timeout: 10000,
+            }
+          );
+          currentParentId = response.data.id;
+        }
       }
     }
 
@@ -417,7 +429,11 @@ async function findGoogleDriveFile(
       ? "mimeType='application/vnd.google-apps.folder'"
       : "mimeType!='application/vnd.google-apps.folder'";
 
-    const query = `name='${fileName}' and '${parentFolderId}' in parents and ${mimeTypeQuery} and trashed=false`;
+    // Escape single quotes in fileName to prevent query errors
+    const escapedFileName = fileName.replace(/'/g, "\\'");
+    const query = `name='${escapedFileName}' and '${parentFolderId}' in parents and ${mimeTypeQuery} and trashed=false`;
+
+    logger.info(`Searching Google Drive with query: ${query}`);
 
     const response = await axios.get(
       "https://www.googleapis.com/drive/v3/files",
@@ -434,11 +450,20 @@ async function findGoogleDriveFile(
     );
 
     const files = response.data.files || [];
+    logger.info(`Found ${files.length} matching files/folders`);
+    
+    if (files.length > 0) {
+      logger.info(`Using first match: ${files[0].name} (${files[0].id})`);
+    }
+    
     return files.length > 0 ? files[0].id : null;
   } catch (error) {
-    logger.warn(
-      `Error finding Google Drive file: ${error instanceof Error ? error.message : "Unknown error"}`
+    logger.error(
+      `Error finding Google Drive file '${fileName}' in parent '${parentFolderId}': ${error instanceof Error ? error.message : "Unknown error"}`
     );
+    
+    // For authentication errors, we should let the parent function handle the token refresh
+    // Rather than throwing here, return null and let the caller decide
     return null;
   }
 }

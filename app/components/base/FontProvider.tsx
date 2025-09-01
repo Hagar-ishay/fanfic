@@ -33,9 +33,16 @@ const bloklettersLight = localFont({
 
 export function FontProvider({ children }: { children: React.ReactNode }) {
   const isMobile = useIsMobile();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Apply classes to body on client side to avoid hydration mismatch
   React.useEffect(() => {
+    if (!mounted) return;
+
     const body = document.body;
     const classes = cn(
       blokletters.variable,
@@ -60,7 +67,7 @@ export function FontProvider({ children }: { children: React.ReactNode }) {
         }
       });
     };
-  }, [isMobile]);
+  }, [isMobile, mounted]);
 
   return <>{children}</>;
 }
