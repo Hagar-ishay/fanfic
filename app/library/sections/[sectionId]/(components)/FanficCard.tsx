@@ -7,7 +7,7 @@ import { Section, UserFanfic } from "@/db/types";
 import { cn, getFont } from "@/lib/utils";
 import { FanficContextMenu } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficContextMenu";
 import { Draggable } from "@hello-pangea/dnd";
-import { BookUp2, CircleCheck, Grip, Heart } from "lucide-react";
+import { BookUp, BookUp2, CircleCheck, Grip, Heart } from "lucide-react";
 import Link from "next/link";
 import React, { useRef } from "react";
 import { useOptimistic, useTransition } from "react";
@@ -58,10 +58,59 @@ export default function FanficCard({
     });
   };
 
+  const getUploadStatus = () => {
+    if (!fanficIntegrations || fanficIntegrations.length === 0) {
+      return {
+        icon: BookUp2,
+        tooltip: "Not uploaded yet",
+        color: "text-muted-foreground/60",
+        show: true,
+      };
+    }
+
+    const latestSync = fanficIntegrations
+      .filter((integration) => integration.lastTriggered)
+      .reduce(
+        (latest, integration) => {
+          if (!integration.lastTriggered) return latest;
+          if (!latest) return integration.lastTriggered;
+          return integration.lastTriggered > latest
+            ? integration.lastTriggered
+            : latest;
+        },
+        null as Date | null
+      );
+
+    if (!latestSync) {
+      return {
+        icon: BookUp2,
+        tooltip: "Not uploaded yet",
+        color: "text-muted-foreground/60",
+      };
+    }
+
+    const fanficUpdatedAt = new Date(fanfic.updatedAt);
+    const hasUpdates = fanficUpdatedAt > latestSync;
+
+    return hasUpdates
+      ? {
+          icon: BookUp,
+          tooltip: "Updates available",
+          color: "text-orange-500",
+        }
+      : null;
+  };
+
+  const uploadStatus = getUploadStatus();
+
   return (
     <Draggable draggableId={`fanfic-${fanfic.id}`} index={index}>
       {(provided, snapshot) => (
-        <div ref={provided.innerRef} {...provided.draggableProps} className="relative">
+        <div
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          className="relative"
+        >
           <FanficContextMenu
             sections={transferableSections}
             fanfic={fanfic}
@@ -85,7 +134,10 @@ export default function FanficCard({
             >
               <div className="flex flex-row items-center justify-between w-full">
                 <div className="flex-grow min-w-0 flex flex-row items-center gap-4">
-                  <div {...provided.dragHandleProps} className="cursor-grab active:cursor-grabbing flex-shrink-0 text-muted-foreground/60 hover:text-muted-foreground transition-colors">
+                  <div
+                    {...provided.dragHandleProps}
+                    className="cursor-grab active:cursor-grabbing flex-shrink-0 text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+                  >
                     <Grip className="h-4 w-4" />
                   </div>
                   <Link
@@ -98,7 +150,12 @@ export default function FanficCard({
                     }}
                   >
                     <div className="min-w-0 flex-1">
-                      <div className={cn("text-base font-semibold truncate group-hover:text-primary transition-colors", getFont(fanfic.language))}>
+                      <div
+                        className={cn(
+                          "text-base font-semibold truncate group-hover:text-primary transition-colors",
+                          getFont(fanfic.language)
+                        )}
+                      >
                         {fanfic.title}
                       </div>
                       <div className="text-sm text-muted-foreground/80 truncate font-blokletters-light mt-1">
@@ -108,7 +165,11 @@ export default function FanficCard({
                   </Link>
                 </div>
                 <div className="flex flex-row gap-3 flex-shrink-0 items-center">
-                  <Tooltip description={optimisticKudos ? "Remove kudos" : "Send kudos"}>
+                  <Tooltip
+                    description={
+                      optimisticKudos ? "Remove kudos" : "Send kudos"
+                    }
+                  >
                     <Button
                       variant="ghost"
                       size="sm"
@@ -116,16 +177,22 @@ export default function FanficCard({
                       className="text-muted-foreground hover:text-primary transition-colors p-1.5 h-auto min-w-0 rounded-md"
                       onClick={handleKudos}
                     >
-                      <Heart className={cn("h-4 w-4", optimisticKudos && "fill-primary text-primary")} />
+                      <Heart
+                        className={cn(
+                          "h-4 w-4",
+                          optimisticKudos && "fill-primary text-primary"
+                        )}
+                      />
                     </Button>
                   </Tooltip>
 
-                  {/* TODO: Implement integration-based lastSent check */}
-                  <Tooltip description="Not uploaded yet">
-                    <div className="text-muted-foreground/60">
-                      <BookUp2 size="16" />
-                    </div>
-                  </Tooltip>
+                  {uploadStatus && (
+                    <Tooltip description={uploadStatus.tooltip}>
+                      <div className={uploadStatus.color}>
+                        <uploadStatus.icon size="16" />
+                      </div>
+                    </Tooltip>
+                  )}
                   {fanfic.completedAt && (
                     <Tooltip description="Completed">
                       <div className="text-green-600">
