@@ -44,3 +44,11 @@ Be mindful of free tier constraints when implementing features:
 - Consider these limitations when suggesting scheduled tasks or heavy database operations
 - Optimize database queries for efficiency
 - Be conservative with automated/scheduled features
+
+## Rule 7: External Service Documentation Validation
+Always use Context7 MCP to validate documentation and best practices for external public services and libraries:
+- Check Context7 for Next.js, Vercel, Neon, and other external services before implementation
+- Verify API changes, deprecations, and current best practices
+- Use Context7 to confirm configuration patterns and setup procedures
+- Reference up-to-date documentation when troubleshooting external service issues
+- Apply Context7 findings to ensure implementations follow current standards
