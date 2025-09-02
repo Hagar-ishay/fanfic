@@ -1,0 +1,46 @@
+# Claude Rules for Fanfiction Project
+
+## Rule 1: Modal Component Usage
+Always use @/components/base/DrawerDialog.tsx for all modal dialogs and popups. This component automatically adapts between Dialog (desktop) and Drawer (mobile) based on screen size detection. Never use Dialog or Drawer components directly - always use the DrawerDialog wrapper components:
+- DrawerDialog (root component)
+- DrawerDialogTrigger (button/trigger)
+- DrawerDialogContent (main content)
+- DrawerDialogHeader, DrawerDialogTitle, DrawerDialogDescription
+- DrawerDialogFooter, DrawerDialogClose
+
+## Rule 2: Mobile-First Responsive Design
+This application prioritizes mobile experience while ensuring desktop functionality. When implementing features:
+- Design for mobile screens first (320px+)
+- Use responsive utilities (sm:, md:, lg:) for desktop enhancements
+- Test both mobile and desktop layouts using browser dev tools
+- Ensure touch-friendly interactions (min 44px touch targets)
+- Verify drawer/dialog behavior works correctly on both platforms
+
+## Rule 3: Code Quality Verification
+Always run linting and type checking before considering any task complete:
+- Run `pnpm run lint` to check ESLint rules
+- Run type checking (likely `pnpm run typecheck` or similar)
+- Fix all errors and warnings before proceeding
+- Never commit or mark tasks as complete with linting/type errors
+
+## Rule 4: Browser Testing Requirement
+Use the Browser MCP tools frequently to verify implementations in the actual development environment:
+- Take screenshots to verify visual appearance
+- Test responsive behavior at different screen sizes
+- Verify interactive elements work correctly
+- Check mobile drawer vs desktop dialog behavior
+- Validate forms, navigation, and user flows work as expected
+
+## Rule 5: Development Server Assumption
+The development server is already running at localhost:3000 (or similar). Never attempt to start the dev server with `pnpm dev`:
+- Always assume the server is running and accessible
+- Use browser tools to navigate to the running application
+- If the server appears down, ask the user rather than attempting to start it
+
+## Rule 6: Vercel/Neon Free Tier Limitations
+Be mindful of free tier constraints when implementing features:
+- Vercel free tier: Maximum 2 cron jobs total
+- Neon free tier: Database storage and connection limits
+- Consider these limitations when suggesting scheduled tasks or heavy database operations
+- Optimize database queries for efficiency
+- Be conservative with automated/scheduled features

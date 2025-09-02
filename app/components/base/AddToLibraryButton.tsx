@@ -55,13 +55,13 @@ export function AddToLibraryButton({
         } else {
           toast.error(result.message);
         }
-      } catch (error) {
+      } catch {
         toast.error("Failed to add fanfic to library");
       }
     });
   };
 
-  const handleSectionSelect = async (sectionId: number, setAsDefault: boolean) => {
+  const handleSectionSelect = (sectionId: number, setAsDefault: boolean) => {
     startTransition(async () => {
       try {
         const result = await addFanficFromSearch(searchResult, userId, sectionId);
@@ -85,7 +85,7 @@ export function AddToLibraryButton({
         } else {
           toast.error(result.message);
         }
-      } catch (error) {
+      } catch {
         toast.error("Failed to add fanfic to library");
       }
     });
@@ -136,7 +136,9 @@ export function AddToLibraryButton({
         sections={sections}
         isOpen={showSectionPicker}
         onClose={() => setShowSectionPicker(false)}
-        onSelect={handleSectionSelect}
+        onSelect={(sectionId, setAsDefault) => {
+          handleSectionSelect(sectionId, setAsDefault);
+        }}
         defaultSectionId={defaultSectionId}
       />
     </>
