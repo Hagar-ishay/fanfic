@@ -9,22 +9,27 @@ export async function addFanficFromSearch(
   userId: string,
   sectionId?: number
 ): Promise<{ success: boolean; message: string; sectionId?: number }> {
-  let targetSectionId = sectionId;
+  let targetSectionId: number | null | undefined = sectionId;
 
   if (!targetSectionId) {
     const userSettings = await getSettings(userId);
     targetSectionId = userSettings.defaultSectionId;
-    
+
     if (!targetSectionId) {
       return {
         success: false,
-        message: "No default section set. Please choose a section or set a default in settings.",
+        message:
+          "No default section set. Please choose a section or set a default in settings.",
       };
     }
   }
 
-  const result = await addFanfic(targetSectionId, userId, searchResult.sourceUrl);
-  
+  const result = await addFanfic(
+    targetSectionId,
+    userId,
+    searchResult.sourceUrl
+  );
+
   return {
     ...result,
     sectionId: targetSectionId,
