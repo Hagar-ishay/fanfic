@@ -27,6 +27,15 @@ export const listUserSections = async (userId: string) => {
     .where(drizzle.eq(sections.userId, userId));
 };
 
+// Cached version with Next.js 15 caching
+export const listUserSectionsCached = async (userId: string) => {
+  "use cache";
+  return await db
+    .select()
+    .from(sections)
+    .where(drizzle.eq(sections.userId, userId));
+};
+
 export const insertSection = async ({
   name,
   userId,

@@ -23,13 +23,11 @@ export const metadata: Metadata = {
   title: "Penio Fanfic - Library",
 };
 
-export default async function Page() {
-  const { user } = (await auth())!;
-
-  // Database functions already have caching built-in with "use cache"
+// Separate component for heavy data loading
+async function LibraryData({ userId }: { userId: string }) {
   const [allSections, userFanfics] = await Promise.all([
-    selectOrCreateSections(user.id),
-    listUserFanfics(user.id),
+    selectOrCreateSections(userId),
+    listUserFanfics(userId),
   ]);
 
   const topLevelSections = allSections.filter((sec) => sec.parentId === null);
@@ -45,7 +43,7 @@ export default async function Page() {
           <div className="grid gap-4 w-full max-w-full">
             {topLevelSections.map((section) => (
               <Link key={section.id} href={`/library/sections/${section.id}`}>
-                <div className="transform transition-all duration-200  hover:shadow-lg">
+                <div className="transform transition-all duration-200 hover:shadow-lg">
                   <Section section={section} />
                 </div>
               </Link>
@@ -55,4 +53,16 @@ export default async function Page() {
       </div>
     </>
   );
+}
+
+export default async function Page() {
+  const session = await auth();
+  
+  if (!session?.user) {
+    return null; // Let middleware handle redirect
+  }
+  
+  const { user } = session;
+
+  return <LibraryData userId={user.id} />;
 }

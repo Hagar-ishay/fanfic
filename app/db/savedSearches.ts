@@ -44,6 +44,15 @@ export async function getSavedSearches(userId: string) {
     .where(drizzle.eq(savedSearches.userId, userId));
 }
 
+// Cached version with Next.js 15 caching
+export async function getSavedSearchesCached(userId: string) {
+  "use cache";
+  return await db
+    .select()
+    .from(savedSearches)
+    .where(drizzle.eq(savedSearches.userId, userId));
+}
+
 export async function deleteSavedSearch(id: number) {
   await db.delete(savedSearches).where(drizzle.eq(savedSearches.id, id));
   revalidatePath(`/explore`);

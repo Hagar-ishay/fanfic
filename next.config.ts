@@ -3,13 +3,27 @@ import "@/config";
 
 const nextConfig: NextConfig = {
   experimental: {
-    // cacheComponents: true,
     optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
+    staleTimes: {
+      dynamic: 30,
+      static: 180,
+    },
+    
+    // Enable React 19 features
+    ppr: true,
+    useCache: true,
+    // reactCompiler: {
+    //   compilationMode: 'annotation',
+    // },
+    
+    // Performance optimizations
+    optimizeServerReact: true,
+    clientRouterFilter: true,
   },
   serverExternalPackages: [
     "epub",
     "epub-gen",
-    "tough-cookie",
+    "tough-cookie", 
     "axios-cookiejar-support",
   ],
   redirects: async () => [
@@ -25,6 +39,10 @@ const nextConfig: NextConfig = {
   trailingSlash: false,
   skipTrailingSlashRedirect: true,
   output: "standalone",
+  
+  // Enhanced caching
+  cacheHandler: process.env.NODE_ENV === 'production' ? require.resolve('./cache-handler.js') : undefined,
+  cacheMaxMemorySize: 0, // disable default in-memory caching
 };
 
 export default nextConfig;
