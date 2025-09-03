@@ -4,9 +4,20 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { auth } from "@/auth";
 import { SetTopbar } from "@/components/base/SetTopbar";
-import { AddNewSectionButton } from "@/library/(components)/AddNewSectionButton";
-import { LibraryTopbarSearch } from "@/library/(components)/LibraryTopbarSearch";
 import { listUserFanfics } from "@/db/fanfics";
+import dynamic from "next/dynamic";
+
+const AddNewSectionButton = dynamic(() =>
+  import("@/library/(components)/AddNewSectionButton").then((mod) => ({
+    default: mod.AddNewSectionButton,
+  }))
+);
+
+const LibraryTopbarSearch = dynamic(() =>
+  import("@/library/(components)/LibraryTopbarSearch").then((mod) => ({
+    default: mod.LibraryTopbarSearch,
+  }))
+);
 
 export const metadata: Metadata = {
   title: "Penio Fanfic - Library",
@@ -15,9 +26,13 @@ export const metadata: Metadata = {
 export default async function Page() {
   const { user } = (await auth())!;
 
-  const sections = await selectOrCreateSections(user.id);
-  const topLevelSections = sections.filter((sec) => sec.parentId === null);
-  const userFanfics = await listUserFanfics(user.id);
+  // Database functions already have caching built-in with "use cache"
+  const [allSections, userFanfics] = await Promise.all([
+    selectOrCreateSections(user.id),
+    listUserFanfics(user.id),
+  ]);
+
+  const topLevelSections = allSections.filter((sec) => sec.parentId === null);
 
   return (
     <>

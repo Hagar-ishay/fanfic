@@ -1,5 +1,7 @@
 import { BlockQuote } from "@/components/base/BlockQuote";
 
+import type { JSX } from "react";
+
 function formatLine(text: string) {
   if (text.startsWith("_") && text.endsWith("_") && text.length > 2) {
     return <span className="italic">{text.slice(1, -1)}</span>;

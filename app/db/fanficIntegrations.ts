@@ -12,7 +12,6 @@ import {
 } from "./schema";
 
 export async function getFanficIntegrations(sectionFanficId: number) {
-  "use cache";
   return await db
     .select({
       id: fanficIntegrations.id,
@@ -43,7 +42,6 @@ export async function getFanficIntegrations(sectionFanficId: number) {
 }
 
 export async function getFanficIntegration(id: number) {
-  "use cache";
   const result = await db
     .select()
     .from(fanficIntegrations)
@@ -220,7 +218,6 @@ function buildDetailedFanficIntegrationQuery() {
 }
 
 export async function getFanficsNeedingSync() {
-  "use cache";
   return await buildDetailedFanficIntegrationQuery().where(
     and(
       eq(fanficIntegrations.enabled, true),

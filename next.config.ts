@@ -3,9 +3,15 @@ import "@/config";
 
 const nextConfig: NextConfig = {
   experimental: {
-    dynamicIO: true,
+    // cacheComponents: true,
+    optimizePackageImports: ["lucide-react", "@radix-ui/react-icons"],
   },
-  serverExternalPackages: ["epub", "epub-gen", "tough-cookie", "axios-cookiejar-support"],
+  serverExternalPackages: [
+    "epub",
+    "epub-gen",
+    "tough-cookie",
+    "axios-cookiejar-support",
+  ],
   redirects: async () => [
     {
       source: "/",
@@ -13,6 +19,12 @@ const nextConfig: NextConfig = {
       permanent: true,
     },
   ],
+  compress: true,
+  poweredByHeader: false,
+  generateBuildId: async () => "build-" + Date.now(),
+  trailingSlash: false,
+  skipTrailingSlashRedirect: true,
+  output: "standalone",
 };
 
 export default nextConfig;

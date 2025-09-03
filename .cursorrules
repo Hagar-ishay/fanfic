@@ -1,0 +1,184 @@
+# Cursor Rules for Fanfiction Platform
+
+## Project Overview
+
+This is a Next.js 15 App Router fanfiction platform that provides enhanced reading experiences for AO3 content with Kindle delivery and AI translation features.
+
+## Development Commands
+
+**Package Manager:** Always use `pnpm` (not npm or yarn)
+
+```bash
+# Install dependencies
+pnpm install
+
+# Start development server with Turbopack
+pnpm run dev
+
+# Build for production
+pnpm run build
+
+# Start production server
+pnpm start
+
+# Lint code
+pnpm run lint
+```
+
+## Tech Stack & Dependencies
+
+- **Framework:** Next.js 15 with App Router (Turbopack for dev)
+- **Database:** PostgreSQL via Neon Serverless with Drizzle ORM
+- **Auth:** NextAuth v5 (beta) with Google provider
+- **UI:** Tailwind CSS + Radix UI (Shadcn components)
+- **Deployment:** Vercel
+
+## Architecture Patterns & Conventions
+
+### Directory Structure
+
+```
+app/
+├── api/                    # API routes (auth, cron jobs)
+├── components/
+│   ├── base/              # Custom base components
+│   └── ui/                # Shadcn UI components
+├── db/                    # Database schema, queries, and types
+├── lib/                   # Core utilities (AO3 client, parsers)
+├── explore/               # AO3 content discovery and search
+├── library/               # Personal library management
+│   └── sections/          # Nested section management
+├── settings/              # User preferences and Kindle config
+└── auth.ts               # NextAuth configuration
+```
+
+### Code Organization Rules
+
+1. **Server Actions:** Use Next.js server actions in `(server)/` directories for data mutations
+2. **Database Access:** All DB operations must go through `app/db/` modules, never use direct queries in components
+3. **Component Structure:** Follow existing patterns in `app/components/base/` for custom components
+4. **AO3 Integration:** Extend `app/lib/ao3Client.ts` class for new AO3 API interactions
+
+### Database Schema
+
+Uses Drizzle ORM with PostgreSQL schema named `fanfiction`. Key entities:
+
+- **users** - NextAuth user management
+- **sections** - Hierarchical library organization
+- **fanfics** - AO3 story metadata
+- **sectionFanfics** - User's personal story tracking (kudos, reading progress)
+- **credentials** - Encrypted AO3 session storage
+- **savedSearches** - User's saved AO3 search filters
+
+### Type Safety Requirements
+
+- Use extensive TypeScript with Drizzle-generated types
+- Never use `any` types
+- Ensure proper typing for all database operations
+
+### Development Workflow
+
+1. **Database Changes:**
+   - Modify `app/db/schema.ts`
+   - Run `pnpm drizzle-kit generate`
+   - Apply migrations
+2. **Authentication:** Access user sessions via NextAuth `auth()` server function
+3. **Path Imports:** Use `@/` alias which maps to `app/` directory
+
+## Technical Constraints & Requirements
+
+- **Runtime:** Must use Node.js runtime (not Edge) due to epub-gen and AO3 scraping dependencies
+- **External Packages:** epub, epub-gen, tough-cookie, and axios-cookiejar-support are externalized
+- **Security:** AO3 credentials must be encrypted and stored in database, never in environment variables
+- **Environment:** Requires Google OAuth credentials and Neon database URL
+
+## Code Style Guidelines
+
+- Follow existing component patterns in the codebase
+- Use Tailwind CSS for styling
+- Implement proper error handling for all AO3 API interactions
+- Ensure responsive design using existing mobile-first patterns
+- Use Shadcn UI components when possible before creating custom ones
+
+## File Naming Conventions
+
+- React components: PascalCase (e.g., `ComponentName.tsx`)
+- Server actions: camelCase in `(server)/` directories
+- Database modules: camelCase in `app/db/` directory
+- Utility functions: camelCase in `app/lib/` directory
+
+## Performance Considerations
+
+- Use Turbopack for development builds
+- Implement proper caching for AO3 API responses
+- Optimize database queries using Drizzle's query builder
+- Use Next.js built-in performance optimizations (Image, Link, etc.)
+
+## Development Rules & Best Practices
+
+### Rule 1: Modal Component Usage
+
+Always use `@/components/base/DrawerDialog.tsx` for all modal dialogs and popups. This component automatically adapts between Dialog (desktop) and Drawer (mobile) based on screen size detection. Never use Dialog or Drawer components directly - always use the DrawerDialog wrapper components:
+
+- DrawerDialog (root component)
+- DrawerDialogTrigger (button/trigger)
+- DrawerDialogContent (main content)
+- DrawerDialogHeader, DrawerDialogTitle, DrawerDialogDescription
+- DrawerDialogFooter, DrawerDialogClose
+
+### Rule 2: Mobile-First Responsive Design
+
+This application prioritizes mobile experience while ensuring desktop functionality. When implementing features:
+
+- Design for mobile screens first (320px+)
+- Use responsive utilities (sm:, md:, lg:) for desktop enhancements
+- Test both mobile and desktop layouts using browser dev tools
+- Ensure touch-friendly interactions (min 44px touch targets)
+- Verify drawer/dialog behavior works correctly on both platforms
+
+### Rule 3: Code Quality Verification
+
+Always run linting and type checking before considering any task complete:
+
+- Run `pnpm run lint` to check ESLint rules
+- Run type checking (likely `pnpm run typecheck` or similar)
+- Fix all errors and warnings before proceeding
+- Never commit or mark tasks as complete with linting/type errors
+
+### Rule 4: Browser Testing Requirement
+
+Use the Browser MCP tools frequently to verify implementations in the actual development environment:
+
+- Take screenshots to verify visual appearance
+- Test responsive behavior at different screen sizes
+- Verify interactive elements work correctly
+- Check mobile drawer vs desktop dialog behavior
+- Validate forms, navigation, and user flows work as expected
+
+### Rule 5: Development Server Assumption
+
+The development server is already running at localhost:3000 (or similar). Never attempt to start the dev server with `pnpm dev`:
+
+- Always assume the server is running and accessible
+- Use browser tools to navigate to the running application
+- If the server appears down, ask the user rather than attempting to start it
+
+### Rule 6: Vercel/Neon Free Tier Limitations
+
+Be mindful of free tier constraints when implementing features:
+
+- Vercel free tier: Maximum 2 cron jobs total
+- Neon free tier: Database storage and connection limits
+- Consider these limitations when suggesting scheduled tasks or heavy database operations
+- Optimize database queries for efficiency
+- Be conservative with automated/scheduled features
+
+### Rule 7: External Service Documentation Validation
+
+Always use Context7 MCP to validate documentation and best practices for external public services and libraries:
+
+- Check Context7 for Next.js, Vercel, Neon, and other external services before implementation
+- Verify API changes, deprecations, and current best practices
+- Use Context7 to confirm configuration patterns and setup procedures
+- Reference up-to-date documentation when troubleshooting external service issues
+- Apply Context7 findings to ensure implementations follow current standards

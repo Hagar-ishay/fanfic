@@ -38,8 +38,10 @@ export async function saveSearch({
 }
 
 export async function getSavedSearches(userId: string) {
-  "use cache";
-  return await db.select().from(savedSearches).where(drizzle.eq(savedSearches.userId, userId));
+  return await db
+    .select()
+    .from(savedSearches)
+    .where(drizzle.eq(savedSearches.userId, userId));
 }
 
 export async function deleteSavedSearch(id: number) {

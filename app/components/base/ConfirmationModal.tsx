@@ -22,7 +22,7 @@ export function ConfirmationModal({
 }: {
   header?: React.ReactNode;
   onSubmit: () => void | Promise<void>;
-  ref?: React.RefObject<HTMLDivElement>;
+  ref?: React.RefObject<HTMLDivElement | null>;
   trigger?: React.ReactNode;
   destructive?: boolean;
 }) {

@@ -11,7 +11,13 @@ export const metadata: Metadata = {
 };
 
 export default async function Page() {
-  const { user } = (await auth())!;
+  const session = await auth();
+  
+  if (!session?.user) {
+    return null; // Let middleware handle redirect
+  }
+  
+  const { user } = session;
   
   const [savedSearches, sections, settings, userFanficIds] = await Promise.all([
     getSavedSearches(user.id),
