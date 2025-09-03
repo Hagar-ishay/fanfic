@@ -43,21 +43,17 @@ export default async function Page({
     notFound();
   }
 
-  const userSections = await listUserSections(user.id);
-  const transferableSections = userSections.filter(
-    (section) => section.id !== sectionId
-  );
-  const segments = await getBreadcrumbs(
-    sectionId,
-    fanfic.sectionName,
-    fanfic.sectionParentId
-  );
-
-  // Fetch integrations for the context menu
-  const [activeIntegrations, fanficIntegrations] = await Promise.all([
+  // Run all queries in parallel for maximum performance
+  const [userSections, segments, activeIntegrations, fanficIntegrations] = await Promise.all([
+    listUserSections(user.id),
+    getBreadcrumbs(sectionId, fanfic.sectionName, fanfic.sectionParentId),
     getActiveIntegrations(user.id),
     getFanficIntegrations(fanfic.id),
   ]);
+  
+  const transferableSections = userSections.filter(
+    (section) => section.id !== sectionId
+  );
 
   return (
     <>

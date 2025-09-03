@@ -41,16 +41,19 @@ export default async function Page({ params }: Props) {
     return notFound();
   }
 
-  const [userSections, fanfics, currentSection] = await Promise.all([
+  // Run all initial queries in parallel for better performance
+  const [userSections, fanfics, currentSection, userIntegrations] = await Promise.all([
     listUserSections(user.id),
     selectSectionFanfic([sectionId]),
     getSection(sectionId),
+    getActiveIntegrations(user.id),
   ]);
 
   if (!currentSection) {
     return notFound();
   }
 
+  // These can be computed synchronously since we have the data
   const childSections = userSections.filter(
     (section) => section.parentId === sectionId
   );
@@ -59,18 +62,21 @@ export default async function Page({ params }: Props) {
     return section.id !== sectionId && section.parentId !== sectionId;
   });
 
-  const segments = await getBreadcrumbs(
-    sectionId,
-    currentSection.name,
-    currentSection.parentId
-  );
+  // Get breadcrumbs in parallel with fanfic integrations
+  const [segments] = await Promise.all([
+    getBreadcrumbs(sectionId, currentSection.name, currentSection.parentId),
+  ]);
 
-  const userIntegrations = await getActiveIntegrations(user.id);
-
-  // Fetch fanfic integrations for each fanfic
+  // Fetch fanfic integrations in parallel (much faster than sequential)
   const fanficIntegrationsMap: Record<number, any[]> = {};
-  for (const fanfic of fanfics) {
-    fanficIntegrationsMap[fanfic.id] = await getFanficIntegrations(fanfic.id);
+  const integrationPromises = fanfics.map(async (fanfic) => {
+    const integrations = await getFanficIntegrations(fanfic.id);
+    return { fanficId: fanfic.id, integrations };
+  });
+  
+  const integrationResults = await Promise.all(integrationPromises);
+  for (const { fanficId, integrations } of integrationResults) {
+    fanficIntegrationsMap[fanficId] = integrations;
   }
 
   const serializedFanficIntegrationsMap: Record<number, any[]> = {};

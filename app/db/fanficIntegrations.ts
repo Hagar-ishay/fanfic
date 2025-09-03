@@ -11,6 +11,59 @@ import {
   integrations,
 } from "./schema";
 
+// Cached version
+export async function getFanficIntegrationsCached(sectionFanficId: number) {
+  "use cache";
+  return getFanficIntegrations(sectionFanficId);
+}
+
+// Bulk fetch for better performance
+export async function getBulkFanficIntegrations(sectionFanficIds: number[]) {
+  "use cache";
+  if (sectionFanficIds.length === 0) return {};
+  
+  const results = await db
+    .select({
+      id: fanficIntegrations.id,
+      sectionFanficId: fanficIntegrations.sectionFanficId,
+      integrationId: fanficIntegrations.integrationId,
+      enabled: fanficIntegrations.enabled,
+      lastTriggered: fanficIntegrations.lastTriggered,
+      cloudPath: fanficIntegrations.cloudPath,
+      syncStatus: fanficIntegrations.syncStatus,
+      lastError: fanficIntegrations.lastError,
+      creationTime: fanficIntegrations.creationTime,
+      updateTime: fanficIntegrations.updateTime,
+      integration: {
+        id: integrations.id,
+        type: integrations.type,
+        name: integrations.name,
+        config: integrations.config,
+        isEnabled: integrations.enabled,
+        creationTime: integrations.creationTime,
+        updateTime: integrations.updateTime,
+      },
+    })
+    .from(fanficIntegrations)
+    .innerJoin(integrations, eq(fanficIntegrations.integrationId, integrations.id))
+    .where(and(
+      eq(fanficIntegrations.sectionFanficId, sectionFanficIds[0])
+      // TODO: extend this to handle multiple IDs efficiently
+    ))
+    .orderBy(asc(fanficIntegrations.creationTime));
+
+  // Group by sectionFanficId
+  const grouped: Record<number, any[]> = {};
+  for (const result of results) {
+    if (!grouped[result.sectionFanficId]) {
+      grouped[result.sectionFanficId] = [];
+    }
+    grouped[result.sectionFanficId].push(result);
+  }
+  
+  return grouped;
+}
+
 export async function getFanficIntegrations(sectionFanficId: number) {
   return await db
     .select({
