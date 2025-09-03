@@ -34,7 +34,7 @@ export function ConfirmationModal({
     <div>
       <DrawerDialog>
         <DrawerDialogTrigger asChild>
-          {trigger ? trigger : <div hidden ref={ref} />}
+          {trigger ? trigger : <div hidden ref={ref as React.LegacyRef<HTMLDivElement>} />}
         </DrawerDialogTrigger>
         <DrawerDialogContent className="pb-5">
           <DrawerDialogHeader>

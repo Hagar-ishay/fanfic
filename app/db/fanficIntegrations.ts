@@ -39,7 +39,7 @@ export async function getBulkFanficIntegrations(sectionFanficIds: number[]) {
         type: integrations.type,
         name: integrations.name,
         config: integrations.config,
-        isEnabled: integrations.enabled,
+        isEnabled: integrations.isActive,
         creationTime: integrations.creationTime,
         updateTime: integrations.updateTime,
       },
