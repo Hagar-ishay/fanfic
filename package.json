@@ -6,7 +6,7 @@
     "dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "eslint ."
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.10.0",
@@ -68,6 +68,7 @@
     "vaul": "^1.1.2"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.34.0",
     "@next/eslint-plugin-next": "^15.5.2",
     "@types/epub-gen": "^0.1.2",
