@@ -14,8 +14,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { HelpCircleIcon, Home, Library, LogOut, Settings } from "lucide-react";
-import { MdOutlineExplore } from "react-icons/md";
+import { HelpCircleIcon, Home, Library, LogOut, Settings, Search } from "lucide-react";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { LibraryHelp } from "@/library/(components)/LibraryHelp";
@@ -30,7 +29,7 @@ const PLATFORM_ITEMS = [
   {
     title: "Explore",
     url: "/explore",
-    icon: MdOutlineExplore,
+    icon: Search,
   },
   {
     title: "Library",
@@ -87,7 +86,7 @@ export function AppSidebar() {
               {PLATFORM_ITEMS.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild>
-                    <Link href={item.url}>
+                    <Link href={item.url} prefetch>
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>
@@ -105,7 +104,7 @@ export function AppSidebar() {
               {SETTINGS_ITEMS.map((item) => (
                 <SidebarMenuItem key={item.url}>
                   <SidebarMenuButton asChild>
-                    <Link href={item.url}>
+                    <Link href={item.url} prefetch>
                       <item.icon />
                       <span>{item.title}</span>
                     </Link>

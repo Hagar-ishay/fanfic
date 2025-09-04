@@ -22,7 +22,7 @@ export function ConfirmationModal({
 }: {
   header?: React.ReactNode;
   onSubmit: () => void | Promise<void>;
-  ref?: React.RefObject<HTMLDivElement>;
+  ref?: React.RefObject<HTMLDivElement | null>;
   trigger?: React.ReactNode;
   destructive?: boolean;
 }) {
@@ -34,7 +34,7 @@ export function ConfirmationModal({
     <div>
       <DrawerDialog>
         <DrawerDialogTrigger asChild>
-          {trigger ? trigger : <div hidden ref={ref} />}
+          {trigger ? trigger : <div hidden ref={ref as React.LegacyRef<HTMLDivElement>} />}
         </DrawerDialogTrigger>
         <DrawerDialogContent className="pb-5">
           <DrawerDialogHeader>

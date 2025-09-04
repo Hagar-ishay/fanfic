@@ -7,7 +7,6 @@ import { integrations, fanficIntegrations } from "./schema";
 import type { NewIntegration, NewFanficIntegration } from "./types";
 
 export async function getIntegrations(userId: string) {
-  "use cache";
   return await db
     .select()
     .from(integrations)
@@ -18,7 +17,6 @@ export async function getIntegrationsByCategory(
   userId: string,
   category: string
 ) {
-  "use cache";
   return await db
     .select()
     .from(integrations)
@@ -28,17 +26,14 @@ export async function getIntegrationsByCategory(
 }
 
 export async function getCloudStorageIntegrations(userId: string) {
-  "use cache";
   return await getIntegrationsByCategory(userId, "cloud_storage");
 }
 
 export async function getDeliveryIntegrations(userId: string) {
-  "use cache";
   return await getIntegrationsByCategory(userId, "delivery");
 }
 
 export async function getIntegration(integrationId: number) {
-  "use cache";
   const integration = await db
     .select()
     .from(integrations)
@@ -47,7 +42,6 @@ export async function getIntegration(integrationId: number) {
 }
 
 export async function getActiveIntegrations(userId: string) {
-  "use cache";
   const userIntegrations = await getIntegrations(userId);
   return userIntegrations.filter((integration) => integration.isActive);
 }
@@ -119,7 +113,6 @@ export async function setActiveIntegration(
 }
 
 export async function getEmailIntegration(userId: string) {
-  "use cache";
   const emailIntegrations = await db
     .select()
     .from(integrations)
@@ -133,7 +126,6 @@ export async function getEmailIntegration(userId: string) {
 export async function getUserEmailAddress(
   userId: string
 ): Promise<string | null> {
-  "use cache";
   const emailIntegration = await getEmailIntegration(userId);
   return emailIntegration?.config?.readerEmail || null;
 }
@@ -142,7 +134,6 @@ export async function getFanficIntegration(
   sectionFanficId: number,
   integrationId: number
 ) {
-  "use cache";
   const fanficIntegration = await db
     .select()
     .from(fanficIntegrations)
@@ -208,7 +199,6 @@ export async function getFanficLastSent(
   sectionFanficId: number,
   userId: string
 ): Promise<Date | null> {
-  "use cache";
   const emailIntegration = await getEmailIntegration(userId);
   if (!emailIntegration) {
     return null;

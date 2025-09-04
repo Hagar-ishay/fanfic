@@ -51,16 +51,18 @@ export function MultiSelect({
     setOptions([]);
   };
 
-  const debouncedHandleValueChange = React.useCallback(
-    debounce(async (value: string) => {
-      if (value) {
-        const newOptions = await getOptions(value, name);
-        setOptions(newOptions);
-      } else {
-        setOptions([]);
-      }
-    }, 600),
-    [getOptions, name]
+  const handleValueChange = React.useCallback(async (value: string) => {
+    if (value) {
+      const newOptions = await getOptions(value, name);
+      setOptions(newOptions);
+    } else {
+      setOptions([]);
+    }
+  }, [getOptions, name]);
+
+  const debouncedHandleValueChange = React.useMemo(
+    () => debounce(handleValueChange, 600),
+    [handleValueChange]
   );
 
   return (

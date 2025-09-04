@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/select";
 import { ExternalLink } from "lucide-react";
 import { useState } from "react";
-import { useSession } from "next-auth/react";
 import logger from "@/logger";
 
 interface NewIntegrationFormProps {
@@ -33,7 +32,6 @@ export function NewIntegrationForm({
   const [type, setType] = useState("");
   const [config, setConfig] = useState<Record<string, string>>({});
   const [isCreatingGoogleDrive, setIsCreatingGoogleDrive] = useState(false);
-  const { data: session } = useSession();
 
   const integrationTypes = [
     {
@@ -79,7 +77,9 @@ export function NewIntegrationForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    logger.info(`Form submit: type=${type}, selectedType=${selectedType?.value}, config=${JSON.stringify(config)}`);
+    logger.info(
+      `Form submit: type=${type}, selectedType=${selectedType?.value}, config=${JSON.stringify(config)}`
+    );
 
     if (!type || !selectedType) {
       logger.error("Missing type or selectedType");
@@ -119,16 +119,10 @@ export function NewIntegrationForm({
   };
 
   const handleGoogleDriveIntegration = async () => {
-    if (!session?.accessToken) {
-      alert(
-        "Please sign out and sign in again to grant Google Drive permissions."
-      );
-      return;
-    }
-
     setIsCreatingGoogleDrive(true);
 
     try {
+      // First try the original method (if user has Drive tokens from login)
       const response = await fetch("/api/integrations/google-drive", {
         method: "POST",
         headers: {
@@ -150,14 +144,46 @@ export function NewIntegrationForm({
         } else {
           onCancel();
         }
+      } else if (result.requiresOAuth) {
+        // User needs to go through OAuth flow
+        await handleGoogleDriveOAuth();
       } else {
         alert(result.error || "Failed to create Google Drive integration");
       }
     } catch (error) {
-      logger.error(`Google Drive integration error: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        `Google Drive integration error: ${error instanceof Error ? error.message : String(error)}`
+      );
       alert("Failed to create Google Drive integration");
     } finally {
       setIsCreatingGoogleDrive(false);
+    }
+  };
+
+  const handleGoogleDriveOAuth = async () => {
+    try {
+      // Get OAuth URL from our API
+      const params = new URLSearchParams({
+        name: config.name || "Google Drive",
+        folderId: config.folderId || "root",
+      });
+
+      const response = await fetch(
+        `/api/integrations/google-drive/oauth?${params.toString()}`
+      );
+      const result = await response.json();
+
+      if (response.ok && result.authUrl) {
+        // Redirect to Google OAuth
+        window.location.href = result.authUrl;
+      } else {
+        alert("Failed to initiate Google Drive OAuth");
+      }
+    } catch (error) {
+      logger.error(
+        `Google Drive OAuth error: ${error instanceof Error ? error.message : String(error)}`
+      );
+      alert("Failed to initiate Google Drive OAuth");
     }
   };
 
@@ -224,10 +250,10 @@ export function NewIntegrationForm({
             <p className="text-sm text-muted-foreground leading-relaxed">
               {selectedType.description}
             </p>
-            {type === "google_drive" && !session?.accessToken && (
-              <p className="text-sm text-orange-600 dark:text-orange-400 font-medium">
-                ⚠️ Please sign out and sign in again to grant Google Drive
-                permissions.
+            {type === "google_drive" && (
+              <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                ℹ️ You&apos;ll be redirected to Google to grant Drive
+                permissions when you create this integration.
               </p>
             )}
             <a

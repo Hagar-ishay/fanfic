@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { FcGoogle } from "react-icons/fc";
+// Using Chrome icon from lucide-react instead of react-icons for better compatibility
 import { signIn } from "next-auth/react";
 
 export default function SignIn() {
@@ -22,10 +22,7 @@ export default function SignIn() {
           size="lg"
           onClick={() => void signIn("google", { callbackUrl: "/library" })}
         >
-          <>
-            <FcGoogle className="h-5 w-5" />
-            Sign in with Google
-          </>
+          Sign in with Google
         </Button>
       </div>
     </div>

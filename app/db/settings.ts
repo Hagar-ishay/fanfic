@@ -7,8 +7,10 @@ import { settings } from "./schema";
 import type { NewSettings } from "./types";
 
 export async function getSettings(userId: string) {
-  "use cache";
-  const userSettings = await db.select().from(settings).where(eq(settings.userId, userId));
+  const userSettings = await db
+    .select()
+    .from(settings)
+    .where(eq(settings.userId, userId));
 
   return (
     userSettings[0] || {
@@ -20,7 +22,7 @@ export async function getSettings(userId: string) {
   );
 }
 
-type SettingsData = Omit<NewSettings, 'id' | 'creationTime' | 'updateTime'>;
+type SettingsData = Omit<NewSettings, "id" | "creationTime" | "updateTime">;
 
 export async function createSettings(data: SettingsData) {
   return db

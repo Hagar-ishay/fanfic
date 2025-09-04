@@ -3,9 +3,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Section as DbSection } from "@/db/types";
 import { SectionContextMenu } from "@/library/(components)/SectionContextMenu";
 import { ChevronRight } from "lucide-react";
-import { useRef } from "react";
+import { useRef, memo } from "react";
 
-export function Section({
+const SectionComponent = memo(function Section({
   section,
 }: {
   section: DbSection;
@@ -42,4 +42,6 @@ export function Section({
       </Card>
     </>
   );
-}
+});
+
+export const Section = SectionComponent;
