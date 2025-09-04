@@ -1,45 +1,37 @@
-const { IncrementalCache } = require('@neshca/cache-handler');
-const createRedisHandler = require('@neshca/cache-handler/redis-strings').default;
-const createLruHandler = require('@neshca/cache-handler/local-lru').default;
+const cache = new Map();
 
-IncrementalCache.onCreation(async () => {
-  let redisHandler;
+module.exports = class CacheHandler {
+  constructor(options) {
+    this.options = options;
+  }
 
-  if (process.env.REDIS_URL) {
-    try {
-      const { createClient } = require('redis');
-      const client = createClient({
-        url: process.env.REDIS_URL,
-      });
+  async get(key) {
+    // This could be stored anywhere, like durable storage
+    return cache.get(key);
+  }
 
-      client.on('error', (err) => {
-        console.error('Redis Client Error:', err);
-      });
+  async set(key, data, ctx) {
+    // This could be stored anywhere, like durable storage
+    cache.set(key, {
+      value: data,
+      lastModified: Date.now(),
+      tags: ctx.tags,
+    });
+  }
 
-      await client.connect();
-
-      redisHandler = createRedisHandler({
-        client,
-        keyPrefix: 'fanfic:',
-        timeoutMs: 1000,
-      });
-    } catch (error) {
-      console.warn('Failed to connect to Redis:', error.message);
+  async revalidateTag(tags) {
+    // tags is either a string or an array of strings
+    tags = [tags].flat();
+    // Iterate over all entries in the cache
+    for (let [key, value] of cache) {
+      // If the value's tags include the specified tag, delete this entry
+      if (value.tags.some((tag) => tags.includes(tag))) {
+        cache.delete(key);
+      }
     }
   }
 
-  const localHandler = createLruHandler({
-    maxItemsNumber: 1000,
-    maxItemSizeBytes: 1024 * 1024 * 500, // 500MB
-  });
-
-  return {
-    handlers: [
-      // Use Redis if available, fallback to LRU
-      ...(redisHandler ? [redisHandler] : []),
-      localHandler,
-    ],
-  };
-});
-
-module.exports = IncrementalCache;
+  // If you want to have temporary in memory cache for a single request that is reset
+  // before the next request you can leverage this method
+  resetRequestCache() {}
+};

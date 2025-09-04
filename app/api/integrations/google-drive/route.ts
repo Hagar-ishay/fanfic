@@ -17,7 +17,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "No Google Drive access. Please sign out and sign in again to grant Google Drive permissions.",
+            "No Google Drive access. Please use the OAuth flow to grant Google Drive permissions.",
+          requiresOAuth: true,
         },
         { status: 400 }
       );
