@@ -74,7 +74,6 @@ export async function GET(request: NextRequest) {
 
     const tokens = await tokenResponse.json();
 
-    // Create integration with the tokens
     await createIntegration({
       category: "cloud_storage",
       userId: session.user.id,
@@ -86,11 +85,13 @@ export async function GET(request: NextRequest) {
         folderId: integrationRequest.folderId,
         expiresAt: tokens.expires_in
           ? Math.floor(Date.now() / 1000 + tokens.expires_in).toString()
-          : undefined,
+          : "",
       },
     });
 
-    logger.info(`Google Drive integration created successfully for user ${session.user.id}`);
+    logger.info(
+      `Google Drive integration created successfully for user ${session.user.id}`
+    );
 
     // Redirect back to settings with success
     return NextResponse.redirect(

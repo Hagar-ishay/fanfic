@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/select";
 import { ExternalLink } from "lucide-react";
 import { useState } from "react";
-import { useSession } from "next-auth/react";
 import logger from "@/logger";
 
 interface NewIntegrationFormProps {
@@ -33,7 +32,6 @@ export function NewIntegrationForm({
   const [type, setType] = useState("");
   const [config, setConfig] = useState<Record<string, string>>({});
   const [isCreatingGoogleDrive, setIsCreatingGoogleDrive] = useState(false);
-  const { data: session } = useSession();
 
   const integrationTypes = [
     {
@@ -79,7 +77,9 @@ export function NewIntegrationForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    logger.info(`Form submit: type=${type}, selectedType=${selectedType?.value}, config=${JSON.stringify(config)}`);
+    logger.info(
+      `Form submit: type=${type}, selectedType=${selectedType?.value}, config=${JSON.stringify(config)}`
+    );
 
     if (!type || !selectedType) {
       logger.error("Missing type or selectedType");
@@ -151,7 +151,9 @@ export function NewIntegrationForm({
         alert(result.error || "Failed to create Google Drive integration");
       }
     } catch (error) {
-      logger.error(`Google Drive integration error: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        `Google Drive integration error: ${error instanceof Error ? error.message : String(error)}`
+      );
       alert("Failed to create Google Drive integration");
     } finally {
       setIsCreatingGoogleDrive(false);
@@ -166,7 +168,9 @@ export function NewIntegrationForm({
         folderId: config.folderId || "root",
       });
 
-      const response = await fetch(`/api/integrations/google-drive/oauth?${params.toString()}`);
+      const response = await fetch(
+        `/api/integrations/google-drive/oauth?${params.toString()}`
+      );
       const result = await response.json();
 
       if (response.ok && result.authUrl) {
@@ -176,7 +180,9 @@ export function NewIntegrationForm({
         alert("Failed to initiate Google Drive OAuth");
       }
     } catch (error) {
-      logger.error(`Google Drive OAuth error: ${error instanceof Error ? error.message : String(error)}`);
+      logger.error(
+        `Google Drive OAuth error: ${error instanceof Error ? error.message : String(error)}`
+      );
       alert("Failed to initiate Google Drive OAuth");
     }
   };
@@ -246,7 +252,8 @@ export function NewIntegrationForm({
             </p>
             {type === "google_drive" && (
               <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">
-                ℹ️ You'll be redirected to Google to grant Drive permissions when you create this integration.
+                ℹ️ You&apos;ll be redirected to Google to grant Drive
+                permissions when you create this integration.
               </p>
             )}
             <a

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { createIntegration } from "@/db/integrations";
 import logger from "@/logger";
 import { errorMessage } from "@/lib/utils";
 
