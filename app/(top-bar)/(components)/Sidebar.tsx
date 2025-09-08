@@ -14,7 +14,14 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { HelpCircleIcon, Home, Library, LogOut, Settings, Search } from "lucide-react";
+import {
+  HelpCircleIcon,
+  Home,
+  Library,
+  LogOut,
+  Settings,
+  Search,
+} from "lucide-react";
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
 import { LibraryHelp } from "@/library/(components)/LibraryHelp";
@@ -129,6 +136,7 @@ export function AppSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton
+              size="lg"
               onClick={() => void signOut({ redirectTo: "/signin" })}
               className="w-full"
             >
@@ -141,7 +149,9 @@ export function AppSidebar() {
                 <span className="truncate font-semibold">
                   {session?.user?.name || "User"}
                 </span>
-                <span className="truncate text-xs leading-normal">{session?.user?.email}</span>
+                <span className="truncate text-xs leading-normal">
+                  {session?.user?.email}
+                </span>
               </div>
               <LogOut className="ml-auto size-4" />
             </SidebarMenuButton>

@@ -13,16 +13,15 @@ export async function POST(request: NextRequest) {
     }
 
 
-    if (!session.accessToken || !session.refreshToken) {
-      return NextResponse.json(
-        {
-          error:
-            "No Google Drive access. Please use the OAuth flow to grant Google Drive permissions.",
-          requiresOAuth: true,
-        },
-        { status: 400 }
-      );
-    }
+    // Always require OAuth for Google Drive to ensure proper Drive permissions
+    return NextResponse.json(
+      {
+        error:
+          "Google Drive integration requires specific permissions. Please complete the OAuth flow.",
+        requiresOAuth: true,
+      },
+      { status: 400 }
+    );
 
     const body = (await request.json()) as { name?: string; folderId?: string };
     const { name, folderId } = body;

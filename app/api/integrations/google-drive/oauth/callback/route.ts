@@ -49,6 +49,9 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // Use the current request's origin instead of hardcoded NEXTAUTH_URL
+    const origin = new URL(request.url).origin;
+    
     // Exchange code for tokens
     const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
@@ -60,7 +63,7 @@ export async function GET(request: NextRequest) {
         client_secret: process.env.GOOGLE_CLIENT_SECRET!,
         code,
         grant_type: "authorization_code",
-        redirect_uri: `${process.env.NEXTAUTH_URL}/api/integrations/google-drive/oauth/callback`,
+        redirect_uri: `${origin}/api/integrations/google-drive/oauth/callback`,
       }),
     });
 
