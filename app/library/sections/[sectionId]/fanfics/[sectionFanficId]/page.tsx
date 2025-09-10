@@ -51,7 +51,7 @@ export default async function Page({
     getFanficIntegrations(fanfic.id),
     hasUserAo3Credentials(user.id),
   ]);
-  
+
   const transferableSections = userSections.filter(
     (section) => section.id !== sectionId
   );

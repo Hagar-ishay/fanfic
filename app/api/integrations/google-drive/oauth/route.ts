@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
 
     // Use the current request's origin instead of hardcoded NEXTAUTH_URL
     const origin = new URL(request.url).origin;
-    
+
     const params = new URLSearchParams({
       client_id: process.env.GOOGLE_CLIENT_ID!,
       redirect_uri: `${origin}/api/integrations/google-drive/oauth/callback`,

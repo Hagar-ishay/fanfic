@@ -74,7 +74,7 @@ export default async function Page({ params }: Props) {
     const integrations = await getFanficIntegrations(fanfic.id);
     return { fanficId: fanfic.id, integrations };
   });
-  
+
   const integrationResults = await Promise.all(integrationPromises);
   for (const { fanficId, integrations } of integrationResults) {
     fanficIntegrationsMap[fanficId] = integrations;

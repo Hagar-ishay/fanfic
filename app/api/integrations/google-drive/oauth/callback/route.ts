@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
 
     // Use the current request's origin instead of hardcoded NEXTAUTH_URL
     const origin = new URL(request.url).origin;
-    
+
     // Exchange code for tokens
     const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",

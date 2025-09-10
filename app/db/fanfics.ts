@@ -23,19 +23,19 @@ export const tranferSectionFanfic = async (
 ) => {
   const position = await getNextPosition(newSectionId);
   const updateParams = { position, sectionId: newSectionId };
-  
+
   // Check if the new section has cleanup enabled
   const newSection = await db
     .select()
     .from(sections)
     .where(drizzle.eq(sections.id, newSectionId));
-  
+
   if (newSection[0]?.enableIntegrationCleanup) {
     // Get fanfic details and integrations for cleanup
     const fanficData = await getFanficById(sectionFanficId);
     if (fanficData) {
       const fanficIntegrations = await getDetailedFanficIntegrations(sectionFanficId);
-      
+
       // Perform cleanup for each cloud integration
       for (const integration of fanficIntegrations) {
         if (['google_drive', 'webdav', 'dropbox'].includes(integration.integration.type)) {
@@ -44,7 +44,7 @@ export const tranferSectionFanfic = async (
               fanficIntegration: integration,
               fanficTitle: fanficData.title,
             });
-            
+
             if (cleanupResult.success) {
               logger.info(`Cleaned up ${fanficData.title} from ${integration.integration.name}: ${cleanupResult.message}`);
             } else {
@@ -57,7 +57,7 @@ export const tranferSectionFanfic = async (
       }
     }
   }
-  
+
   await db
     .update(sectionFanfics)
     .set(updateParams)
@@ -204,7 +204,7 @@ export const deleteSectionFanfic = async (userFanficId: number) => {
   const fanficData = await getFanficById(userFanficId);
   if (fanficData) {
     const fanficIntegrations = await getDetailedFanficIntegrations(userFanficId);
-    
+
     // Perform cleanup for each cloud integration
     for (const integration of fanficIntegrations) {
       if (['google_drive', 'webdav', 'dropbox'].includes(integration.integration.type)) {
@@ -213,7 +213,7 @@ export const deleteSectionFanfic = async (userFanficId: number) => {
             fanficIntegration: integration,
             fanficTitle: fanficData.title,
           });
-          
+
           if (cleanupResult.success) {
             logger.info(`Cleaned up ${fanficData.title} from ${integration.integration.name} during deletion: ${cleanupResult.message}`);
           } else {
