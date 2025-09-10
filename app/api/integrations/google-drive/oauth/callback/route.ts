@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { createIntegration } from "@/db/integrations";
+import { createIntegration, updateIntegration } from "@/db/integrations";
 import logger from "@/logger";
 import { errorMessage } from "@/lib/utils";
 
@@ -77,20 +77,36 @@ export async function GET(request: NextRequest) {
 
     const tokens = await tokenResponse.json();
 
-    await createIntegration({
-      category: "cloud_storage",
-      userId: session.user.id,
-      name: integrationRequest.name,
-      type: "google_drive",
-      config: {
-        accessToken: tokens.access_token,
-        refreshToken: tokens.refresh_token,
-        folderId: integrationRequest.folderId,
-        expiresAt: tokens.expires_in
-          ? Math.floor(Date.now() / 1000 + tokens.expires_in).toString()
-          : "",
-      },
-    });
+    // Check if this is a re-authentication
+    if (integrationRequest.isReauth && integrationRequest.existingIntegrationId) {
+      // Update existing integration with new tokens
+      await updateIntegration(integrationRequest.existingIntegrationId, {
+        config: {
+          accessToken: tokens.access_token,
+          refreshToken: tokens.refresh_token,
+          folderId: integrationRequest.folderId,
+          expiresAt: tokens.expires_in
+            ? Math.floor(Date.now() / 1000 + tokens.expires_in).toString()
+            : "",
+        },
+      });
+    } else {
+      // Create new integration
+      await createIntegration({
+        category: "cloud_storage",
+        userId: session.user.id,
+        name: integrationRequest.name,
+        type: "google_drive",
+        config: {
+          accessToken: tokens.access_token,
+          refreshToken: tokens.refresh_token,
+          folderId: integrationRequest.folderId,
+          expiresAt: tokens.expires_in
+            ? Math.floor(Date.now() / 1000 + tokens.expires_in).toString()
+            : "",
+        },
+      });
+    }
 
     logger.info(
       `Google Drive integration created successfully for user ${session.user.id}`

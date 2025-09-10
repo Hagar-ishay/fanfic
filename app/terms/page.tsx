@@ -12,7 +12,7 @@ export default function TermsOfService() {
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold">Acceptance of Terms</h2>
           <p>
-            By accessing and using Fanfic Penio ("the Service"), you accept and agree to be 
+            By accessing and using Fanfic Penio (&quot;the Service&quot;), you accept and agree to be 
             bound by the terms and provision of this agreement. If you do not agree to abide 
             by the above, please do not use this service.
           </p>
@@ -55,7 +55,7 @@ export default function TermsOfService() {
             <li>Violate any applicable laws or regulations</li>
             <li>Infringe upon the rights of others</li>
             <li>Upload, post, or transmit any harmful, illegal, or inappropriate content</li>
-            <li>Attempt to gain unauthorized access to the Service or other users' accounts</li>
+            <li>Attempt to gain unauthorized access to the Service or other users&apos; accounts</li>
             <li>Use the Service to spam, harass, or abuse other users</li>
             <li>Interfere with or disrupt the Service or servers</li>
             <li>Use automated tools to access the Service without permission</li>
@@ -79,7 +79,7 @@ export default function TermsOfService() {
           </p>
           <ul className="list-disc pl-6 space-y-1">
             <li>Not redistributing content without permission</li>
-            <li>Respecting author's download restrictions</li>
+            <li>Respecting author&apos;s download restrictions</li>
             <li>Using our service for personal reading purposes only</li>
             <li>Not removing author attribution from downloaded content</li>
           </ul>
@@ -100,7 +100,7 @@ export default function TermsOfService() {
           </p>
           <ul className="list-disc pl-6 space-y-1">
             <li>You authorize us to access AO3 content on your behalf</li>
-            <li>You agree to comply with AO3's Terms of Service</li>
+            <li>You agree to comply with AO3&apos;s Terms of Service</li>
             <li>You understand that we may discontinue AO3 integration if required</li>
             <li>You acknowledge that AO3 access depends on your account standing with AO3</li>
           </ul>
@@ -140,7 +140,7 @@ export default function TermsOfService() {
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold">Disclaimers</h2>
           <p>
-            THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY 
+            THE SERVICE IS PROVIDED &quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; WITHOUT WARRANTIES OF ANY 
             KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES 
             OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
           </p>
@@ -177,7 +177,7 @@ export default function TermsOfService() {
           <p>
             We reserve the right to modify these Terms at any time. We will notify users 
             of any material changes by posting the new Terms on this page and updating 
-            the "Last updated" date.
+            the &quot;Last updated&quot; date.
           </p>
           <p>
             Your continued use of the Service after any such changes constitutes your 
@@ -198,7 +198,7 @@ export default function TermsOfService() {
           <h2 className="text-2xl font-semibold">Contact Information</h2>
           <p>
             If you have any questions about these Terms of Service, please contact us 
-            through the app's support features or settings page.
+            through the app&apos;s support features or settings page.
           </p>
         </section>
 

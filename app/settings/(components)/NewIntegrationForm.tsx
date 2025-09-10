@@ -71,6 +71,14 @@ export function NewIntegrationForm({
         "https://www.amazon.com/gp/help/customer/display.html?nodeId=GX9XLEVV8G4DB28H",
       configFields: ["readerEmail"],
     },
+    {
+      value: "ao3",
+      category: "authentication",
+      label: "AO3 Account",
+      description: "Connect your AO3 account to leave kudos and access restricted content",
+      docUrl: "https://archiveofourown.org/",
+      configFields: ["username", "password"],
+    },
   ];
 
   const selectedType = integrationTypes.find((t) => t.value === type);
@@ -194,8 +202,8 @@ export function NewIntegrationForm({
   const getFieldLabel = (field: string): string => {
     const labels: Record<string, string> = {
       url: "Server URL",
-      username: "Username",
-      password: "Password",
+      username: type === "ao3" ? "AO3 Username" : "Username",
+      password: type === "ao3" ? "AO3 Password" : "Password",
       accessToken: "Access Token",
       name: "Integration Name",
       folderId: "Parent Folder ID (Optional)",
@@ -207,8 +215,8 @@ export function NewIntegrationForm({
   const getFieldPlaceholder = (field: string): string => {
     const placeholders: Record<string, string> = {
       url: "https://app.koofr.net/dav/Koofr",
-      username: "your-username",
-      password: "your-password",
+      username: type === "ao3" ? "your-ao3-username" : "your-username",
+      password: type === "ao3" ? "your-ao3-password" : "your-password",
       accessToken:
         field === "accessToken" && type === "google_drive"
           ? "Your Google Drive OAuth2 access token"

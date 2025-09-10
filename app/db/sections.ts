@@ -107,6 +107,17 @@ export const transferSection = async (
   revalidatePath(`/library/sections/${parentId}`);
 };
 
+export const updateSectionCleanup = async (
+  sectionId: number,
+  enableIntegrationCleanup: boolean
+) => {
+  await db
+    .update(sections)
+    .set({ enableIntegrationCleanup })
+    .where(drizzle.eq(sections.id, sectionId));
+  revalidatePath(`/library/sections/${sectionId}`);
+};
+
 export const getSectionByNameUser = async (userId: string, name: string) => {
   return await db
     .select()

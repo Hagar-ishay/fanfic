@@ -12,6 +12,7 @@ interface CloudSyncResult {
   success: boolean;
   message: string;
   cloudPath?: string;
+  requiresReauth?: boolean;
 }
 
 type IntegrationConfig = {
@@ -148,7 +149,8 @@ async function syncToGoogleDrive({
     return {
       success: false,
       message:
-        "Google Drive access has expired and no refresh token is available. Please sign out and sign back in to re-authenticate your Google account.",
+        "Google Drive access has expired and no refresh token is available. Please re-authenticate your Google Drive integration in Settings.",
+      requiresReauth: true,
     };
   }
 
@@ -185,7 +187,8 @@ async function syncToGoogleDrive({
         return {
           success: false,
           message:
-            "Google Drive access has expired. Please remove and re-add your Google Drive integration in Settings to authenticate again.",
+            "Google Drive access has expired and refresh failed. Please re-authenticate your Google Drive integration in Settings.",
+          requiresReauth: true,
         };
       }
     }
@@ -800,4 +803,261 @@ async function updateIntegrationTokens(
       expiresAt: tokens.expiresAt.toString(),
     },
   });
+}
+
+interface CleanupResult {
+  success: boolean;
+  message: string;
+}
+
+type CleanupIntegrations = Record<
+  string,
+  (params: {
+    fanficIntegration: UserFanficIntegration;
+    fileName: string;
+  }) => Promise<CleanupResult>
+>;
+
+export async function cleanupFromCloud({
+  fanficIntegration,
+  fanficTitle,
+}: {
+  fanficIntegration: UserFanficIntegration;
+  fanficTitle: string;
+}): Promise<CleanupResult> {
+  const cleanupIntegrations: CleanupIntegrations = {
+    google_drive: cleanupFromGoogleDrive,
+    webdav: cleanupFromWebDAV,
+    dropbox: cleanupFromDropbox,
+  };
+
+  const fileName = `${fanficTitle.replace(/[^a-zA-Z0-9\-_]/g, "_")}.epub`;
+
+  try {
+    if (fanficIntegration.integration.type in cleanupIntegrations) {
+      const cleanupFunction = cleanupIntegrations[fanficIntegration.integration.type];
+      if (!cleanupFunction) {
+        return { success: false, message: "Unsupported cloud provider for cleanup" };
+      }
+
+      const result = await cleanupFunction({
+        fanficIntegration,
+        fileName,
+      });
+
+      return result;
+    }
+  } catch (error) {
+    logger.error(
+      `Cloud cleanup error: ${error instanceof Error ? error.message : String(error)}`
+    );
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Unknown cloud cleanup error",
+    };
+  }
+
+  return {
+    success: false,
+    message: "Unsupported integration type for cleanup",
+  };
+}
+
+async function cleanupFromGoogleDrive({
+  fanficIntegration,
+  fileName,
+}: {
+  fanficIntegration: UserFanficIntegration;
+  fileName: string;
+}): Promise<CleanupResult> {
+  let { accessToken, refreshToken, folderId } = fanficIntegration.integration.config as {
+    accessToken?: string;
+    refreshToken?: string;
+    folderId?: string;
+  };
+
+  if (!accessToken) {
+    return {
+      success: false,
+      message: "Google Drive access token not configured",
+    };
+  }
+
+  let updatedIntegration = { ...fanficIntegration.integration };
+
+  // Try to refresh token if needed
+  if (refreshToken) {
+    try {
+      const refreshedTokens = await refreshGoogleDriveToken(refreshToken);
+      if (refreshedTokens.accessToken) {
+        accessToken = refreshedTokens.accessToken;
+        await updateIntegrationTokens(
+          fanficIntegration.integration.id,
+          refreshedTokens,
+          fanficIntegration.integration.config
+        );
+        updatedIntegration = {
+          ...fanficIntegration.integration,
+          config: {
+            ...fanficIntegration.integration.config,
+            accessToken: refreshedTokens.accessToken,
+          },
+        };
+      }
+    } catch (error) {
+      logger.warn(`Failed to refresh Google Drive token during cleanup: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
+  try {
+    // Determine folder to search in
+    let searchFolderId = "root";
+    if (folderId && folderId !== "root") {
+      if (folderId.includes("-") && folderId.length > 10) {
+        searchFolderId = folderId;
+      } else {
+        const foundFolderId = await findGoogleDriveFile(updatedIntegration, folderId, "root", true);
+        if (foundFolderId) {
+          searchFolderId = foundFolderId;
+        }
+      }
+    }
+
+    // Find the file to delete
+    const fileId = await findGoogleDriveFile(updatedIntegration, fileName, searchFolderId);
+    
+    if (!fileId) {
+      return {
+        success: true,
+        message: "File not found in Google Drive (may have been already deleted)",
+      };
+    }
+
+    // Delete the file
+    await axios.delete(`https://www.googleapis.com/drive/v3/files/${fileId}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      timeout: 30000,
+    });
+
+    return {
+      success: true,
+      message: "Successfully cleaned up file from Google Drive",
+    };
+  } catch (error) {
+    logger.error(`Google Drive cleanup error: ${error instanceof Error ? error.message : String(error)}`);
+    return {
+      success: false,
+      message: `Google Drive cleanup failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+    };
+  }
+}
+
+async function cleanupFromWebDAV({
+  fanficIntegration,
+  fileName,
+}: {
+  fanficIntegration: UserFanficIntegration;
+  fileName: string;
+}): Promise<CleanupResult> {
+  const { url, username, password, folderName } = fanficIntegration.integration.config as {
+    url?: string;
+    username?: string;
+    password?: string;
+    folderName?: string;
+  };
+
+  if (!url || !username || !password) {
+    return { success: false, message: "WebDAV credentials not configured" };
+  }
+
+  try {
+    const cloudPath = folderName && folderName.includes("/")
+      ? path.posix.join("/PenioFanfic", folderName, fileName)
+      : path.posix.join("/PenioFanfic", fileName);
+
+    const deleteUrl = new URL(cloudPath, url).toString();
+
+    await axios.delete(deleteUrl, {
+      auth: {
+        username,
+        password,
+      },
+      timeout: 30000,
+    });
+
+    return {
+      success: true,
+      message: "Successfully cleaned up file from WebDAV",
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.status === 404) {
+      return {
+        success: true,
+        message: "File not found in WebDAV (may have been already deleted)",
+      };
+    }
+    
+    logger.error(`WebDAV cleanup error: ${error instanceof Error ? error.message : String(error)}`);
+    return {
+      success: false,
+      message: `WebDAV cleanup failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+    };
+  }
+}
+
+async function cleanupFromDropbox({
+  fanficIntegration,
+  fileName,
+}: {
+  fanficIntegration: UserFanficIntegration;
+  fileName: string;
+}): Promise<CleanupResult> {
+  const { accessToken, folderName } = fanficIntegration.integration.config as {
+    accessToken?: string;
+    folderName?: string;
+  };
+
+  if (!accessToken) {
+    return { success: false, message: "Dropbox access token not configured" };
+  }
+
+  try {
+    const cloudPath = folderName && folderName.includes("/")
+      ? path.posix.join("/PenioFanfic", folderName, fileName)
+      : path.posix.join("/PenioFanfic", fileName);
+
+    await axios.post(
+      "https://api.dropboxapi.com/2/files/delete_v2",
+      {
+        path: cloudPath,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        timeout: 30000,
+      }
+    );
+
+    return {
+      success: true,
+      message: "Successfully cleaned up file from Dropbox",
+    };
+  } catch (error) {
+    if (axios.isAxiosError(error) && error.response?.data?.error_summary?.includes("not_found")) {
+      return {
+        success: true,
+        message: "File not found in Dropbox (may have been already deleted)",
+      };
+    }
+    
+    logger.error(`Dropbox cleanup error: ${error instanceof Error ? error.message : String(error)}`);
+    return {
+      success: false,
+      message: `Dropbox cleanup failed: ${error instanceof Error ? error.message : "Unknown error"}`,
+    };
+  }
 }

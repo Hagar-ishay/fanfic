@@ -20,12 +20,14 @@ export default function FanficCard({
   transferableSections,
   userIntegrations,
   fanficIntegrations,
+  hasAo3Credentials,
 }: {
   fanfic: UserFanfic;
   index: number;
   transferableSections: Section[];
   userIntegrations: any[];
   fanficIntegrations: any[];
+  hasAo3Credentials: boolean;
 }) {
   const triggerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -38,6 +40,15 @@ export default function FanficCard({
   const handleKudos = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
+
+    if (!hasAo3Credentials) {
+      toast({
+        title: "AO3 Account Required",
+        description: "Please add your AO3 credentials in Settings to leave kudos.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     startTransition(async () => {
       setOptimisticKudos(!optimisticKudos);
@@ -54,6 +65,8 @@ export default function FanficCard({
           description: result.message,
           variant: "destructive",
         });
+        // Revert optimistic update on error
+        setOptimisticKudos(fanfic.kudos || false);
       }
     });
   };
@@ -167,20 +180,27 @@ export default function FanficCard({
                 <div className="flex flex-row gap-3 flex-shrink-0 items-center">
                   <Tooltip
                     description={
-                      optimisticKudos ? "Remove kudos" : "Send kudos"
+                      !hasAo3Credentials
+                        ? "Add AO3 credentials in Settings to leave kudos"
+                        : optimisticKudos 
+                        ? "Remove kudos" 
+                        : "Send kudos"
                     }
                   >
                     <Button
                       variant="ghost"
                       size="sm"
-                      disabled={isPending}
-                      className="text-muted-foreground hover:text-primary transition-colors p-1.5 h-auto min-w-0 rounded-md"
+                      disabled={isPending || !hasAo3Credentials}
+                      className={cn(
+                        "text-muted-foreground hover:text-primary transition-colors p-1.5 h-auto min-w-0 rounded-md",
+                        !hasAo3Credentials && "opacity-50 cursor-not-allowed hover:text-muted-foreground"
+                      )}
                       onClick={handleKudos}
                     >
                       <Heart
                         className={cn(
                           "h-4 w-4",
-                          optimisticKudos && "fill-primary text-primary"
+                          optimisticKudos && hasAo3Credentials && "fill-primary text-primary"
                         )}
                       />
                     </Button>

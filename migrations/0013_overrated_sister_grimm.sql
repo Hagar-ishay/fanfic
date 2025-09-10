@@ -1,0 +1,1 @@
+ALTER TABLE "fanfiction"."sections" ADD COLUMN "enable_integration_cleanup" boolean DEFAULT false NOT NULL;

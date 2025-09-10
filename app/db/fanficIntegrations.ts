@@ -280,6 +280,12 @@ export async function getFanficsNeedingSync() {
   );
 }
 
+export async function getDetailedFanficIntegrations(sectionFanficId: number) {
+  return await buildDetailedFanficIntegrationQuery().where(
+    eq(fanficIntegrations.sectionFanficId, sectionFanficId)
+  );
+}
+
 export async function deleteFanficIntegration(id: number) {
   await db.delete(fanficIntegrations).where(eq(fanficIntegrations.id, id));
   revalidatePath("/library");

@@ -13,6 +13,8 @@ export async function getIntegrations(userId: string) {
     .where(eq(integrations.userId, userId));
 }
 
+export const getUserIntegrations = getIntegrations;
+
 export async function getIntegrationsByCategory(
   userId: string,
   category: string
@@ -209,4 +211,48 @@ export async function getFanficLastSent(
     emailIntegration.id
   );
   return fanficIntegration?.lastTriggered || null;
+}
+
+export async function getAo3Integration(userId: string) {
+  const ao3Integrations = await db
+    .select()
+    .from(integrations)
+    .where(
+      and(eq(integrations.userId, userId), eq(integrations.type, "ao3"), eq(integrations.isActive, true))
+    );
+
+  return ao3Integrations[0] || null;
+}
+
+export async function hasUserAo3Credentials(userId: string): Promise<boolean> {
+  const ao3Integration = await getAo3Integration(userId);
+  return !!ao3Integration && !!ao3Integration.config.username && !!ao3Integration.config.password;
+}
+
+export async function isGoogleDriveTokenExpired(integration: any): Promise<boolean> {
+  if (!integration || integration.type !== "google_drive") {
+    return false;
+  }
+
+  const expiresAt = integration.config.expiresAt;
+  if (!expiresAt) {
+    return false; // No expiration info, assume valid
+  }
+
+  const expirationTime = parseInt(expiresAt) * 1000; // Convert to milliseconds
+  return Date.now() >= expirationTime;
+}
+
+export async function getExpiredGoogleDriveIntegrations(userId: string) {
+  const integrations = await getIntegrations(userId);
+  const googleDriveIntegrations = integrations.filter(i => i.type === "google_drive");
+  
+  const expiredIntegrations = [];
+  for (const integration of googleDriveIntegrations) {
+    if (await isGoogleDriveTokenExpired(integration)) {
+      expiredIntegrations.push(integration);
+    }
+  }
+  
+  return expiredIntegrations;
 }

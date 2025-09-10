@@ -5,6 +5,9 @@ import { db } from "@/db/db";
 import { fanfics, sectionFanfics, sections } from "@/db/schema";
 import { NewFanfic, UserFanfic } from "@/db/types";
 import { revalidatePath } from "next/cache";
+import { getDetailedFanficIntegrations } from "@/db/fanficIntegrations";
+import { cleanupFromCloud } from "@/lib/cloudSync";
+import logger from "@/logger";
 export const updateFanfic = async (ficId: number, { ...update }) => {
   return await db
     .update(fanfics)
@@ -20,6 +23,41 @@ export const tranferSectionFanfic = async (
 ) => {
   const position = await getNextPosition(newSectionId);
   const updateParams = { position, sectionId: newSectionId };
+  
+  // Check if the new section has cleanup enabled
+  const newSection = await db
+    .select()
+    .from(sections)
+    .where(drizzle.eq(sections.id, newSectionId));
+  
+  if (newSection[0]?.enableIntegrationCleanup) {
+    // Get fanfic details and integrations for cleanup
+    const fanficData = await getFanficById(sectionFanficId);
+    if (fanficData) {
+      const fanficIntegrations = await getDetailedFanficIntegrations(sectionFanficId);
+      
+      // Perform cleanup for each cloud integration
+      for (const integration of fanficIntegrations) {
+        if (['google_drive', 'webdav', 'dropbox'].includes(integration.integration.type)) {
+          try {
+            const cleanupResult = await cleanupFromCloud({
+              fanficIntegration: integration,
+              fanficTitle: fanficData.title,
+            });
+            
+            if (cleanupResult.success) {
+              logger.info(`Cleaned up ${fanficData.title} from ${integration.integration.name}: ${cleanupResult.message}`);
+            } else {
+              logger.warn(`Failed to cleanup ${fanficData.title} from ${integration.integration.name}: ${cleanupResult.message}`);
+            }
+          } catch (error) {
+            logger.error(`Error during cleanup: ${error instanceof Error ? error.message : String(error)}`);
+          }
+        }
+      }
+    }
+  }
+  
   await db
     .update(sectionFanfics)
     .set(updateParams)
@@ -162,6 +200,32 @@ export const getNextPosition = async (sectionId: number) => {
 };
 
 export const deleteSectionFanfic = async (userFanficId: number) => {
+  // Get fanfic details and integrations before deletion
+  const fanficData = await getFanficById(userFanficId);
+  if (fanficData) {
+    const fanficIntegrations = await getDetailedFanficIntegrations(userFanficId);
+    
+    // Perform cleanup for each cloud integration
+    for (const integration of fanficIntegrations) {
+      if (['google_drive', 'webdav', 'dropbox'].includes(integration.integration.type)) {
+        try {
+          const cleanupResult = await cleanupFromCloud({
+            fanficIntegration: integration,
+            fanficTitle: fanficData.title,
+          });
+          
+          if (cleanupResult.success) {
+            logger.info(`Cleaned up ${fanficData.title} from ${integration.integration.name} during deletion: ${cleanupResult.message}`);
+          } else {
+            logger.warn(`Failed to cleanup ${fanficData.title} from ${integration.integration.name} during deletion: ${cleanupResult.message}`);
+          }
+        } catch (error) {
+          logger.error(`Error during cleanup on deletion: ${error instanceof Error ? error.message : String(error)}`);
+        }
+      }
+    }
+  }
+
   const result = await db
     .delete(sectionFanfics)
     .where(drizzle.eq(sectionFanfics.id, userFanficId))

@@ -1,5 +1,3 @@
-"use server";
-
 import fs from "node:fs";
 import querystring from "querystring";
 import axios, { AxiosInstance, AxiosResponse } from "axios";
@@ -11,7 +9,16 @@ import { getCredentials, refreshSession } from "@/db/credentials";
 import * as cheerio from "cheerio";
 import logger from "@/logger";
 
-export async function getAo3Client() {
+export async function getAo3Client(userId?: string) {
+  // If userId is provided, try to get user-specific AO3 credentials from integrations
+  if (userId) {
+    const userClient = await getUserAo3Client(userId);
+    if (userClient) {
+      return userClient;
+    }
+  }
+  
+  // Fall back to default credentials
   const credentials = await getCredentials("AO3");
   if (!credentials) {
     throw new Error("No AO3 credentials found");
@@ -21,13 +28,32 @@ export async function getAo3Client() {
   return ao3Client;
 }
 
+export async function getUserAo3Client(userId: string): Promise<AO3Client | null> {
+  try {
+    const { getUserIntegrations } = await import("@/db/integrations");
+    const integrations = await getUserIntegrations(userId);
+    const ao3Integration = integrations.find(i => i.type === "ao3" && i.isActive);
+    
+    if (!ao3Integration || !ao3Integration.config.username || !ao3Integration.config.password) {
+      return null;
+    }
+    
+    const ao3Client = new AO3Client();
+    await ao3Client.loginWithCredentials(ao3Integration.config.username, ao3Integration.config.password);
+    return ao3Client;
+  } catch (error) {
+    logger.error(`Failed to get user AO3 client: ${error instanceof Error ? error.message : String(error)}`);
+    return null;
+  }
+}
+
 export type AutoCompleteType =
   | "fandom"
   | "freeform"
   | "relationship"
   | "character";
 
-class AO3Client {
+export class AO3Client {
   private cookieJar: CookieJar;
   private axiosInstance: AxiosInstance;
   private defaultHeaders: object = {
@@ -178,6 +204,58 @@ class AO3Client {
     } else {
       await this.refreshLogin();
     }
+  }
+
+  public async loginWithCredentials(username: string, password: string): Promise<void> {
+    logger.info(`Attempting to login with user credentials: ${username}`);
+    const loginUrl = `${AO3_LINK}/users/login`;
+    
+    try {
+      const tokenResponse = await this.getToken();
+      const data = {
+        authenticity_token: tokenResponse,
+        "user[login]": username,
+        "user[password]": password,
+        "user[remember_me]": 1,
+        commit: "Log in",
+      };
+      const encodedData = querystring.stringify(data);
+
+      await this.request({
+        method: "POST",
+        url: loginUrl,
+        data: encodedData,
+        headers: {
+          Referer: `${AO3_LINK}/users/login`,
+        },
+      });
+
+      const cookies = (await this.cookieJar.store.getAllCookies()).map(
+        (cookie) => ({
+          key: cookie.key,
+          value: cookie.value,
+          expires: cookie.expires,
+        })
+      );
+
+      // Set cookies but don't persist to global credentials table
+      this.setCookies(cookies.filter((cookie) => this.essentialCookies.includes(cookie.key)));
+    } catch (error) {
+      logger.error(`Failed to login with user credentials: ${error instanceof Error ? error.message : String(error)}`);
+      throw error;
+    }
+  }
+
+  public async testLogin(username: string, password: string): Promise<void> {
+    // Create a temporary client to test credentials without affecting the current session
+    const testClient = new AO3Client();
+    await testClient.loginWithCredentials(username, password);
+    
+    // Test by making a simple request
+    await testClient.request({
+      method: "GET",
+      url: `${AO3_LINK}/users/${username}`,
+    });
   }
 
   public async getFanfic(externalId: string): Promise<string> {

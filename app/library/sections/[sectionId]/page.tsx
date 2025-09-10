@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { getBreadcrumbs, getSection, listUserSections } from "@/db/sections";
 import { selectSectionFanfic } from "@/db/fanfics";
 import FanficList from "@/library/sections/[sectionId]/(components)/FanficList";
-import { getActiveIntegrations } from "@/db/integrations";
+import { getActiveIntegrations, hasUserAo3Credentials } from "@/db/integrations";
 import { getFanficIntegrations } from "@/db/fanficIntegrations";
 import { LibraryHelp } from "@/library/(components)/LibraryHelp";
 import { auth } from "@/auth";
@@ -42,11 +42,12 @@ export default async function Page({ params }: Props) {
   }
 
   // Run all initial queries in parallel for better performance
-  const [userSections, fanfics, currentSection, userIntegrations] = await Promise.all([
+  const [userSections, fanfics, currentSection, userIntegrations, hasAo3Credentials] = await Promise.all([
     listUserSections(user.id),
     selectSectionFanfic([sectionId]),
     getSection(sectionId),
     getActiveIntegrations(user.id),
+    hasUserAo3Credentials(user.id),
   ]);
 
   if (!currentSection) {
@@ -116,6 +117,7 @@ export default async function Page({ params }: Props) {
                 transferableSections={transferableSections}
                 userIntegrations={userIntegrations}
                 fanficIntegrationsMap={serializedFanficIntegrationsMap}
+                hasAo3Credentials={hasAo3Credentials}
               />
             )}
           </div>

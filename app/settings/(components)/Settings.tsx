@@ -28,6 +28,7 @@ import {
   Plus,
   Trash2,
   Settings as SettingsIcon,
+  RefreshCw,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useTransition, useState, useEffect } from "react";
@@ -221,6 +222,52 @@ export function Settings({
         variant: "destructive",
       });
     }
+  }
+
+  async function handleReauthGoogleDrive(integrationId: number) {
+    try {
+      const response = await fetch("/api/integrations/google-drive/reauth", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ integrationId }),
+      });
+      
+      const result = await response.json();
+      
+      if (response.ok && result.authUrl) {
+        // Redirect to Google OAuth
+        window.location.href = result.authUrl;
+      } else {
+        toast({
+          title: "Re-authentication Failed",
+          description: result.error || "Failed to initiate re-authentication",
+          variant: "destructive",
+        });
+      }
+    } catch {
+      toast({
+        title: "Re-authentication Failed",
+        description: "Failed to initiate Google Drive re-authentication",
+        variant: "destructive",
+      });
+    }
+  }
+
+  // Check if Google Drive token is expired
+  function isGoogleDriveExpired(integration: any): boolean {
+    if (integration.type !== "google_drive") {
+      return false;
+    }
+    
+    const expiresAt = integration.config?.expiresAt;
+    if (!expiresAt) {
+      return false; // No expiration info, assume valid
+    }
+    
+    const expirationTime = parseInt(expiresAt) * 1000; // Convert to milliseconds
+    return Date.now() >= expirationTime;
   }
 
   const generalSettings = [
@@ -444,22 +491,40 @@ export function Settings({
                               <p className="text-xs text-muted-foreground">
                                 {integration.type.replace("_", " ")}{" "}
                                 {integration.isActive && "• Active"}
+                                {isGoogleDriveExpired(integration) && " • Authentication Expired"}
                               </p>
                             </div>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              void handleDeleteIntegration(
-                                integration.id,
-                                integration.name
-                              );
-                            }}
-                            className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground flex-shrink-0"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          <div className="flex items-center space-x-2">
+                            {integration.type === "google_drive" && isGoogleDriveExpired(integration) && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  void handleReauthGoogleDrive(
+                                    integration.id
+                                  );
+                                }}
+                                className="h-8 px-2 text-xs"
+                              >
+                                <RefreshCw className="h-3 w-3 mr-1" />
+                                Re-authenticate
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                void handleDeleteIntegration(
+                                  integration.id,
+                                  integration.name
+                                );
+                              }}
+                              className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground flex-shrink-0"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       ))}
                     </div>

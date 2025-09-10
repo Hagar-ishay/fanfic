@@ -7,7 +7,7 @@ import { sendKudos } from "@/library/sections/[sectionId]/(server)/kudosAction";
 import { Heart } from "lucide-react";
 import { useOptimistic, useTransition } from "react";
 
-export function Kudos({ fanfic }: { fanfic: UserFanfic }) {
+export function Kudos({ fanfic, hasAo3Credentials }: { fanfic: UserFanfic; hasAo3Credentials: boolean }) {
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
   const [optimisticKudos, setOptimisticKudos] = useOptimistic(
@@ -16,6 +16,15 @@ export function Kudos({ fanfic }: { fanfic: UserFanfic }) {
   );
 
   const handleKudos = () => {
+    if (!hasAo3Credentials) {
+      toast({
+        title: "AO3 Account Required",
+        description: "Please add your AO3 credentials in Settings to leave kudos.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     startTransition(async () => {
       setOptimisticKudos(!optimisticKudos);
       const result = await sendKudos({
@@ -36,6 +45,21 @@ export function Kudos({ fanfic }: { fanfic: UserFanfic }) {
       }
     });
   };
+
+  if (!hasAo3Credentials) {
+    return (
+      <Button
+        variant="ghost"
+        size="sm"
+        disabled
+        className="text-muted-foreground opacity-50 cursor-not-allowed"
+        onClick={handleKudos}
+        title="Add AO3 credentials in Settings to leave kudos"
+      >
+        <Heart className="h-5 w-5" />
+      </Button>
+    );
+  }
 
   return (
     <Button

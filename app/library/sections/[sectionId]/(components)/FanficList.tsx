@@ -12,6 +12,7 @@ type FanficListProps = {
   transferableSections: Section[];
   userIntegrations: any[];
   fanficIntegrationsMap: Record<number, any[]>;
+  hasAo3Credentials: boolean;
 };
 
 export default function FanficList({
@@ -20,6 +21,7 @@ export default function FanficList({
   transferableSections,
   userIntegrations,
   fanficIntegrationsMap,
+  hasAo3Credentials,
 }: FanficListProps) {
   const [, startTransition] = useTransition();
   const [optimisticFics, setOptimistic] = useOptimistic(
@@ -58,6 +60,7 @@ export default function FanficList({
                 index={index}
                 userIntegrations={userIntegrations}
                 fanficIntegrations={fanficIntegrationsMap[fanfic.id] || []}
+                hasAo3Credentials={hasAo3Credentials}
               />
             ))}
             {provided.placeholder}

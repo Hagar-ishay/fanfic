@@ -8,7 +8,7 @@ import { SetTopbar } from "@/components/base/SetTopbar";
 import { EllipsisVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FanficContextMenu } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficContextMenu";
-import { getActiveIntegrations } from "@/db/integrations";
+import { getActiveIntegrations, hasUserAo3Credentials } from "@/db/integrations";
 import { getFanficIntegrations } from "@/db/fanficIntegrations";
 import { Kudos } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/Kudos";
 export async function generateMetadata({
@@ -44,11 +44,12 @@ export default async function Page({
   }
 
   // Run all queries in parallel for maximum performance
-  const [userSections, segments, activeIntegrations, fanficIntegrations] = await Promise.all([
+  const [userSections, segments, activeIntegrations, fanficIntegrations, hasAo3Credentials] = await Promise.all([
     listUserSections(user.id),
     getBreadcrumbs(sectionId, fanfic.sectionName, fanfic.sectionParentId),
     getActiveIntegrations(user.id),
     getFanficIntegrations(fanfic.id),
+    hasUserAo3Credentials(user.id),
   ]);
   
   const transferableSections = userSections.filter(
@@ -58,7 +59,7 @@ export default async function Page({
   return (
     <>
       <SetTopbar segments={segments}>
-        <Kudos fanfic={fanfic} />
+        <Kudos fanfic={fanfic} hasAo3Credentials={hasAo3Credentials} />
         <FanficContextMenu
           fanfic={fanfic}
           sections={transferableSections}

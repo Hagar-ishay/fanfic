@@ -6,6 +6,7 @@ import type { Integration, Section, UserFanfic } from "@/db/types";
 import logger from "@/logger";
 
 import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { emailSender } from "@/library/sections/[sectionId]/(server)/email";
 import { FanficHeader } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficHeader";
 import {
@@ -87,10 +88,22 @@ export function FanficContextMenu({
           description: `Successfully synced ${fanfic.title} to ${fanficIntegration.integration.name}`,
         });
       } else {
+        const description = (result as any).requiresReauth 
+          ? `${result.message} Click to go to Settings.`
+          : result.message;
+          
         toast({
           title: "Sync Failed",
-          description: result.message,
+          description,
           variant: "destructive",
+          action: (result as any).requiresReauth ? (
+            <ToastAction 
+              altText="Go to Settings" 
+              onClick={() => window.location.href = "/settings"}
+            >
+              Go to Settings
+            </ToastAction>
+          ) : undefined,
         });
       }
     } catch (error) {

@@ -3,6 +3,7 @@
 import { getAo3Client } from "@/lib/ao3Client";
 import { errorMessage } from "@/lib/utils";
 import { updateSectionFanfic } from "@/db/fanfics";
+import { auth } from "@/auth";
 
 export async function sendKudos({
   externalId,
@@ -17,7 +18,12 @@ export async function sendKudos({
 }) {
   try {
     if (!currentKudos) {
-      const ao3Client = await getAo3Client();
+      const session = await auth();
+      if (!session?.user?.id) {
+        throw new Error("User not authenticated");
+      }
+      
+      const ao3Client = await getAo3Client(session.user.id);
       await ao3Client.kudos(String(externalId));
     }
     await updateSectionFanfic(sectionId, userFanficId, {
