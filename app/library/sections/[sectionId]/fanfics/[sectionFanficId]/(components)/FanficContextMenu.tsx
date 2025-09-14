@@ -31,7 +31,7 @@ export function FanficContextMenu({
   sections: Section[];
   userIntegrations: Integration[];
   fanficIntegrations: any[];
-  trigger?: React.ReactNode;
+  trigger: React.ReactNode;
 }) {
   const { toast } = useToast();
   const router = useRouter();
@@ -88,18 +88,18 @@ export function FanficContextMenu({
           description: `Successfully synced ${fanfic.title} to ${fanficIntegration.integration.name}`,
         });
       } else {
-        const description = (result as any).requiresReauth 
+        const description = (result as any).requiresReauth
           ? `${result.message} Click to go to Settings.`
           : result.message;
-          
+
         toast({
           title: "Sync Failed",
           description,
           variant: "destructive",
           action: (result as any).requiresReauth ? (
-            <ToastAction 
-              altText="Go to Settings" 
-              onClick={() => window.location.href = "/settings"}
+            <ToastAction
+              altText="Go to Settings"
+              onClick={() => (window.location.href = "/settings")}
             >
               Go to Settings
             </ToastAction>
@@ -211,12 +211,10 @@ export function FanficContextMenu({
   const options = buildIntegrationOptions();
 
   return (
-    <div>
-      <ContextMenu
-        options={options}
-        trigger={trigger}
-        header={<FanficHeader fanfic={fanfic} />}
-      />
-    </div>
+    <ContextMenu
+      options={options}
+      trigger={trigger}
+      header={<FanficHeader fanfic={fanfic} />}
+    />
   );
 }

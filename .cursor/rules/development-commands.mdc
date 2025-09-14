@@ -1,0 +1,26 @@
+---
+description: Development commands and package manager usage
+globs:
+alwaysApply: true
+---
+
+## Development Commands
+
+**Package Manager:** Always use `pnpm` (not npm or yarn)
+
+```bash
+# Install dependencies
+pnpm install
+
+# Start development server with Turbopack
+pnpm run dev
+
+# Build for production
+pnpm run build
+
+# Start production server
+pnpm start
+
+# Lint code
+pnpm run lint
+```

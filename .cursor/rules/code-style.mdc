@@ -1,0 +1,13 @@
+---
+description: Code style guidelines and UI conventions
+globs:
+alwaysApply: true
+---
+
+## Code Style Guidelines
+
+- Follow existing component patterns in the codebase
+- Use Tailwind CSS for styling
+- Implement proper error handling for all AO3 API interactions
+- Ensure responsive design using existing mobile-first patterns
+- Use Shadcn UI components when possible before creating custom ones

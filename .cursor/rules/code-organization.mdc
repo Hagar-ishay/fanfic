@@ -1,0 +1,12 @@
+---
+description: Code organization and access rules
+globs:
+alwaysApply: true
+---
+
+## Code Organization Rules
+
+1. **Server Actions:** Use Next.js server actions in `(server)/` directories for data mutations
+2. **Database Access:** All DB operations must go through `app/db/` modules, never use direct queries in components
+3. **Component Structure:** Follow existing patterns in `app/components/base/` for custom components
+4. **AO3 Integration:** Extend `app/lib/ao3Client.ts` class for new AO3 API interactions

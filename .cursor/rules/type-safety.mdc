@@ -1,0 +1,11 @@
+---
+description: Type safety requirements and guarantees
+globs:
+alwaysApply: true
+---
+
+## Type Safety Requirements
+
+- Use extensive TypeScript with Drizzle-generated types
+- Never use `any` types
+- Ensure proper typing for all database operations

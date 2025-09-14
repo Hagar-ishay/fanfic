@@ -21,21 +21,19 @@ import {
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { ComponentProps } from "react";
-import { getIsDesktop } from "@/lib/utils";
-
-const isDesktop = () => getIsDesktop()
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function DrawerDialog(
   props: ComponentProps<typeof Dialog> | ComponentProps<typeof Drawer>
 ) {
-  const Component = isDesktop() ? Dialog : Drawer;
+  const isMobile = useIsMobile();
+  const Component = isMobile ? Drawer : Dialog;
   return <Component {...props} />;
 }
 
-export function DrawerDialogClose(
-  props: ComponentProps<typeof DialogClose>
-) {
-  const Component = isDesktop() ? DialogClose : DrawerClose;
+export function DrawerDialogClose(props: ComponentProps<typeof DialogClose>) {
+  const isMobile = useIsMobile();
+  const Component = isMobile ? DrawerClose : DialogClose;
   return <Component {...props} />;
 }
 
@@ -44,41 +42,41 @@ export function DrawerDialogContent(
     | ComponentProps<typeof DialogContent>
     | ComponentProps<typeof DrawerContent>
 ) {
-  const Component = isDesktop() ? DialogContent : DrawerContent;
+  const isMobile = useIsMobile();
+  const Component = isMobile ? DrawerContent : DialogContent;
   return <Component {...props} />;
 }
 
 export function DrawerDialogDescription(
   props: ComponentProps<typeof DialogDescription>
 ) {
-  const Component = isDesktop() ? DialogDescription : DrawerDescription;
+  const isMobile = useIsMobile();
+  const Component = isMobile ? DrawerDescription : DialogDescription;
   return <Component {...props} />;
 }
 
-export function DrawerDialogFooter(
-  props: ComponentProps<typeof DialogFooter>
-) {
-  const Component = isDesktop() ? DialogFooter : DrawerFooter;
+export function DrawerDialogFooter(props: ComponentProps<typeof DialogFooter>) {
+  const isMobile = useIsMobile();
+  const Component = isMobile ? DrawerFooter : DialogFooter;
   return <Component {...props} />;
 }
 
-export function DrawerDialogHeader(
-  props: ComponentProps<typeof DialogHeader>
-) {
-  const Component = isDesktop() ? DialogHeader : DrawerHeader;
+export function DrawerDialogHeader(props: ComponentProps<typeof DialogHeader>) {
+  const isMobile = useIsMobile();
+  const Component = isMobile ? DrawerHeader : DialogHeader;
   return <Component {...props} />;
 }
 
-export function DrawerDialogTitle(
-  props: ComponentProps<typeof DialogTitle>
-) {
-  const Component = isDesktop() ? DialogTitle : DrawerTitle;
+export function DrawerDialogTitle(props: ComponentProps<typeof DialogTitle>) {
+  const isMobile = useIsMobile();
+  const Component = isMobile ? DrawerTitle : DialogTitle;
   return <Component {...props} />;
 }
 
 export function DrawerDialogTrigger(
   props: ComponentProps<typeof DialogTrigger>
 ) {
-  const Component = isDesktop() ? DialogTrigger : DrawerTrigger;
+  const isMobile = useIsMobile();
+  const Component = isMobile ? DrawerTrigger : DialogTrigger;
   return <Component {...props} />;
 }

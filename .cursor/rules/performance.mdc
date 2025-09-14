@@ -1,0 +1,12 @@
+---
+description: Performance considerations and optimizations
+globs:
+alwaysApply: true
+---
+
+## Performance Considerations
+
+- Use Turbopack for development builds
+- Implement proper caching for AO3 API responses
+- Optimize database queries using Drizzle's query builder
+- Use Next.js built-in performance optimizations (Image, Link, etc.)

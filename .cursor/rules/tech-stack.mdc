@@ -1,0 +1,13 @@
+---
+description: Tech stack and dependencies for the project
+globs:
+alwaysApply: true
+---
+
+## Tech Stack & Dependencies
+
+- **Framework:** Next.js 15 with App Router (Turbopack for dev)
+- **Database:** PostgreSQL via Neon Serverless with Drizzle ORM
+- **Auth:** NextAuth v5 (beta) with Google provider
+- **UI:** Tailwind CSS + Radix UI (Shadcn components)
+- **Deployment:** Vercel

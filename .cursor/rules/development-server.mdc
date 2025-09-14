@@ -1,0 +1,13 @@
+---
+description: Development server usage policy
+globs:
+alwaysApply: true
+---
+
+## Rule: Development Server Assumption
+
+The development server is already running at localhost:3000 (or similar). Never attempt to start the dev server with `pnpm dev`:
+
+- Always assume the server is running and accessible
+- Use browser tools to navigate to the running application
+- If the server appears down, ask the user rather than attempting to start it

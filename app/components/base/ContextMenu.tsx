@@ -85,7 +85,7 @@ export function ContextMenu({
 
   return (
     <DrawerDialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DrawerDialogTrigger asChild>{trigger}</DrawerDialogTrigger>
+      <DrawerDialogTrigger>{trigger}</DrawerDialogTrigger>
       <DrawerDialogContent onOpenAutoFocus={(e) => e.preventDefault()}>
         <DrawerDialogHeader>
           <DrawerDialogTitle>

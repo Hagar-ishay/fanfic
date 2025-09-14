@@ -1,0 +1,15 @@
+---
+description: Constraints for Vercel and Neon free tiers
+globs:
+alwaysApply: true
+---
+
+## Rule: Vercel/Neon Free Tier Limitations
+
+Be mindful of free tier constraints when implementing features:
+
+- Vercel free tier: Maximum 2 cron jobs total
+- Neon free tier: Database storage and connection limits
+- Consider these limitations when suggesting scheduled tasks or heavy database operations
+- Optimize database queries for efficiency
+- Be conservative with automated/scheduled features

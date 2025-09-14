@@ -1,0 +1,16 @@
+---
+description: Database schema overview and entities
+globs:
+alwaysApply: true
+---
+
+## Database Schema
+
+Uses Drizzle ORM with PostgreSQL schema named `fanfiction`. Key entities:
+
+- **users** - NextAuth user management
+- **sections** - Hierarchical library organization
+- **fanfics** - AO3 story metadata
+- **sectionFanfics** - User's personal story tracking (kudos, reading progress)
+- **credentials** - Encrypted AO3 session storage
+- **savedSearches** - User's saved AO3 search filters

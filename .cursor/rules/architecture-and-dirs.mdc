@@ -1,0 +1,24 @@
+---
+description: Architecture patterns and directory structure
+globs:
+alwaysApply: true
+---
+
+## Architecture Patterns & Conventions
+
+### Directory Structure
+
+```
+app/
+├── api/                    # API routes (auth, cron jobs)
+├── components/
+│   ├── base/              # Custom base components
+│   └── ui/                # Shadcn UI components
+├── db/                    # Database schema, queries, and types
+├── lib/                   # Core utilities (AO3 client, parsers)
+├── explore/               # AO3 content discovery and search
+├── library/               # Personal library management
+│   └── sections/          # Nested section management
+├── settings/              # User preferences and Kindle config
+└── auth.ts               # NextAuth configuration
+```

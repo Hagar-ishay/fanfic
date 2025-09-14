@@ -1,0 +1,15 @@
+---
+description: Modal component usage policy (DrawerDialog only)
+globs:
+alwaysApply: true
+---
+
+## Rule: Modal Component Usage
+
+Always use `@/components/base/DrawerDialog.tsx` for all modal dialogs and popups. This component automatically adapts between Dialog (desktop) and Drawer (mobile) based on screen size detection. Never use Dialog or Drawer components directly - always use the DrawerDialog wrapper components:
+
+- DrawerDialog (root component)
+- DrawerDialogTrigger (button/trigger)
+- DrawerDialogContent (main content)
+- DrawerDialogHeader, DrawerDialogTitle, DrawerDialogDescription
+- DrawerDialogFooter, DrawerDialogClose

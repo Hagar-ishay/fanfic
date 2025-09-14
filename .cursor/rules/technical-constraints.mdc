@@ -1,0 +1,12 @@
+---
+description: Technical constraints and environmental requirements
+globs:
+alwaysApply: true
+---
+
+## Technical Constraints & Requirements
+
+- **Runtime:** Must use Node.js runtime (not Edge) due to epub-gen and AO3 scraping dependencies
+- **External Packages:** epub, epub-gen, tough-cookie, and axios-cookiejar-support are externalized
+- **Security:** AO3 credentials must be encrypted and stored in database, never in environment variables
+- **Environment:** Requires Google OAuth credentials and Neon database URL

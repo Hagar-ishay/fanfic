@@ -1,0 +1,9 @@
+---
+description: Project overview of the Fanfiction Platform
+globs:
+alwaysApply: true
+---
+
+## Project Overview
+
+This is a Next.js 15 App Router fanfiction platform that provides enhanced reading experiences for AO3 content with Kindle delivery and AI translation features.

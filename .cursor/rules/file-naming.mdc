@@ -1,0 +1,12 @@
+---
+description: File naming conventions across the codebase
+globs:
+alwaysApply: true
+---
+
+## File Naming Conventions
+
+- React components: PascalCase (e.g., `ComponentName.tsx`)
+- Server actions: camelCase in `(server)/` directories
+- Database modules: camelCase in `app/db/` directory
+- Utility functions: camelCase in `app/lib/` directory

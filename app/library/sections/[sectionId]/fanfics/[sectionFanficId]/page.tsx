@@ -6,9 +6,11 @@ import Fanfic from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(co
 import { auth } from "@/auth";
 import { SetTopbar } from "@/components/base/SetTopbar";
 import { EllipsisVertical } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { FanficContextMenu } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/FanficContextMenu";
-import { getActiveIntegrations, hasUserAo3Credentials } from "@/db/integrations";
+import {
+  getActiveIntegrations,
+  hasUserAo3Credentials,
+} from "@/db/integrations";
 import { getFanficIntegrations } from "@/db/fanficIntegrations";
 import { Kudos } from "@/library/sections/[sectionId]/fanfics/[sectionFanficId]/(components)/Kudos";
 export async function generateMetadata({
@@ -44,7 +46,13 @@ export default async function Page({
   }
 
   // Run all queries in parallel for maximum performance
-  const [userSections, segments, activeIntegrations, fanficIntegrations, hasAo3Credentials] = await Promise.all([
+  const [
+    userSections,
+    segments,
+    activeIntegrations,
+    fanficIntegrations,
+    hasAo3Credentials,
+  ] = await Promise.all([
     listUserSections(user.id),
     getBreadcrumbs(sectionId, fanfic.sectionName, fanfic.sectionParentId),
     getActiveIntegrations(user.id),
@@ -66,9 +74,9 @@ export default async function Page({
           userIntegrations={activeIntegrations}
           fanficIntegrations={fanficIntegrations}
           trigger={
-            <Button size="icon" variant="ghost">
-              {<EllipsisVertical />}
-            </Button>
+            <div className="flex h-10 w-10 items-center justify-center rounded-md hover:bg-accent hover:text-accent-foreground cursor-pointer">
+              <EllipsisVertical size={16} />
+            </div>
           }
         />
       </SetTopbar>

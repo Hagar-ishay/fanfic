@@ -1,0 +1,14 @@
+---
+description: Standard development workflow for schema, auth, and imports
+globs:
+alwaysApply: true
+---
+
+## Development Workflow
+
+1. **Database Changes:**
+   - Modify `app/db/schema.ts`
+   - Run `pnpm drizzle-kit generate`
+   - Apply migrations
+2. **Authentication:** Access user sessions via NextAuth `auth()` server function
+3. **Path Imports:** Use `@/` alias which maps to `app/` directory

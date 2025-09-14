@@ -1,0 +1,14 @@
+---
+description: Code quality verification process (lint and type checking)
+globs:
+alwaysApply: true
+---
+
+## Rule: Code Quality Verification
+
+Always run linting and type checking before considering any task complete:
+
+- Run `pnpm run lint` to check ESLint rules
+- Run type checking (likely `pnpm run typecheck` or similar)
+- Fix all errors and warnings before proceeding
+- Never commit or mark tasks as complete with linting/type errors

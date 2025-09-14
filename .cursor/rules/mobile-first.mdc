@@ -1,0 +1,15 @@
+---
+description: Mobile-first responsive design requirements
+globs:
+alwaysApply: true
+---
+
+## Rule: Mobile-First Responsive Design
+
+This application prioritizes mobile experience while ensuring desktop functionality. When implementing features:
+
+- Design for mobile screens first (320px+)
+- Use responsive utilities (sm:, md:, lg:) for desktop enhancements
+- Test both mobile and desktop layouts using browser dev tools
+- Ensure touch-friendly interactions (min 44px touch targets)
+- Verify drawer/dialog behavior works correctly on both platforms
