@@ -126,8 +126,3 @@ export async function isCacheValid(
 ): Promise<boolean> {
   return cached.ao3UpdatedAt.getTime() >= fanficUpdatedAt.getTime();
 }
-
-/**
- * Get cached EPUB by MD5 hash (alias for getCachedEpubByHash)
- */
-export { getCachedEpubByHash };
