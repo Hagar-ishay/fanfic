@@ -35,7 +35,7 @@ export function KOReaderSettings({ userId, hasApiKey: initialHasApiKey }: KORead
           title: "API Key Generated",
           description: "Your KOReader API key has been created. Copy it now - you won't see it again!",
         });
-      } catch (error) {
+      } catch {
         toast({
           title: "Error",
           description: "Failed to generate API key. Please try again.",
@@ -126,7 +126,7 @@ export function KOReaderSettings({ userId, hasApiKey: initialHasApiKey }: KORead
                   {apiKey && (
                     <div className="rounded-lg border bg-muted p-4 space-y-2">
                       <p className="text-sm font-medium text-destructive">
-                        ⚠️ Copy this API key now - you won't be able to see it again!
+                        ⚠️ Copy this API key now - you won&apos;t be able to see it again!
                       </p>
                       <div className="flex gap-2">
                         <Input
@@ -206,7 +206,7 @@ export function KOReaderSettings({ userId, hasApiKey: initialHasApiKey }: KORead
               </p>
               <ol className="text-sm space-y-1 list-decimal list-inside text-muted-foreground">
                 <li>Open KOReader → Search → OPDS Catalog</li>
-                <li>Tap "+" to add a new catalog</li>
+                <li>Tap &quot;+&quot; to add a new catalog</li>
                 <li>Paste the catalog URL</li>
                 <li>Enter any username (ignored)</li>
                 <li>Enter your API key as the password</li>

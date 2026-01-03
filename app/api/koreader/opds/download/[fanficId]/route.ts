@@ -11,15 +11,13 @@ import {
 import {
   uploadEpubToR2,
   downloadEpubFromR2,
-  getSignedEpubUrl,
 } from "@/lib/koreader/r2Client";
 import {
   calculateKOReaderHash,
-  calculateKOReaderHashFromBuffer,
 } from "@/lib/koreader/md5Hash";
 import { getAo3Client } from "@/lib/ao3Client";
 import { Readable } from "stream";
-import { promises as fs, statSync } from "fs";
+import { promises as fs } from "fs";
 import * as path from "path";
 import EPub from "epub";
 import logger from "@/logger";
@@ -101,7 +99,7 @@ export async function GET(
     // Cache miss or invalid - generate EPUB
     logger.info(`Cache miss for fanfic ${fanficIdNum}, generating EPUB`);
 
-    const { epubBuffer, md5Hash, chapterBoundaries, totalBytes } =
+    const { epubBuffer, md5Hash } =
       await generateAndCacheEpub(userId, fanfic);
 
     // Stream the newly generated EPUB
@@ -205,7 +203,7 @@ async function generateAndCacheEpub(
 async function extractChapterBoundaries(
   epubPath: string
 ): Promise<Record<string, number>> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const epub = new EPub(epubPath);
 
     epub.on("error", (err) => {

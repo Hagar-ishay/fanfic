@@ -3,7 +3,6 @@ import { db } from "@/db/db";
 import { integrations } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import bcrypt from "bcryptjs";
-import { createHash } from "crypto";
 
 export const maxDuration = 59;
 

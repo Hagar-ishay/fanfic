@@ -145,7 +145,7 @@ export async function epubExistsInR2(
 
     await r2Client.send(command);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }

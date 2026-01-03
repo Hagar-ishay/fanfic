@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { listUserSections } from "@/db/sections";
 import { getSettings } from "@/db/settings";
 import logger from "@/logger";
 import { errorMessage } from "@/lib/utils";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await auth();
 

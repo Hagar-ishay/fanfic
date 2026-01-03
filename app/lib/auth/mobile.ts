@@ -72,7 +72,7 @@ export async function verifyMobileToken(
     }
 
     return decoded.userId;
-  } catch (error) {
+  } catch {
     // Token is invalid or expired
     return null;
   }
@@ -94,7 +94,7 @@ export async function refreshAccessToken(
     }
 
     return await generateJWT(decoded.userId);
-  } catch (error) {
+  } catch {
     // Refresh token is invalid or expired
     return null;
   }
