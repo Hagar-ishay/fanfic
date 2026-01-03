@@ -120,10 +120,10 @@ export async function deleteEpubCache(
 /**
  * Check if cached EPUB is still valid (AO3 hasn't updated)
  */
-export function isCacheValid(
+export async function isCacheValid(
   cached: EpubCacheEntry,
   fanficUpdatedAt: Date
-): boolean {
+): Promise<boolean> {
   return cached.ao3UpdatedAt.getTime() >= fanficUpdatedAt.getTime();
 }
 

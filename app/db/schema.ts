@@ -4,6 +4,7 @@ import {
   jsonb,
   pgSchema,
   primaryKey,
+  real,
   serial,
   text,
   timestamp,
@@ -283,6 +284,90 @@ export const fanficIntegrations = schema.table(
     sectionFanficIntegrationUnique: uniqueIndex(
       "section_fanfic_integration_unique"
     ).on(table.sectionFanficId, table.integrationId),
+  })
+);
+
+// KOReader Integration Tables
+
+export const epubCache = schema.table(
+  "epub_cache",
+  {
+    id: serial().primaryKey(),
+    fanficId: integer("fanfic_id")
+      .notNull()
+      .references(() => fanfics.id),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id),
+    epubUrl: varchar("epub_url").notNull(),
+    md5Hash: varchar("md5_hash", { length: 32 }).notNull(),
+    ao3UpdatedAt: timestamp("ao3_updated_at").notNull(),
+    chapterCount: varchar("chapter_count"),
+    chapterBoundaries: jsonb("chapter_boundaries").$type<
+      Record<string, number>
+    >(),
+    totalBytes: integer("total_bytes"),
+    creationTime: timestamp("creation_time").notNull().defaultNow(),
+    updateTime: timestamp("update_time").$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    userFanficUnique: uniqueIndex("epub_cache_user_fanfic_unique").on(
+      table.userId,
+      table.fanficId
+    ),
+    md5HashIndex: uniqueIndex("epub_cache_md5_hash_idx").on(table.md5Hash),
+  })
+);
+
+export const koreaderSyncState = schema.table(
+  "koreader_sync_state",
+  {
+    id: serial().primaryKey(),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id),
+    deviceId: varchar("device_id").notNull(),
+    documentHash: varchar("document_hash", { length: 32 }).notNull(),
+    fanficId: integer("fanfic_id").references(() => fanfics.id),
+    progress: integer("progress").notNull(),
+    percentage: real("percentage").notNull(),
+    lastSyncAt: timestamp("last_sync_at").notNull().defaultNow(),
+    creationTime: timestamp("creation_time").notNull().defaultNow(),
+    updateTime: timestamp("update_time").$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    userDeviceDocUnique: uniqueIndex(
+      "koreader_sync_user_device_doc_unique"
+    ).on(table.userId, table.deviceId, table.documentHash),
+    userDocHashIndex: uniqueIndex("koreader_sync_user_doc_hash_idx").on(
+      table.userId,
+      table.documentHash
+    ),
+  })
+);
+
+export const koreaderHighlights = schema.table(
+  "koreader_highlights",
+  {
+    id: serial().primaryKey(),
+    sectionFanficId: integer("section_fanfic_id")
+      .notNull()
+      .references(() => sectionFanfics.id),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id),
+    highlightText: text("highlight_text").notNull(),
+    noteText: text("note_text"),
+    chapterTitle: varchar("chapter_title"),
+    positionInChapter: integer("position_in_chapter"),
+    highlightCreatedAt: timestamp("highlight_created_at").notNull(),
+    creationTime: timestamp("creation_time").notNull().defaultNow(),
+    updateTime: timestamp("update_time").$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    sectionFanficCreatedAtIndex: uniqueIndex(
+      "koreader_highlights_section_fanfic_created_idx"
+    ).on(table.sectionFanficId, table.highlightCreatedAt),
   })
 );
 

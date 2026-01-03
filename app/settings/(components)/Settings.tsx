@@ -35,6 +35,8 @@ import { useTransition, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { NewIntegrationForm } from "./NewIntegrationForm";
+import { KOReaderSettings } from "./KOReaderSettings";
+import { BookOpen } from "lucide-react";
 
 const languages = [
   { code: "en", name: "English" },
@@ -386,7 +388,7 @@ export function Settings({
           <Separator className="opacity-50" />
 
           <Tabs defaultValue="general" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-muted/50 p-1">
+            <TabsList className="grid w-full grid-cols-3 bg-muted/50 p-1">
               <TabsTrigger
                 value="general"
                 className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
@@ -400,6 +402,13 @@ export function Settings({
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Integrations
+              </TabsTrigger>
+              <TabsTrigger
+                value="koreader"
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                <BookOpen className="h-4 w-4 mr-2" />
+                KOReader
               </TabsTrigger>
             </TabsList>
 
@@ -553,6 +562,15 @@ export function Settings({
                   </Dialog>
                 </div>
               </div>
+            </TabsContent>
+
+            <TabsContent value="koreader" className="space-y-6 mt-6">
+              <KOReaderSettings
+                userId={userId}
+                hasApiKey={integrations.some(
+                  (i) => i.type === "koreader_api" && i.isActive
+                )}
+              />
             </TabsContent>
           </Tabs>
         </div>
