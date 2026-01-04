@@ -19,7 +19,7 @@ import { getAo3Client } from "@/lib/ao3Client";
 import { Readable } from "stream";
 import { promises as fs } from "fs";
 import * as path from "path";
-import EPub from "epub";
+import { parseEpub } from "@gxl/epub-parser";
 import logger from "@/logger";
 
 const unlinkAsync = fs.unlink;
@@ -72,7 +72,7 @@ export async function GET(
     if (
       cached &&
       fanfic.updatedAt &&
-      isCacheValid(cached, fanfic.updatedAt)
+      (await isCacheValid(cached, fanfic.updatedAt))
     ) {
       // Cache hit - stream from R2
       logger.info(
@@ -203,52 +203,36 @@ async function generateAndCacheEpub(
 async function extractChapterBoundaries(
   epubPath: string
 ): Promise<Record<string, number>> {
-  return new Promise((resolve) => {
-    const epub = new EPub(epubPath);
+  try {
+    const epub = await parseEpub(epubPath, { type: "path" });
+    const boundaries: Record<string, number> = {};
 
-    epub.on("error", (err) => {
-      logger.error("Error parsing EPUB:", err);
-      // Return empty boundaries on error
-      resolve({});
-    });
+    if (epub.sections && epub.sections.length > 0) {
+      let byteOffset = 0;
 
-    epub.on("end", () => {
-      try {
-        const flow = epub.flow;
-        const boundaries: Record<string, number> = {};
+      epub.sections.forEach((section, index) => {
+        const chapterNum = index + 1;
+        boundaries[chapterNum.toString()] = byteOffset;
 
-        // EPub.flow is an array of chapter objects with IDs
-        if (Array.isArray(flow) && flow.length > 0) {
-          let byteOffset = 0;
+        // Calculate actual byte size from HTML content
+        const chapterSize = Buffer.byteLength(section.htmlString, "utf8");
+        byteOffset += chapterSize;
+      });
 
-          flow.forEach((chapter, index) => {
-            const chapterNum = index + 1;
-            boundaries[chapterNum.toString()] = byteOffset;
+      logger.info(
+        `Extracted ${epub.sections.length} chapter boundaries from EPUB`
+      );
+    } else {
+      logger.warn("No sections found in EPUB, using defaults");
+      // Default: single chapter
+      boundaries["1"] = 0;
+    }
 
-            // Estimate chapter size (this is approximate)
-            // In a real implementation, you'd parse the HTML content size
-            // For now, use a rough estimate
-            byteOffset += 50000; // ~50KB per chapter estimate
-          });
-
-          logger.info(
-            `Extracted ${flow.length} chapter boundaries from EPUB`
-          );
-        } else {
-          logger.warn("No flow/chapters found in EPUB, using defaults");
-          // Default: single chapter
-          boundaries["1"] = 0;
-        }
-
-        resolve(boundaries);
-      } catch (error) {
-        logger.error("Error extracting chapter boundaries:", error);
-        resolve({ "1": 0 }); // Fallback to single chapter
-      }
-    });
-
-    epub.parse();
-  });
+    return boundaries;
+  } catch (error) {
+    logger.error("Error extracting chapter boundaries:", error);
+    return { "1": 0 }; // Fallback to single chapter
+  }
 }
 
 /**

@@ -8,7 +8,7 @@ import {
   translateChapter,
   translateMetadata,
 } from "@/library/sections/[sectionId]/(server)/translator";
-import EPub from "epub";
+import { parseEpub } from "@gxl/epub-parser";
 import EpubGen from "epub-gen";
 import fs from "node:fs";
 import path from "node:path";
@@ -24,11 +24,6 @@ import logger from "@/logger";
 
 const unlinkAsync = promisify(fs.unlink);
 const statAsync = promisify(fs.stat);
-
-interface Chapter {
-  title: string;
-  id: string;
-}
 
 export async function emailSender({
   fanfic,
@@ -131,53 +126,50 @@ async function ParseFanfic(
     fs.mkdirSync(imageDir, { recursive: true });
   }
 
-  const epub = new EPub(downloadPath); // IMAGES DO NOT WORK!!! need to set the correct path to the <img src= /> in html :/
+  // Parse EPUB using new parser
+  const epub = await parseEpub(downloadPath, { type: "path" });
   const chapters: { data: string; title: string }[] = [];
 
-  return new Promise<{ data: string; title: string }[]>((resolve, reject) => {
-    epub.on("end", () => {
-      void (async () => {
-      try {
-        const startingSlice =
-          sendLatestChapters && startingChapter ? startingChapter : 0;
-        for (const chapter of epub.flow.slice(startingSlice) as Chapter[]) {
-          const chapterText = await getChapter(epub, chapter.id);
-          if (shouldTranslate) {
-            const chapterData = await translateChapter(
-              chapterText,
-              chapter.title
-            );
-            chapters.push(chapterData);
-          } else {
-            chapters.push({
-              data: chapterText,
-              title: chapter.title,
-            });
-          }
+  // Create a map of section IDs to titles from the structure
+  const sectionTitles = new Map<string, string>();
+  if (epub.structure) {
+    const flattenStructure = (items: any[], index = 0): number => {
+      let currentIndex = index;
+      for (const item of items) {
+        if (item.sectionId) {
+          sectionTitles.set(item.sectionId, item.name || `Chapter ${currentIndex + 1}`);
+          currentIndex++;
         }
-        resolve(chapters);
-      } catch (error) {
-        reject(new Error(String(error)));
+        if (item.children) {
+          currentIndex = flattenStructure(item.children, currentIndex);
+        }
       }
-      })();
-    });
+      return currentIndex;
+    };
+    flattenStructure(epub.structure);
+  }
 
-    epub.parse();
+  const startingSlice =
+    sendLatestChapters && startingChapter ? startingChapter : 0;
+  const sectionsToProcess = epub.sections?.slice(startingSlice) || [];
 
-    return chapters;
-  });
-}
+  for (let i = 0; i < sectionsToProcess.length; i++) {
+    const section = sectionsToProcess[i];
+    const chapterText = section.htmlString;
+    const chapterTitle = sectionTitles.get(section.id) || `Chapter ${startingSlice + i + 1}`;
 
-function getChapter(epub: EPub, chapterId: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    epub.getChapter(chapterId, (err, text) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(text);
-      }
-    });
-  });
+    if (shouldTranslate) {
+      const chapterData = await translateChapter(chapterText, chapterTitle);
+      chapters.push(chapterData);
+    } else {
+      chapters.push({
+        data: chapterText,
+        title: chapterTitle,
+      });
+    }
+  }
+
+  return chapters;
 }
 
 async function buildNewEpub(newEpub: EpubGen.Options, downloadPath: string) {
