@@ -33,7 +33,7 @@ export async function authenticateOPDSRequest(
     const credentials = Buffer.from(base64Credentials, "base64").toString(
       "utf-8"
     );
-    const [_username, password] = credentials.split(":");
+    const password = credentials.split(":")[1];
 
     // Username is userId, password is API key
     const userId = await verifyApiKey(password);

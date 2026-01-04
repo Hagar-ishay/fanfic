@@ -230,7 +230,7 @@ export function KOReaderSettings({ userId, hasApiKey: initialHasApiKey }: KORead
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            This feature is currently under development. Soon you'll be able to:
+            This feature is currently under development. Soon you&apos;ll be able to:
           </p>
           <ul className="text-sm space-y-1 list-disc list-inside text-muted-foreground mt-2">
             <li>Sync reading progress from Kobo to web app</li>
