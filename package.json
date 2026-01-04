@@ -10,8 +10,6 @@
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.10.0",
-    "@aws-sdk/client-s3": "^3.962.0",
-    "@aws-sdk/s3-request-presigner": "^3.962.0",
     "@google/generative-ai": "^0.21.0",
     "@gxl/epub-parser": "^2.0.4",
     "@hello-pangea/dnd": "^17.0.0",
@@ -37,7 +35,6 @@
     "@types/html-to-text": "^9.0.4",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/luxon": "^3.7.1",
-    "@vercel/blob": "^2.0.0",
     "autoprefixer": "^10.4.21",
     "axios": "^1.11.0",
     "axios-cookiejar-support": "^5.0.5",

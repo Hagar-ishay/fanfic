@@ -132,7 +132,7 @@ async function ParseFanfic(
 
   // Create a map of section IDs to titles from the structure
   const sectionTitles = new Map<string, string>();
-  if (epub.structure) {
+  if (epub.structure && Array.isArray(epub.structure)) {
     const flattenStructure = (items: any[], index = 0): number => {
       let currentIndex = index;
       for (const item of items) {

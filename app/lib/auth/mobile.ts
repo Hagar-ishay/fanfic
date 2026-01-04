@@ -3,13 +3,13 @@
 import * as jwt from "jsonwebtoken";
 import { NextRequest } from "next/server";
 
-const JWT_SECRET = process.env.JWT_SECRET || "";
-const JWT_EXPIRY = process.env.JWT_EXPIRY || "1h";
-const REFRESH_TOKEN_EXPIRY = process.env.REFRESH_TOKEN_EXPIRY || "30d";
-
-if (!JWT_SECRET) {
+if (!process.env.JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is not set");
 }
+
+const JWT_SECRET: string = process.env.JWT_SECRET;
+const JWT_EXPIRY = process.env.JWT_EXPIRY || "1h";
+const REFRESH_TOKEN_EXPIRY = process.env.REFRESH_TOKEN_EXPIRY || "30d";
 
 interface TokenPayload {
   userId: string;

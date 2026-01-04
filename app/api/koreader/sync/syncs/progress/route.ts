@@ -9,10 +9,7 @@ import {
   getFanficIdByHash,
   getSectionFanficId,
 } from "@/db/koreaderSync";
-import { getCachedEpubByHash } from "@/db/epubCache";
 import {
-  percentageToChapter,
-  chapterProgressToBytePosition,
   resolveProgressConflict,
 } from "@/lib/koreader/progressMapping";
 import logger from "@/logger";
@@ -137,23 +134,10 @@ export async function GET(request: NextRequest) {
         responsePercentage = syncState.percentage;
         responseDevice = syncState.deviceId;
       } else {
-        // Web app wins - convert chapter to byte position
-        const cached = await getCachedEpubByHash(document);
-        if (cached && cached.chapterBoundaries && cached.totalBytes) {
-          responseProgress = chapterProgressToBytePosition(
-            webProgress.currentChapter,
-            webProgress.readingProgress,
-            cached.chapterBoundaries,
-            cached.totalBytes
-          );
-          responsePercentage = webProgress.readingProgress / 100;
-          responseDevice = "web";
-        } else {
-          // Fallback to KOReader progress
-          responseProgress = syncState?.progress || 0;
-          responsePercentage = syncState?.percentage || 0;
-          responseDevice = syncState?.deviceId || "unknown";
-        }
+        // Web app wins - use percentage directly (no chapter boundaries available without caching)
+        responseProgress = Math.floor(webProgress.readingProgress * 100); // Estimate
+        responsePercentage = webProgress.readingProgress / 100;
+        responseDevice = "web";
       }
     } else if (syncState) {
       // Only KOReader state exists
@@ -161,23 +145,10 @@ export async function GET(request: NextRequest) {
       responsePercentage = syncState.percentage;
       responseDevice = syncState.deviceId;
     } else if (webProgress) {
-      // Only web progress exists - convert to byte position
-      const cached = await getCachedEpubByHash(document);
-      if (cached && cached.chapterBoundaries && cached.totalBytes) {
-        responseProgress = chapterProgressToBytePosition(
-          webProgress.currentChapter,
-          webProgress.readingProgress,
-          cached.chapterBoundaries,
-          cached.totalBytes
-        );
-        responsePercentage = webProgress.readingProgress / 100;
-        responseDevice = "web";
-      } else {
-        // No cached data - return 0
-        responseProgress = 0;
-        responsePercentage = 0;
-        responseDevice = "unknown";
-      }
+      // Only web progress exists - use percentage directly
+      responseProgress = Math.floor(webProgress.readingProgress * 100); // Estimate
+      responsePercentage = webProgress.readingProgress / 100;
+      responseDevice = "web";
     } else {
       // No progress anywhere
       responseProgress = 0;
@@ -199,7 +170,9 @@ export async function GET(request: NextRequest) {
       }
     );
   } catch (error) {
-    logger.error("KOSync GET progress error:", error);
+    logger.error(
+      `KOSync GET progress error: ${error instanceof Error ? error.message : String(error)}`
+    );
     return NextResponse.json(
       { message: "Failed to get progress" },
       { status: 500 }
@@ -245,30 +218,23 @@ export async function PUT(request: NextRequest) {
     if (fanficId) {
       const sectionFanficId = await getSectionFanficId(userId, fanficId);
       if (sectionFanficId) {
-        const cached = await getCachedEpubByHash(document);
+        // Without caching, we can't accurately convert percentage to chapter
+        // Just store the percentage as readingProgress
+        const currentChapter = 1; // Default to chapter 1 without boundary data
 
-        if (cached && cached.chapterBoundaries && cached.totalBytes) {
-          // Calculate chapter from percentage
-          const currentChapter = percentageToChapter(
-            percentage,
-            cached.chapterBoundaries,
-            cached.totalBytes
-          );
+        // Update web app progress
+        await db
+          .update(sectionFanfics)
+          .set({
+            currentChapter,
+            readingProgress: Math.round(percentage * 100),
+            lastReadAt: new Date(),
+          })
+          .where(eq(sectionFanfics.id, sectionFanficId));
 
-          // Update web app progress
-          await db
-            .update(sectionFanfics)
-            .set({
-              currentChapter,
-              readingProgress: Math.round(percentage * 100),
-              lastReadAt: new Date(),
-            })
-            .where(eq(sectionFanfics.id, sectionFanficId));
-
-          logger.info(
-            `Synced progress from KOReader: fanfic ${fanficId}, chapter ${currentChapter}, ${Math.round(percentage * 100)}%`
-          );
-        }
+        logger.info(
+          `Synced progress from KOReader: fanfic ${fanficId}, ${Math.round(percentage * 100)}%`
+        );
       }
     }
 
@@ -286,7 +252,9 @@ export async function PUT(request: NextRequest) {
       }
     );
   } catch (error) {
-    logger.error("KOSync PUT progress error:", error);
+    logger.error(
+      `KOSync PUT progress error: ${error instanceof Error ? error.message : String(error)}`
+    );
     return NextResponse.json(
       { message: "Failed to update progress" },
       { status: 500 }

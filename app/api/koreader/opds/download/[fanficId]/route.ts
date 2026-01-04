@@ -3,23 +3,11 @@ import { authenticateOPDSRequest } from "@/lib/koreader/auth";
 import { db } from "@/db/db";
 import { fanfics } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import {
-  getCachedEpub,
-  upsertEpubCache,
-  isCacheValid,
-} from "@/db/epubCache";
-import {
-  uploadEpubToR2,
-  downloadEpubFromR2,
-} from "@/lib/koreader/r2Client";
-import {
-  calculateKOReaderHash,
-} from "@/lib/koreader/md5Hash";
+import { calculateKOReaderHash } from "@/lib/koreader/md5Hash";
 import { getAo3Client } from "@/lib/ao3Client";
 import { Readable } from "stream";
 import { promises as fs } from "fs";
 import * as path from "path";
-import { parseEpub } from "@gxl/epub-parser";
 import logger from "@/logger";
 
 const unlinkAsync = fs.unlink;
@@ -30,7 +18,7 @@ export const maxDuration = 59;
 
 /**
  * GET /api/koreader/opds/download/[fanficId]
- * Download EPUB with caching (generates if needed)
+ * Download EPUB (always fresh from AO3, no caching)
  */
 export async function GET(
   request: NextRequest,
@@ -66,46 +54,16 @@ export async function GET(
       return new NextResponse("Fanfic not found", { status: 404 });
     }
 
-    // Check cache
-    const cached = await getCachedEpub(userId, fanficIdNum);
+    // Generate EPUB on-demand (always fresh from AO3)
+    logger.info(`Generating fresh EPUB for fanfic ${fanficIdNum}`);
 
-    if (
-      cached &&
-      fanfic.updatedAt &&
-      (await isCacheValid(cached, fanfic.updatedAt))
-    ) {
-      // Cache hit - stream from R2
-      logger.info(
-        `Cache hit for fanfic ${fanficIdNum}, streaming from R2`
-      );
-
-      const result = await downloadEpubFromR2(userId, fanficIdNum);
-
-      if (result.success && result.stream) {
-        return new NextResponse(result.stream as ReadableStream, {
-          headers: {
-            "Content-Type": "application/epub+zip",
-            "Content-Disposition": `attachment; filename="${sanitizeFilename(fanfic.title)}.epub"`,
-          },
-        });
-      } else {
-        logger.warn(
-          `Cache entry exists but R2 download failed, regenerating`
-        );
-        // Fall through to regeneration
-      }
-    }
-
-    // Cache miss or invalid - generate EPUB
-    logger.info(`Cache miss for fanfic ${fanficIdNum}, generating EPUB`);
-
-    const { epubBuffer, md5Hash } =
-      await generateAndCacheEpub(userId, fanfic);
+    const { epubBuffer, md5Hash } = await generateEpub(fanfic);
 
     // Stream the newly generated EPUB
     const stream = Readable.from(epubBuffer);
+    const webStream = Readable.toWeb(stream) as ReadableStream;
 
-    return new NextResponse(stream as unknown as ReadableStream, {
+    return new NextResponse(webStream, {
       headers: {
         "Content-Type": "application/epub+zip",
         "Content-Disposition": `attachment; filename="${sanitizeFilename(fanfic.title)}.epub"`,
@@ -114,24 +72,20 @@ export async function GET(
     });
   } catch (error) {
     logger.error(
-      `Error downloading EPUB for fanfic ${fanficId}:`,
-      error
+      `Error downloading EPUB for fanfic ${fanficId}: ${error instanceof Error ? error.message : String(error)}`
     );
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }
 
 /**
- * Generate EPUB, cache it, and return buffer with metadata
+ * Generate EPUB from AO3 and return buffer with metadata
  */
-async function generateAndCacheEpub(
-  userId: string,
+async function generateEpub(
   fanfic: typeof fanfics.$inferSelect
 ): Promise<{
   epubBuffer: Buffer;
   md5Hash: string;
-  chapterBoundaries: Record<string, number>;
-  totalBytes: number;
 }> {
   const title = fanfic.title.trim();
   const downloadPath = path.resolve(`/tmp/${title}-${fanfic.id}.epub`);
@@ -150,88 +104,21 @@ async function generateAndCacheEpub(
     // Calculate KOReader MD5 hash
     const md5Hash = calculateKOReaderHash(downloadPath);
 
-    // Extract chapter boundaries
-    const chapterBoundaries = await extractChapterBoundaries(downloadPath);
-
     // Read file into buffer
     const epubBuffer = await readFileAsync(downloadPath);
-    const totalBytes = epubBuffer.length;
-
-    // Upload to R2
-    const uploadResult = await uploadEpubToR2(
-      userId,
-      fanfic.id,
-      epubBuffer
-    );
-
-    if (!uploadResult.success) {
-      logger.error(`Failed to upload EPUB to R2: ${uploadResult.error}`);
-      // Continue anyway - we can still serve the EPUB
-    }
-
-    // Cache metadata in database
-    await upsertEpubCache({
-      userId,
-      fanficId: fanfic.id,
-      epubUrl: uploadResult.url || "",
-      md5Hash,
-      ao3UpdatedAt: fanfic.updatedAt || new Date(),
-      chapterCount: fanfic.chapterCount || undefined,
-      chapterBoundaries,
-      totalBytes,
-    });
 
     logger.info(
-      `Successfully generated and cached EPUB for fanfic ${fanfic.id}`
+      `Successfully generated EPUB for fanfic ${fanfic.id} (${stats.size} bytes)`
     );
 
     // Clean up temp file
     await unlinkAsync(downloadPath).catch(() => {});
 
-    return { epubBuffer, md5Hash, chapterBoundaries, totalBytes };
+    return { epubBuffer, md5Hash };
   } catch (error) {
     // Clean up temp file on error
     await unlinkAsync(downloadPath).catch(() => {});
     throw error;
-  }
-}
-
-/**
- * Extract chapter byte boundaries from EPUB
- * Returns a map of chapter number -> byte offset
- */
-async function extractChapterBoundaries(
-  epubPath: string
-): Promise<Record<string, number>> {
-  try {
-    const epub = await parseEpub(epubPath, { type: "path" });
-    const boundaries: Record<string, number> = {};
-
-    if (epub.sections && epub.sections.length > 0) {
-      let byteOffset = 0;
-
-      epub.sections.forEach((section, index) => {
-        const chapterNum = index + 1;
-        boundaries[chapterNum.toString()] = byteOffset;
-
-        // Calculate actual byte size from HTML content
-        const chapterSize = Buffer.byteLength(section.htmlString, "utf8");
-        byteOffset += chapterSize;
-      });
-
-      logger.info(
-        `Extracted ${epub.sections.length} chapter boundaries from EPUB`
-      );
-    } else {
-      logger.warn("No sections found in EPUB, using defaults");
-      // Default: single chapter
-      boundaries["1"] = 0;
-    }
-
-    return boundaries;
-  } catch (error) {
-    logger.error("Error extracting chapter boundaries:", error);
-    return { "1": 0 }; // Fallback to single chapter
   }
 }
 

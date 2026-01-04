@@ -176,6 +176,9 @@ export const sectionFanfics = schema.table(
       .$type<string[]>()
       .default([])
       .notNull(),
+    readingProgress: integer("reading_progress").default(0).notNull(),
+    currentChapter: integer("current_chapter").default(1).notNull(),
+    lastReadAt: timestamp("last_read_at"),
   },
   (table) => ({
     sectionFanficsUniquePosition: uniqueIndex(
@@ -331,6 +334,14 @@ export const koreaderSyncState = schema.table(
     fanficId: integer("fanfic_id").references(() => fanfics.id),
     progress: integer("progress").notNull(),
     percentage: real("percentage").notNull(),
+
+    // Smart sync fields - survive EPUB updates
+    currentChapter: integer("current_chapter"),
+    percentThroughChapter: real("percent_through_chapter"),
+    lastReadParagraph: text("last_read_paragraph"), // Text anchor for precise restoration
+    totalChapters: integer("total_chapters"), // Track chapter count when last read
+    ao3UpdatedAt: timestamp("ao3_updated_at"), // Detect if fanfic updated
+
     lastSyncAt: timestamp("last_sync_at").notNull().defaultNow(),
     creationTime: timestamp("creation_time").notNull().defaultNow(),
     updateTime: timestamp("update_time").$onUpdate(() => new Date()),
