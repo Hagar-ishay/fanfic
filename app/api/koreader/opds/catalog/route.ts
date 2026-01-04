@@ -9,7 +9,7 @@ import {
 } from "@/lib/koreader/opdsGenerator";
 import { db } from "@/db/db";
 import { sections } from "@/db/schema";
-import { eq, isNull } from "drizzle-orm";
+import { eq, isNull, and } from "drizzle-orm";
 
 export const maxDuration = 59;
 
@@ -38,8 +38,7 @@ export async function GET(request: NextRequest) {
         creationTime: sections.creationTime,
       })
       .from(sections)
-      .where(eq(sections.userId, userId))
-      .where(isNull(sections.parentId))
+      .where(and(eq(sections.userId, userId), isNull(sections.parentId)))
       .orderBy(sections.creationTime);
 
     // Build OPDS feed
