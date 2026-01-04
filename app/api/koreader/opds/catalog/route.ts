@@ -35,13 +35,12 @@ export async function GET(request: NextRequest) {
       .select({
         id: sections.id,
         name: sections.name,
-        position: sections.position,
         creationTime: sections.creationTime,
       })
       .from(sections)
       .where(eq(sections.userId, userId))
       .where(isNull(sections.parentId))
-      .orderBy(sections.position);
+      .orderBy(sections.creationTime);
 
     // Build OPDS feed
     const baseUrl = getBaseUrl(request);
